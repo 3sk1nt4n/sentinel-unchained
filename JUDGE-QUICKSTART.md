@@ -116,6 +116,17 @@ if ($env:OPENAI_API_KEY) {
 }
 ```
 
+For a temporary process-scoped key without using the Windows environment GUI,
+run the repository helper locally:
+
+```powershell
+.\scripts\set-openai-key.ps1
+```
+
+PowerShell masks the input. The helper prints only a presence confirmation and
+does not write the key to the repository. The value remains available to this
+PowerShell process and programs launched from it until the terminal closes.
+
 Set the requested model and hard caps:
 
 ```powershell
