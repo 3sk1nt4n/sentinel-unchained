@@ -1,0 +1,36 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+dist/
+build/
+unchained-runs/
+.env
+.env.*
+!.env.example
+
+# Forensic evidence and acquired case archives must never be committed.
+evidence/
+case/
+*.E01
+*.E02
+*.aff4
+*.dmp
+*.lime
+*.mem
+*.raw
+*.vmem
+*.dd
+*.001
+*.img
+DC01-*.zip
+
+# Local OS/editor metadata.
+.DS_Store
+Thumbs.db
