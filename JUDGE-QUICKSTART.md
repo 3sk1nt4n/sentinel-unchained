@@ -91,10 +91,32 @@ with its environment details. Do not silently switch interpreters.
 
 ## 4. Verify a completed proof bundle without rebuilding
 
+The no-key demo is one command:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\demo.ps1
+```
+
+Expected final lines:
+
+```text
+DEMO_BUNDLE_VERIFIED_INVALID_INPUT
+BUNDLE=...
+```
+
+This verifies lifecycle and bundle construction only. It is not a forensic
+investigation and does not prove GPT-5.6 participation.
+
 For a supplied completed run:
 
 ```powershell
 & $python -m unchained verify-run C:\path\to\completed-run
+```
+
+The same verifier is available as a one-command wrapper:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\verify.ps1 C:\path\to\completed-run
 ```
 
 For strict submission-strength verification:
