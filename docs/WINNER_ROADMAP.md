@@ -1005,8 +1005,9 @@ Prepare the final judge-facing submission from verified artifacts only.
    unambiguous bright line: prior MIT typed forensic substrate versus Build Week
    agent loop, reviewer, proof contract, frozen evaluation, verifier, and
    viewer. Every number must link to a bundle artifact.
-2. Create JUDGE-QUICKSTART.md with three copy-paste paths: hosted viewer,
-   offline viewer plus verify-run, and optional funded-key pipeline run.
+2. Extend the existing JUDGE-QUICKSTART.md with the completed-bundle hosted
+   viewer path after C6, while retaining its offline verify-run and optional
+   funded-key pipeline paths.
 3. Publish truthful host-platform and evidence-OS matrices with TESTED,
    EXPERIMENTAL, LIMITED, or UNDEMONSTRATED labels.
 4. Draft the Devpost description and a 2:45-to-2:50 narration. Show authentic

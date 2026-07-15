@@ -849,6 +849,12 @@ Git tag, published bundle, and verifier provide the independent anchors.
 
 ## 10. Judge experience
 
+The operational installation and user-facing run path is maintained in
+[`JUDGE-QUICKSTART.md`](../JUDGE-QUICKSTART.md). It is the canonical
+copy-paste guide for a fresh Windows machine, the no-key verifier path, the
+funded authentic run, capability labels, troubleshooting, and the mapping from
+this architecture diagram to the implementation modules.
+
 ### Two distinct layers
 
 Layer 1 is authentic proof:
@@ -1056,7 +1062,8 @@ replay cannot substitute for proof. Convene an explicit go/no-go review.
 - [ ] Run one or two replicates only if the primary is stable and affordable.
 - [ ] Build the static viewer from the genuine bundle.
 - [ ] Add frozen two-axis evaluation and `verify-run`.
-- [ ] Create `JUDGE-QUICKSTART.md`.
+- [x] Create `JUDGE-QUICKSTART.md` for the current Windows flagship; add the
+      final viewer URL after the authentic bundle exists.
 - [ ] Finish README first screen, installation, support matrix, and disclosures.
 - [ ] Draft Devpost text.
 

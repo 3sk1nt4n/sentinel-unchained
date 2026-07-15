@@ -451,7 +451,7 @@ Verified on July 14, 2026 unless otherwise stated.
 | Git provenance | VERIFIED PUBLICLY | Public `origin/main` matches local HEAD `3506d29`; GitHub metadata reports `visibility=public`; server-side commit record retained | Preserve unchanged history and bind the freeze digest |
 | Build provenance document | IMPLEMENTED | `BUILD_PROVENANCE.md` records prior/new/Codex boundaries and local-timestamp limitation | Record baseline hash and public/freeze URLs when they exist |
 | Public experiment preregistration | NOT STARTED | Protocol/rubric/scorer digest is not frozen or remotely timestamped | Complete after deterministic native smoke and before any GPT-5.6 DC01 call |
-| Judge quickstart | NOT STARTED | No `JUDGE-QUICKSTART.md` | Write after replay path exists |
+| Judge quickstart | IMPLEMENTED FOR CURRENT FLAGSHIP | `JUDGE-QUICKSTART.md` documents fresh Windows install, no-key verification, authentic run, host/evidence capability truth, architecture mapping, troubleshooting, and Qwen boundary review | Revalidate commands after the authentic bundle and add viewer URL |
 | Demo video | NOT STARTED | No current-project video | Record only after genuine run |
 | Devpost submission | NOT STARTED | No confirmation artifact | Draft early; submit July 20 |
 | `/feedback` proof | VERIFIED + RETAINED LOCALLY | Current ID `019f61e5-5755-7a02-adb4-618d32baab27` is in project docs and screenshot | Final successful `/feedback` must come from the true majority-core thread after final core work |
@@ -937,7 +937,8 @@ links, licensing, feedback ID, and confirmation checklist are complete.
 
 - [ ] Publish the hosted HTTPS receipt/custody viewer.
 - [ ] Publish the offline viewer/release bundle and no-network verifier.
-- [ ] Write `JUDGE-QUICKSTART.md`.
+- [x] Write `JUDGE-QUICKSTART.md` for the current Windows flagship; add the
+      final viewer URL after the authentic bundle exists.
 - [ ] Rewrite the README hero around outcome, proof, measured results, and the
   instant demo.
 - [ ] Add architecture and support matrix.

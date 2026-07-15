@@ -18,6 +18,11 @@ audit receipts, and resource limits. A frozen reference evaluation and retained
 proof bundle are designed to measure factual correctness and receipt sufficiency
 without treating the model or its reviewer as ground truth.
 
+**New user quickstart:** [`JUDGE-QUICKSTART.md`](JUDGE-QUICKSTART.md) is the
+copy-paste Windows installation, no-key verification path, authentic run path,
+capability matrix, troubleshooting guide, and implementation map. Start there
+if you need to run this repository on a fresh computer.
+
 This is a complementary controlled-autonomy experiment, not a repudiation of
 Sentinel Ensemble's production-oriented deterministic trust layer. It measures
 what happens in a reproducible model-directed case when adaptive semantic agency
