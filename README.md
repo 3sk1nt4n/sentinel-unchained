@@ -1,5 +1,8 @@
 # Sentinel Unchained
 
+<p align="center"><img src="docs/assets/emblem.svg" width="120" alt="Sentinel Unchained emblem"></p>
+<p align="center"><strong>Autonomous DFIR on GPT-5.6</strong><br><em>read-only, capped, fully audited.</em></p>
+
 > **Build Week planning and execution sources:**
 > [docs/WINNER_ROADMAP.md](docs/WINNER_ROADMAP.md) controls priority, sequence,
 > positioning, and go/no-go gates.
