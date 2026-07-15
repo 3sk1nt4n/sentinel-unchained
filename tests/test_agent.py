@@ -6,6 +6,7 @@ import json
 import threading
 from dataclasses import dataclass, field
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -15,6 +16,7 @@ from unchained.agent import (
     UnchainedAgent,
     _parse_investigation,
     _parse_verdicts,
+    _response_history_items,
     _submit_judgment_schema,
 )
 from unchained.audit import AuditLog
@@ -38,6 +40,31 @@ EMPTY_PARAMETERS = {
     "required": [],
     "additionalProperties": False,
 }
+
+
+def test_response_history_removes_provider_only_function_status() -> None:
+    response = SimpleNamespace(
+        output_items=(
+            {
+                "type": "function_call",
+                "call_id": "call-1",
+                "name": "vol_pstree",
+                "arguments": "{}",
+                "status": "completed",
+            },
+            {"type": "reasoning", "status": "completed", "summary": []},
+        )
+    )
+
+    history = _response_history_items(response)
+
+    assert history[0] == {
+        "type": "function_call",
+        "call_id": "call-1",
+        "name": "vol_pstree",
+        "arguments": "{}",
+    }
+    assert history[1]["status"] == "completed"
 
 
 def profile(tmp_path: Path) -> EvidenceProfile:

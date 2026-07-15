@@ -698,7 +698,18 @@ def _response_history_items(response: Any) -> tuple[dict[str, JsonValue], ...]:
     """Carry provider output locally so live requests can use ``store=false``."""
 
     if response.output_items:
-        return response.output_items
+        normalized: list[dict[str, JsonValue]] = []
+        for item in response.output_items:
+            if not isinstance(item, dict):
+                continue
+            copied = dict(item)
+            # Responses output items may carry provider-only lifecycle fields
+            # such as ``status``. They are valid in response output but are not
+            # valid when the item is replayed as request input.
+            if copied.get("type") == "function_call":
+                copied.pop("status", None)
+            normalized.append(copied)
+        return tuple(normalized)
     synthesized: list[dict[str, JsonValue]] = []
     if response.text:
         synthesized.append(
