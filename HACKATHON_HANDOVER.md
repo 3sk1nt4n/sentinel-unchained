@@ -23,10 +23,10 @@ has been demonstrated to a judge, and what is still missing.
 | Field | Current value |
 |---|---|
 | Last live-rule verification | 2026-07-14 20:20 ET, direct current 2026 Official Rules + overview + resources |
-| Last repository verification | 2026-07-14 20:50 ET |
+| Last repository verification | 2026-07-14 20:57 ET |
 | Current event day | Submission Day 2, not Day 8 |
 | Hard deadline | 2026-07-21 17:00 PT / 20:00 ET |
-| Time remaining at 2026-07-14 20:50 ET | Approximately 167.2 hours |
+| Time remaining at 2026-07-14 20:57 ET | Approximately 167.1 hours |
 | Internal submission deadline | 2026-07-20; July 21 is emergency buffer only |
 | Selected track | Developer Tools |
 | Current decision | **CONDITIONAL GO with frozen scope; registry alternative parked** |
@@ -414,7 +414,7 @@ Verified on July 14, 2026 unless otherwise stated.
 | Winner priority and sequencing overlay | VERIFIED + SAVED | `docs/WINNER_ROADMAP.md`; benchmark-leakage, adjudication, provenance, viewer, and C0-C7 red-team audit | Follow order; no GPT-5.6 DC01 call before public freeze |
 | Static judge viewer | NOT STARTED | Strategy document exists; no viewer implementation or hosted path | Generate from real run |
 | No-key replay | NOT STARTED | No replay artifact | Prebuilt verifier/demo |
-| Git provenance | IMPLEMENTED LOCALLY, NOT PUBLICLY ANCHORED | Local `main` repository initialized without backdating; no remote | Commit baseline, secret/evidence rescan, then publish/share |
+| Git provenance | VERIFIED LOCALLY, NOT PUBLICLY ANCHORED | Honest root commit `5b31b32e995d4d485bf512bb8600ca44b46e6f2c` on `main`; no remote | Publish/share without rewriting history |
 | Build provenance document | IMPLEMENTED | `BUILD_PROVENANCE.md` records prior/new/Codex boundaries and local-timestamp limitation | Record baseline hash and public/freeze URLs when they exist |
 | Public experiment preregistration | NOT STARTED | Protocol/rubric/scorer are not yet frozen or remotely timestamped | Complete after C2/C3 and before any GPT-5.6 DC01 call |
 | Judge quickstart | NOT STARTED | No `JUDGE-QUICKSTART.md` | Write after replay path exists |
@@ -453,7 +453,7 @@ integration coverage rather than chasing an arbitrary percentage.
 | WSL mount requirements | `ewfmount` and `ntfs-3g` absent |
 | Docker command | Present through Rancher Desktop; daemon route not yet verified |
 | Evidence candidates in workspace | None found under common forensic extensions |
-| Git repository | Local `main` initialized; no commit or remote yet at this checkpoint |
+| Git repository | Local `main`; baseline commit `5b31b32e995d4d485bf512bb8600ca44b46e6f2c`; no remote |
 
 Tests passing in this environment does not mean the live native route is ready.
 
@@ -720,7 +720,7 @@ links, licensing, feedback ID, and confirmation checklist are complete.
 - [x] Fix the three reproduced correctness/security defects.
 - [ ] Design/implement full-output retention.
 - [x] Freeze product scope to a Windows flagship with memory-only fallback.
-- [x] Initialize local Git honestly; baseline commit still pending.
+- [x] Initialize local Git and create the honest baseline commit.
 - [x] Create `BUILD_PROVENANCE.md`.
 
 ### July 15 — Clean supported path
@@ -1004,12 +1004,12 @@ At the end of every substantial future session:
 | 2026-07-14 19:38 | Completed three verification passes over the corrected master-plan integration | 1,084-line/18-section coverage; link and heading scans; no em dash in master plan; 71 tests; Ruff; truthful dependency and Git failures retained | Execute the focused P0 correctness prompt saved in the master plan |
 | 2026-07-14 20:50 | Deeply red-teamed and saved the Winner Roadmap; corrected the C0-C7 order, forbade GPT-5.6 DC01 rehearsal before a public freeze, split factual correctness from receipt sufficiency, retained the existing Volatility path, and made hosted plus offline viewing the no-rebuild contract | Current Official Rules; official GPT-5.6 and Responses guidance; Qwen adapter/source inspection; independent strategy audit; 881-line roadmap | Finish C1 verification and honest local provenance, then start C2 |
 | 2026-07-14 20:50 | Implemented and root-verified all three reproduced C1 defects: rendered Markdown inertness, exact partition-offset propagation into sealed `fsstat`, and log-before-memory classification | 80 tests passed in 1.39s; six rendered report-safety tests; 34 focused evidence/tool tests; Ruff check and format check; wheel build | Commit the honest baseline, then implement C2 proof artifacts |
-| 2026-07-14 20:50 | Initialized local Git on `main`, added evidence/secret exclusions, created `BUILD_PROVENANCE.md`, and passed high-confidence secret plus evidence scans | Local Git state; `.gitignore`; scans found no key/evidence candidate; public remote absent | Create baseline commit and publish only after final tracked-file review |
+| 2026-07-14 20:56 | Initialized local Git on `main`, added evidence/secret exclusions, created `BUILD_PROVENANCE.md`, passed high-confidence secret and evidence scans, and created the honest root commit | Commit `5b31b32e995d4d485bf512bb8600ca44b46e6f2c`; 32 reviewed files; no public remote | Publish without history rewriting, then start C2 |
 
 ## Single next action
 
-Commit the reviewed honest local baseline, then execute C2: durable
-content-addressed full outputs, provider-returned model identity, manifest,
-summary, environment record, `verify-run`, bounded audited retries, and locked
-Python 3.11 dependencies. Do not run GPT-5.6 on DC01 until deterministic native
-smoke and the public experiment freeze also pass.
+Publish the reviewed baseline without rewriting history, then execute C2:
+durable content-addressed full outputs, provider-returned model identity,
+manifest, summary, environment record, `verify-run`, bounded audited retries,
+and locked Python 3.11 dependencies. Do not run GPT-5.6 on DC01 until
+deterministic native smoke and the public experiment freeze also pass.

@@ -358,8 +358,8 @@ Current environment blockers:
   environment according to `pip check`;
 - `OPENAI_API_KEY` is absent from the current process;
 - WSL lacks `ewfmount` and `ntfs-3g`;
-- a local `main` Git repository exists, but no baseline commit or public remote
-  exists yet.
+- a local `main` Git repository and honest root commit exist, but no public
+  remote or independent server timestamp exists yet.
 
 ### Stop-ship code and proof gaps
 

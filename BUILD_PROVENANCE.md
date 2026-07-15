@@ -3,7 +3,8 @@
 > **Created:** 2026-07-14 during the OpenAI Build Week submission period
 > **Purpose:** distinguish prior work, new Build Week work, Codex work, and
 > current proof limits
-> **Current status:** honest local baseline; public remote timestamp pending
+> **Current status:** honest local baseline committed; public remote timestamp
+> pending
 
 This document records provenance without backdating or overstating what Git can
 prove. It must be updated whenever a material dependency, source boundary,
@@ -120,7 +121,15 @@ permission to claim a future artifact as complete.
 
 ## 6. Baseline state captured on July 14
 
-At the local baseline:
+The honest local baseline is:
+
+```text
+commit 5b31b32e995d4d485bf512bb8600ca44b46e6f2c
+authored/committed 2026-07-14T20:56:22-04:00
+subject Establish honest Build Week baseline after C1 hardening
+```
+
+At that baseline:
 
 - the offline controller and safety boundaries are substantial;
 - the three reproduced C1 defects have code fixes and adversarial regressions;
@@ -178,7 +187,7 @@ not described as immutable or unimpeachable.
 | Date | Event | Independent anchor | Notes |
 |---|---|---|---|
 | 2026-07-14 | Majority-core Codex thread and successful feedback upload retained | Codex Session ID above | Supports Build Week development history; not runtime proof |
-| 2026-07-14 | Honest local Git baseline created | Local commit, to be recorded after creation | Exact content binding; no independent timestamp yet |
+| 2026-07-14 | Honest local Git baseline created | `5b31b32e995d4d485bf512bb8600ca44b46e6f2c` | Exact content binding; no independent timestamp yet |
 | Pending | Public baseline push | Public remote commit | Do not backdate or rewrite |
 | Pending | Experiment freeze | Public tag plus server-timestamped digest CI | Must precede first GPT-5.6 DC01 investigation |
 | Pending | Authentic primary run | Verified proof bundle | First valid post-freeze run controls |

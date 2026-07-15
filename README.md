@@ -36,6 +36,48 @@ judgments that require human review.
 > evidence format. A capability label describes what was actually available in
 > each run; it must never imply that unavailable analysis ran.
 
+## Build Week contribution boundary
+
+Only submission-period additions are evaluated. The boundary is explicit:
+
+**Prior work, used as MIT-licensed context:** selected typed forensic tool
+functions, fixed forensic plugin metadata, and selected evidence-mounting
+substrate from the author's
+[Sentinel-Ensemble-Qwen](https://github.com/3sk1nt4n/Sentinel-Ensemble-Qwen)
+repository at commit
+`9f309c6134e857f7b86f3e6b9c6709ce954944a5`.
+
+**Built for Sentinel Unchained during this submission period:** the evidence
+profiler and capability router; constrained Responses API adapter; model-chosen
+parallel opening; adaptive one-tool loop; literal-DONE and forced-finalization
+protocol; fresh-context downgrade-only reviewer; custody, audit, caps,
+containment, and report-safety integration; Unchained tests and prompts; and the
+new proof bundle, frozen evaluation, verifier, viewer, and submission artifacts
+as each is actually implemented. Future items in that last list remain
+explicitly incomplete in the prototype-status and handover ledgers until an
+artifact proves them.
+
+The prior pipeline, semantic validator, prompts, reports, metrics, findings, and
+runs are not claimed as new Unchained work. See
+[BUILD_PROVENANCE.md](BUILD_PROVENANCE.md) for the dated boundary and exact
+limitations of the initial Git baseline.
+
+## How Codex contributed
+
+The current majority-core Codex thread implemented and reviewed the Unchained
+controller, typed authority boundary, evidence lifecycle, audit and cap
+semantics, model protocol, report safety, and offline tests. Codex also performed
+live-rules verification, official API-contract review, adversarial code review,
+experiment-method review, judge-experience review, and the C1 security and
+partition-routing hardening. The successful thread ID is retained below and in
+the provenance record.
+
+The human owner chose the product thesis, Developer Tools track, DFIR testbed,
+benchmark, safety boundary, scope cuts, evaluation claims, and final submission
+decisions. Codex accelerated implementation and verification; it did not turn
+fake-model tests into runtime proof or make the unfinished authentic run,
+viewer, video, or submission complete.
+
 ## Deterministic floor
 
 Four deterministic safety domains form the control plane. Supporting controller
@@ -76,7 +118,7 @@ Everything forensic above that floor is model-directed:
 PROFILE + ROUTE
        |
        v
-OPENING BOOK: GPT-5.6 selects up to six eligible tools; run in parallel
+OPENING BOOK: GPT-5.6 selects one to six eligible tools; run in parallel
        |
        v
 PLAN -> ACT (one typed tool) -> OBSERVE -> UPDATE CASE NOTES -> repeat/DONE
