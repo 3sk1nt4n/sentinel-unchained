@@ -763,8 +763,9 @@ The verified local quality snapshot is 128 passing tests, clean Ruff check and
 format check, a successful wheel build, and clean `pip check` in both CPython
 3.11.9 environments. The real `vol_pstree`, `vol_psscan`, and post-fix
 high-volume `vol_netscan` smokes described above also pass.
-These are operational checks. They do not replace a public server timestamp,
-experiment freeze, or authentic GPT-5.6 bundle. The earlier C2 commit snapshot
+These are operational checks. They do not replace the public experiment freeze
+or an authentic GPT-5.6 bundle. The repository history is now publicly anchored
+at the remote `origin/main`, while the earlier C2 commit snapshot
 remains 123 tests and is preserved as such in provenance.
 
 Tests run without network access. Their behavioral coverage includes:

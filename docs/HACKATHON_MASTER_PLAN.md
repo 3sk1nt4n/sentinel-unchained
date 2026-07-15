@@ -1,7 +1,7 @@
 # Sentinel Unchained: Build Week Winner Master Plan
 
-> **Status:** CONDITIONAL GO, local native Gate A leg green, provenance anchor red
-> **Last deep review:** 2026-07-14 22:22 ET
+> **Status:** CONDITIONAL GO, Gate A provenance is green, authentic runtime remains red
+> **Last deep review:** 2026-07-14 22:32 ET
 > **Track:** Developer Tools
 > **Internal submission deadline:** 2026-07-20
 > **Hard deadline:** 2026-07-21 17:00 PT / 20:00 ET
@@ -32,20 +32,20 @@ an explicitly historical baseline and must not be quoted as the present build.
 
 | Area | Evidence-backed state | Public claim boundary |
 |---|---|---|
-| Local provenance | Commits `5309e5c`, `7b05d6a`, `6e696a0`, and `207a039` retain the provider/reviewer, C2 proof/lock, real Windows-memory Gate A hardening, and synchronized winner documentation | Publish without rewriting history; no public remote or independent server timestamp exists yet |
+| Local provenance | Commits `5309e5c`, `7b05d6a`, `6e696a0`, `207a039`, and `3506d29` retain the provider/reviewer, C2 proof/lock, real Windows-memory Gate A hardening, synchronized winner documentation, and clean handoff | Public `origin/main` matches local HEAD `3506d29`; GitHub metadata reports `visibility=public`; retain the server-side commit record |
 | Implementation | 14 Python source modules, 8,779 total text lines and 7,889 nonblank lines, 128 passing tests, Ruff and format clean, wheel plus sdist build passing, and diff check clean | Strong local implementation evidence, not an authentic GPT-5.6 investigation |
 | Python environment | Official CPython 3.11.9; clean primary and lockcheck virtual environments; `pip check` clean in both; exact Windows CPython 3.11 constraints and `pylock` committed | Reproducible tested Windows Python environment, not universal host portability |
 | Native-tool readiness | **GREEN LOCALLY:** verified DC01 memory-only profile, resolved Windows symbols, 14 sealed Windows-memory tools, real `vol_pstree`, `vol_psscan`, and post-fix `vol_netscan` results, and matching custody | Deterministic pre-freeze engineering proof only; no GPT-5.6 or scored run occurred |
 | C2 proof contract | Durable content-addressed outputs, requested and provider-returned model identity, response/request IDs, validated usage, bounded audited retries, manifest, summary, environment record, and offline `verify-run` are implemented and tested | Proof machinery is verified offline; it does not prove a live GPT-5.6 or native forensic run |
 | Retained CLI bundle | One empty-input run produced a hash-valid terminal `INVALID` bundle that passes ordinary offline verification | This proves invalid-path finalization only. It is not `COMPLETE`, authentic, evidence-backed, native-tool-backed, or GPT-5.6-backed |
-| Gate A | **LOCAL NATIVE LEG GREEN; OVERALL BLOCKED** | Publish the full unchanged history and establish an independent server timestamp |
+| Gate A | **GREEN FOR LOCAL NATIVE AND PUBLIC PROVENANCE LEGS** | Public remote is verified; authentic runtime, freeze, and primary evidence remain open |
 | Live runtime | `OPENAI_API_KEY` is absent and no funded runtime has been demonstrated | No authentic GPT-5.6 claim is allowed |
 | Downstream submission work | No public freeze/rubric, authentic primary run, viewer, video, or Devpost submission | All remain open and must follow the gate order in this document |
 
 The immediate priority is not another native adapter or more controller breadth.
-Publish the history through Gate A commit `6e696a0` without rewriting it,
-establish an independent server timestamp, then publicly freeze the full
-experiment before any GPT-5.6 DC01 investigation.
+The full history is now pushed without rewriting it and `origin/main` matches
+local HEAD. Establish the freeze commit and its server-timestamped digest,
+then begin the authentic GPT-5.6 path only after that freeze.
 
 Proceed with this project. Do not pivot to a registry project. Do not add
 Linux, macOS, Plaso, Docker portability, or broad new tool families before the

@@ -30,7 +30,7 @@ has been demonstrated to a judge, and what is still missing.
 | Internal submission deadline | 2026-07-20; July 21 is emergency buffer only |
 | Selected track | Developer Tools |
 | Current decision | **CONDITIONAL GO with frozen scope; registry alternative parked** |
-| Flagship-run readiness | **NOT READY: local Gate A is green; public remote, freeze, funded credentials, and authentic run are red** |
+| Flagship-run readiness | **NOT READY: local Gate A and public provenance are green; freeze, funded credentials, and authentic run are red** |
 | Submission readiness | **NOT READY** |
 | Current `/feedback` Session ID | `019f61e5-5755-7a02-adb4-618d32baab27` |
 
@@ -448,7 +448,7 @@ Verified on July 14, 2026 unless otherwise stated.
 | Static judge viewer | NOT STARTED | Strategy document exists; no viewer implementation or hosted path | Generate from real run |
 | Offline `verify-run` | IMPLEMENTED + VERIFIED on invalid bundle | Standard-library verifier passes integrity checks while reporting terminal `INVALID`; it rechecks recorded custody, not absent original evidence bytes | Verify a complete authentic bundle and publish the command |
 | No-key replay/viewer | PARTIAL | Verifier exists; no static viewer or hosted path | Build only over the authentic completed bundle |
-| Git provenance | VERIFIED LOCALLY, NOT PUBLICLY ANCHORED | Local history includes `5309e5c`, `7b05d6a`, Gate A commit `6e696a0`, and synchronized strategy/handover commit `207a039`; no remote or server timestamp | Publish without rewriting history |
+| Git provenance | VERIFIED PUBLICLY | Public `origin/main` matches local HEAD `3506d29`; GitHub metadata reports `visibility=public`; server-side commit record retained | Preserve unchanged history and bind the freeze digest |
 | Build provenance document | IMPLEMENTED | `BUILD_PROVENANCE.md` records prior/new/Codex boundaries and local-timestamp limitation | Record baseline hash and public/freeze URLs when they exist |
 | Public experiment preregistration | NOT STARTED | Protocol/rubric/scorer digest is not frozen or remotely timestamped | Complete after deterministic native smoke and before any GPT-5.6 DC01 call |
 | Judge quickstart | NOT STARTED | No `JUDGE-QUICKSTART.md` | Write after replay path exists |
@@ -486,7 +486,7 @@ integration coverage rather than chasing an arbitrary percentage.
 | Real native plugin proof | VERIFIED LOCALLY: `windows.info` resolves symbols; authoritative `gate-a-final-20260715T015251Z` returns pstree 40 and psscan 72 records; repaired `gate-a-netscan-20260715T014947Z` returns 19,685 records and 3,961,843 accepted-output bytes |
 | Public evidence archive outside repo | 561,424,278 bytes; official MD5 match `64A4E2CB47138084A5C2878066B2D7B1`; archive SHA-256 `86658D85D8254E8D30DCCC4F50D9C2A8B550A101D2E78A6D932316849E37AD80` |
 | Extracted DC01 memory outside repo | 2,147,483,648 bytes; SHA-256 `8079A7459B1739CAF7D4FBF6DDE5EB0AE7A9D24DBDE657DEBF4D5202C8DC6B62`; never commit or redistribute |
-| Git repository | Local `main`; synchronized documentation commit `207a039` follows Gate A code/test commit `6e696a0`, `7b05d6a`, and `5309e5c`; no remote or server timestamp |
+| Git repository | Public `main`; `origin/main` matches `3506d29003262f22fee2144f12352749fc6cd06f`; server-side record retained; no rewrite or force-push |
 | Proof-bundle smoke | Integrity PASS for invalid empty-case bundle `20260715T012818Z-0c60c234`; 4 artifacts, 8 audit entries, terminal `INVALID`, exit 2 |
 
 Tests alone did not prove the native route. The separate real-evidence smoke
@@ -821,9 +821,9 @@ is first reproduced as incapable of that flagship.
 
 Target: before the first GPT-5.6 investigation of DC01.
 
-Current state: **BLOCKED**. Verified local DC01 hashes exist, but there is no
-public remote/server timestamp, public binding of those hashes, frozen rubric,
-scorer digest, or public freeze tag.
+Current state: **PUBLIC PROVENANCE GREEN, EXPERIMENT FREEZE BLOCKED**. The public
+remote exists and matches local HEAD. The frozen rubric, scorer digest, and
+public freeze tag still do not exist.
 
 Pass when the rubric, two-axis scoring specification, metrics, denominators,
 fault criteria, first-valid-run rule, code, prompts, catalog, dependencies,
@@ -1036,7 +1036,7 @@ status changes, and measured outcomes.
 | Risk | Severity | Current mitigation | Exit evidence |
 |---|---|---|---|
 | No authentic GPT-5.6 run | Critical | Hard Gate C; public freeze then proof before polish | Retained `COMPLETE` bundle |
-| No public dated Git provenance | Critical | Local commits through `7b05d6a` exist without backdating; remote still absent | Public commits/tag + provenance map |
+| No public dated Git provenance | RESOLVED FOR CURRENT HISTORY | Public `origin/main` matches local HEAD `3506d29`; no rewrite or force-push | Preserve history and add the freeze digest/tag |
 | Benchmark leakage before freeze | Critical | No GPT-5.6 DC01 call before public Gate B | Public freeze + server timestamp + run timestamps |
 | Sanitizer bypass | RESOLVED OFFLINE | Link-free safe subset and rendered adversarial tests | Authentic report/viewer demonstration |
 | Wrong partition mount | RESOLVED OFFLINE | Exact matched offset sealed end to end | Native paired-disk proof if retained |
@@ -1289,11 +1289,11 @@ At the end of every substantial future session:
 | 2026-07-14 22:06 | Closed the final private-worker error-path leak and fixed the Build Week primary scope | Case-insensitive recursive path scrub now covers success values and exception strings; subprocess regression raises current suite to 128 tests; current source count is 14 modules/8,779 total/7,889 nonblank lines; Windows memory-only is the final primary and paired disk is future work | Run the final verification, commit this checkpoint, publish remote, then publish the full freeze |
 | 2026-07-14 22:19 | Bound the real Gate A hardening in Git and completed the final strategy/doc verification | Commit `6e696a08a9aaeaa345638239e5182ec24826724d`; 128 tests, Ruff, format, both-environment `pip check`, wheel, sdist, Volatility help, 25/5 catalog, diff, links, fences, heading spacing, privacy, evidence, and no-em-dash scans green; exact C4 byte limits, two-axis metrics, evaluator authorship, gate names, and memory-only scope reconciled | Publish unchanged history and complete C4 |
 | 2026-07-14 22:22 | Refreshed the independent lock-check environment against Gate A commit `6e696a0` | The stale installed project correctly failed the two new worker-privacy regressions; reinstalling the current constrained editable package restored 128 passing tests, clean `pip check`, Ruff, and format. No source fix was required | Preserve this as evidence that the second environment detects stale installs; publish unchanged history |
-| 2026-07-14 22:24 | Committed the synchronized winner strategy, handover, provenance, README, and environment record | Commit `207a039836cdaf3045e92a2b74e541a7dd2be77f`; public rules/API references, exact Gate A receipts, Windows memory-only scope, two-axis scoring, evaluator authorship, and all remaining red gates are aligned | Create and anonymously verify the public remote, then complete and publish C4 |
+| 2026-07-14 22:24 | Committed the synchronized winner strategy, handover, provenance, README, and environment record | Commit `207a039836cdaf3045e92a2b74e541a7dd2be77f`; public rules/API references, exact Gate A receipts, Windows memory-only scope, two-axis scoring, evaluator authorship, and all remaining red gates are aligned | Push and verify public provenance, then complete and publish C4 |
+| 2026-07-14 22:32 | Verified public provenance after user push | `origin/main` exactly matches `3506d29003262f22fee2144f12352749fc6cd06f`; GitHub metadata reports `visibility=public`; browser fetch returned a stale 404 and is retained as a non-authoritative discrepancy; API key is not present in this Codex process | Freeze the protocol and rubric before any GPT-5.6 DC01 call |
 
 ## Single next action
 
-Create and verify the public remote without rewriting history. Finish and publish the
-preregistration/freeze with server-timestamped digests. Only after that public
-freeze may DC01 be exposed to GPT-5.6 for the first valid post-freeze primary
-run. No viewer, video, or prose polish outranks this sequence.
+Finish and publish the preregistration/freeze with server-timestamped digests.
+Only after that public freeze may DC01 be exposed to GPT-5.6 for the first valid
+post-freeze primary run. No viewer, video, or prose polish outranks this sequence.

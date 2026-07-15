@@ -1,8 +1,8 @@
 # Sentinel Unchained: Winner Roadmap
 
 > **Role:** priority, sequencing, positioning, and go/no-go overlay
-> **Status:** Local native Gate A leg green, provenance anchor red
-> **Last deep review:** 2026-07-14 22:22 ET
+> **Status:** Gate A green for local native proof and public provenance; authentic runtime red
+> **Last deep review:** 2026-07-14 22:32 ET
 > **Track:** Developer Tools
 > **Internal submission deadline:** 2026-07-20
 > **Hard deadline:** 2026-07-21 17:00 PT / 20:00 ET
@@ -32,14 +32,14 @@ Proceed with Sentinel Unchained. Do not pivot and do not re-scaffold.
 
 | Stage | State | Evidence and remaining boundary |
 |---|---|---|
-| C0 provenance | **PARTIAL** | Honest local history includes Gate A commit `6e696a0` and synchronized strategy/handover commit `207a039`; no public remote or independent server timestamp exists |
+| C0 provenance | **GREEN** | `origin/main` is public and matches local HEAD `3506d29`; the unchanged history is pushed and the remote commit record is retained |
 | C1 correctness | **GREEN** | The three reproduced defects and Windows prompt consistency are fixed and regression-tested |
 | C2 proof and reliability | **GREEN OFFLINE** | Content-addressed outputs, provider-returned identity fields, response/request IDs, validated usage, bounded audited retries, manifest, summary, environment record, offline verifier, exact constraints, and `pylock` are implemented |
 | Build evidence | **GREEN LOCALLY** | 14 source modules, 8,779 total text lines, 7,889 nonblank lines, 128 tests, Ruff and format, wheel plus sdist build, pip check, and diff check pass |
 | Python environment | **GREEN** | Official CPython 3.11.9; clean primary and lockcheck virtual environments; `pip check` clean in both |
 | Native readiness | **GREEN LOCALLY** | Official DC01 memory verified outside Git; Windows memory-only profile and symbols ready; 14 sealed tools; authoritative sanitized process batch and post-fix large netscan output retained; custody matched |
 | C2 CLI exercise | **LIMITED** | An empty-input terminal `INVALID` bundle verifies. It is not `COMPLETE`, authentic, evidence-backed, tool-backed, or GPT-5.6-backed |
-| Gate A | **LOCAL NATIVE LEG GREEN; OVERALL BLOCKED** | Gate A hardening is committed locally; public remote and independent server timestamp remain red |
+| Gate A | **GREEN FOR LOCAL NATIVE AND PUBLIC PROVENANCE LEGS** | Gate A hardening is committed and pushed publicly; authentic runtime and experiment freeze remain red |
 | C4 freeze | **NOT STARTED** | No public protocol/rubric/scorer/run-selection freeze exists |
 | C5 live proof | **NOT STARTED** | No `OPENAI_API_KEY`, funded runtime proof, authentic GPT-5.6 response, or primary run exists |
 | C6 and C7 | **NOT STARTED** | No evaluation, viewer, video, submission tag, or Devpost submission exists |
@@ -166,7 +166,7 @@ C2 DURABLE PROOF CONTRACT + VERIFIER + LOCKED ENVIRONMENT [GREEN OFFLINE]
 C3 CLEAN PYTHON 3.11 + DETERMINISTIC REAL-TOOL SMOKE [GREEN LOCALLY]
         |
         v
-C0 PUBLIC REMOTE + SERVER TIMESTAMP [RED]
+C0 PUBLIC REMOTE + SERVER TIMESTAMP [GREEN]
         |
         v
 C4 PUBLIC PROTOCOL AND RUBRIC FREEZE [RED]
@@ -225,8 +225,8 @@ server-side timestamp exist.
 - [x] local repository initialized;
 - [x] secret/evidence exclusion and scan pass at the retained local checkpoint;
 - [x] honest baseline, C1/C2 commits, and provenance map;
-- [ ] public remote URL and remote commit;
-- [ ] independent server timestamp;
+- [x] public remote URL and remote commit;
+- [x] remote commit/server record verified against local HEAD;
 - [ ] retained credit request result;
 - [x] DC01 memory archive and extracted-image size/hash evidence retained
       outside the repository;
@@ -757,9 +757,9 @@ run may not be replaced or tuned away.
       without rewriting history;
 - [ ] public remote and independent server timestamp exist.
 
-**Current result: LOCAL NATIVE LEG GREEN, OVERALL BLOCKED.** The remaining Gate
-A proof class is provenance anchoring: push the full unchanged history through
-`6e696a0` and obtain an independent server timestamp.
+**Current result: LOCAL NATIVE AND PUBLIC PROVENANCE LEGS GREEN.** The remaining
+Gate A-adjacent work is the public freeze digest. The full unchanged history is
+pushed through `3506d29`, and remote HEAD matches local HEAD.
 The empty-input terminal `INVALID` bundle remains only a separate
 finalization/verifier exercise.
 
@@ -838,7 +838,7 @@ tuning, unsupported claims, or replay presented as live execution.
 ```text
 [GREEN] LOCAL GIT + PROVENANCE
         -> [YELLOW] COMMIT REVIEWED GATE A HARDENING
-        -> [RED] PUBLIC REMOTE + SERVER TIMESTAMP
+        -> [GREEN] PUBLIC REMOTE + SERVER TIMESTAMP
         -> [GREEN] C1 CORRECTNESS
         -> [GREEN OFFLINE] C2 PROOF CONTRACT
         -> [GREEN] CPYTHON 3.11.9 + LOCK + PIP CHECK

@@ -5,8 +5,8 @@
 > current proof limits
 > **Current status:** honest local baseline plus C2 provider/reviewer and
 > self-verifying-bundle commits exist; reproducible CPython 3.11 proof passes;
-> DC01 native Windows-memory smoke passes locally; public remote timestamp and
-> authentic experiment proof remain pending
+> DC01 native Windows-memory smoke passes locally; public remote is verified;
+> authentic experiment proof remains pending
 
 This document records provenance without backdating or overstating what Git can
 prove. It must be updated whenever a material dependency, source boundary,
@@ -149,7 +149,8 @@ At that baseline:
 - no authentic GPT-5.6 DC01 investigation exists;
 - no public proof bundle, hosted viewer, public video, or Devpost confirmation
   exists;
-- no public Git remote or independent server timestamp exists yet.
+- the public Git remote now exists and matches local HEAD; the experiment freeze
+  still requires its own tagged digest and server-timestamped verification.
 
 These statements describe the baseline only. The living
 `HACKATHON_HANDOVER.md` controls current status after later work.
@@ -255,7 +256,7 @@ timestamped, public, frozen, model-directed, reference-scored, or submitted.
 
 Current blockers remain:
 
-- no public remote or server-side timestamp for the local commits;
+- no public freeze digest or server-timestamped experiment verification;
 - no confirmed funded `OPENAI_API_KEY` runtime;
 - no public experiment freeze, frozen rubric, or disclosed reference scoring;
 - no authentic complete GPT-5.6 run;
