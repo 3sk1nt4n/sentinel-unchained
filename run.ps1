@@ -1,0 +1,42 @@
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory = $true)]
+    [string]$EvidencePath,
+    [ValidateSet("default", "strict")]
+    [string]$Caps = "default",
+    [switch]$Live,
+    [switch]$SkipSetup
+)
+
+$ErrorActionPreference = "Stop"
+$root = (Resolve-Path (Join-Path $PSScriptRoot ".")).Path
+$venv = Join-Path $env:LOCALAPPDATA "venvs\sentinel-unchained-py311"
+$python = Join-Path $venv "Scripts\python.exe"
+
+Set-Location $root
+if (-not $SkipSetup -or -not (Test-Path $python)) {
+    & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $root "setup.ps1") -SkipTests
+}
+
+$evidence = (Resolve-Path -LiteralPath $EvidencePath -ErrorAction Stop).Path
+if (-not (Test-Path -LiteralPath $evidence -PathType Container)) {
+    throw "EvidencePath must be an existing directory: $EvidencePath"
+}
+
+$env:UNCHAINED_MODEL = "gpt-5.6"
+$env:MAX_TOOL_CALLS = "60"
+$env:MAX_TOTAL_TOKENS = "400000"
+$env:MAX_WALL_SECONDS = "1800"
+$env:MAX_COST_USD = "10"
+
+if ($Live) {
+    & (Join-Path $root "scripts\set-openai-key.ps1")
+    if (-not $env:OPENAI_API_KEY) {
+        throw "The hidden key prompt completed but OPENAI_API_KEY is absent."
+    }
+} else {
+    throw "Live execution is explicit. Add -Live to run the funded GPT-5.6 investigator."
+}
+
+& $python -m unchained $evidence --caps $Caps
+exit $LASTEXITCODE

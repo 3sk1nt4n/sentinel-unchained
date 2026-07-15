@@ -32,6 +32,18 @@ Conda, or global packages into the proof environment.
 
 ## 2. Clone and install
 
+For the simplest supported setup, the complete install, dependency, and test
+gate is one command after cloning:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\setup.ps1
+```
+
+The script creates the validated Python 3.11 environment outside OneDrive,
+installs the pinned dependencies, runs `pip check`, tests, Ruff, formatting,
+and the package build. The individual commands below remain available when a
+junior analyst needs to see or diagnose each stage.
+
 Run each block from a new PowerShell window:
 
 ```powershell
@@ -159,6 +171,19 @@ profiles content rather than trusting a filename extension and prints a case
 card containing OS, shape, readiness, sizes, hashes, and available tools.
 
 ## 7. Run the bounded investigator
+
+The simplest live run is one command. It performs the environment check,
+prompts for the API key invisibly, sets the hard caps, and launches the
+investigator:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\run.ps1 `
+    -EvidencePath C:\Evidence\sentinel\dc01 -Live
+```
+
+The hidden key prompt appears only in the local PowerShell window. The key is
+not printed or written to the repository. Use `-SkipSetup` only after the setup
+command has already passed in the same checkout.
 
 ```powershell
 Set-Location "$env:USERPROFILE\src\sentinel-unchained"
