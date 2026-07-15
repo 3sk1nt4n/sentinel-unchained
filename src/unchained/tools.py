@@ -24,7 +24,7 @@ from .caps import CapExceeded, RunBudget
 from .models import EvidenceProfile, FunctionCall, JsonValue, ToolResult
 
 ToolExecutor = Callable[[dict[str, JsonValue]], Any]
-_WORKER_MAX_RESPONSE_BYTES = 2_000_000
+_WORKER_MAX_RESPONSE_BYTES = 16_000_000
 _EVENT_LOG_MAX_RETURN_BYTES = 500_000
 
 
@@ -344,15 +344,23 @@ def load_reference_tools(
     catalog = _load_qwen_catalog(budget)
     direct_catalog = catalog["direct"]
     volatility_plugins = catalog["volatility_plugins"]
-    memory_path = str(profile.memory_items[0].path) if profile.memory_items else ""
+    memory_item = profile.memory_items[0] if profile.memory_items else None
+    memory_path = str(memory_item.path) if memory_item is not None else ""
+    memory_id = memory_item.evidence_id if memory_item is not None else ""
     disk_item = profile.disk_items[0] if profile.disk_items else None
     disk_path = str(disk_item.path) if disk_item is not None else ""
+    disk_id = disk_item.evidence_id if disk_item is not None else ""
     mount_path = str(profile.mount_path) if profile.mount_path else ""
     definitions: list[ToolDefinition] = []
     for name, arg_type, family, operating_systems in _direct_specs():
         if profile.os not in operating_systems:
             continue
-        if arg_type == "memory" and (not memory_path or name not in volatility_plugins):
+        # Windows collectors are fixed, direct Qwen functions.  They do not
+        # appear in ``volatility_plugins`` because that catalog is deliberately
+        # restricted to the dynamic Linux/macOS plugin allowlist.  Requiring a
+        # Windows direct-tool name in that unrelated mapping silently removed
+        # every Windows memory tool from a real profile.
+        if arg_type == "memory" and not memory_path:
             continue
         if arg_type == "memory" and not any(
             value.startswith("volatility3.") for value in profile.available_tool_families
@@ -380,6 +388,7 @@ def load_reference_tools(
                     arg_type,
                     memory_path=memory_path,
                     mount_path=mount_path,
+                    evidence_id=memory_id if arg_type == "memory" else disk_id,
                     budget=budget,
                 ),
             )
@@ -389,6 +398,7 @@ def load_reference_tools(
         _dynamic_memory_definitions(
             profile,
             memory_path,
+            memory_id,
             volatility_plugins,
             budget,
         )
@@ -415,6 +425,7 @@ def load_reference_tools(
                         command,
                         disk_path,
                         budget,
+                        evidence_id=disk_id,
                         filesystem_offset=filesystem_offset,
                     ),
                 )
@@ -475,6 +486,7 @@ def _direct_specs() -> tuple[tuple[str, str, str, tuple[str, ...]], ...]:
 def _dynamic_memory_definitions(
     profile: EvidenceProfile,
     memory_path: str,
+    memory_id: str,
     volatility_plugins: dict[str, str],
     budget: RunBudget | None,
 ) -> list[ToolDefinition]:
@@ -510,7 +522,7 @@ def _dynamic_memory_definitions(
                 parameters=_empty_parameters(),
                 families=("memory",),
                 os_families=(profile.os,),
-                executor=_volatility_executor(name, memory_path, budget),
+                executor=_volatility_executor(name, memory_path, memory_id, budget),
             )
         )
     return definitions
@@ -540,6 +552,7 @@ def _direct_executor(
     *,
     memory_path: str,
     mount_path: str,
+    evidence_id: str,
     budget: RunBudget | None,
 ) -> ToolExecutor:
     target = DIRECT_TOOL_TARGETS.get(name)
@@ -551,6 +564,7 @@ def _direct_executor(
             "action": "direct",
             "tool": name,
             "arguments": arguments,
+            "evidence_id": evidence_id,
         }
         if arg_type == "memory":
             spec["evidence_path"] = memory_path
@@ -564,6 +578,7 @@ def _direct_executor(
 def _volatility_executor(
     name: str,
     memory_path: str,
+    evidence_id: str,
     budget: RunBudget | None,
 ) -> ToolExecutor:
     def execute(arguments: dict[str, JsonValue]) -> Any:
@@ -572,6 +587,7 @@ def _volatility_executor(
                 "action": "volatility",
                 "tool": name,
                 "evidence_path": memory_path,
+                "evidence_id": evidence_id,
                 "arguments": arguments,
             },
             budget,
@@ -909,6 +925,7 @@ def _tsk_executor(
     disk_path: str,
     budget: RunBudget | None,
     *,
+    evidence_id: str = "EVIDENCE",
     filesystem_offset: int | None = None,
 ) -> ToolExecutor:
     sector_offset: int | None = None
@@ -924,6 +941,7 @@ def _tsk_executor(
             "action": "tsk",
             "tool": tool_name,
             "evidence_path": disk_path,
+            "evidence_id": evidence_id,
             "arguments": arguments,
         }
         if sector_offset is not None:

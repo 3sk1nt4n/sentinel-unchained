@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import asdict, dataclass, field
 from enum import StrEnum
 from pathlib import Path
@@ -10,6 +11,7 @@ from typing import Any, Literal, TypeAlias
 JsonValue: TypeAlias = None | bool | int | float | str | list["JsonValue"] | dict[str, "JsonValue"]
 OsFamily: TypeAlias = Literal["windows", "linux", "macos", "unknown"]
 EvidenceShape: TypeAlias = Literal["memory-only", "disk-only", "both", "logs-only", "unknown"]
+MODEL_TOOL_OUTPUT_MAX_BYTES = 64 * 1024
 
 
 class RunStatus(StrEnum):
@@ -173,9 +175,43 @@ class ToolResult:
     error: str | None = None
 
     def model_output(self) -> str:
-        """Return the raw, bounded-by-tool output envelope given to the model."""
+        """Return a byte-bounded view while retaining the full accepted output on disk."""
 
-        return self.output
+        accepted_bytes = len(self.output.encode("utf-8"))
+        if accepted_bytes <= MODEL_TOOL_OUTPUT_MAX_BYTES:
+            return self.output
+
+        def render(prefix_characters: int) -> str:
+            return json.dumps(
+                {
+                    "accepted_output_prefix": self.output[:prefix_characters],
+                    "delivery_receipt": {
+                        "accepted_output_bytes": accepted_bytes,
+                        "accepted_output_sha256": self.output_sha256,
+                        "model_view_complete": False,
+                        "model_view_max_bytes": MODEL_TOOL_OUTPUT_MAX_BYTES,
+                        "model_view_prefix_characters": prefix_characters,
+                        "selection": "native-order UTF-8 prefix",
+                    },
+                },
+                ensure_ascii=False,
+                allow_nan=False,
+                separators=(",", ":"),
+                sort_keys=True,
+            )
+
+        low = 0
+        high = len(self.output)
+        best = render(0)
+        while low <= high:
+            middle = (low + high) // 2
+            candidate = render(middle)
+            if len(candidate.encode("utf-8")) <= MODEL_TOOL_OUTPUT_MAX_BYTES:
+                best = candidate
+                low = middle + 1
+            else:
+                high = middle - 1
+        return best
 
 
 @dataclass(frozen=True, slots=True)

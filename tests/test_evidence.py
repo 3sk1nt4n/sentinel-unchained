@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+import os
 from pathlib import Path
 
 import pytest
@@ -15,6 +16,8 @@ from unchained.evidence import (
     EvidenceSession,
     MountContainmentError,
 )
+
+_REAL_VOLATILITY_BASE_COMMAND = evidence_module._volatility_base_command
 
 
 @pytest.fixture(autouse=True)
@@ -546,6 +549,25 @@ def test_fixed_probe_environment_strips_host_credentials(
     assert "PYTHONPATH" not in environment
     assert environment["PYTHONSAFEPATH"] == "1"
     assert environment.get("PATH")
+    assert os.path.normcase(environment["PATH"].split(os.pathsep)[0]) == os.path.normcase(
+        str(Path(evidence_module.sys.executable).resolve().parent)
+    )
+
+
+def test_volatility_launcher_is_discovered_beside_active_interpreter(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """An absolute venv Python path must find its own console entry point."""
+
+    interpreter = tmp_path / "python.exe"
+    interpreter.write_bytes(b"")
+    launcher = tmp_path / ("vol.exe" if os.name == "nt" else "vol")
+    launcher.write_bytes(b"")
+    monkeypatch.setattr(evidence_module.sys, "executable", str(interpreter))
+    monkeypatch.setattr(evidence_module.shutil, "which", lambda _name: None)
+
+    assert _REAL_VOLATILITY_BASE_COMMAND() == [str(launcher)]
 
 
 def test_linux_symbols_must_resolve_this_evidence_plugin(

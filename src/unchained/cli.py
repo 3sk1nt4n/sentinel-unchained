@@ -85,7 +85,7 @@ def _fatal_report(reason: str, profile: EvidenceProfile | None = None) -> str:
         "not established" if profile is None else f"{profile.os} / {profile.shape}"
     )
     safe_reason = defang_untrusted_inline(reason)
-    return f"""# Sentinel Unchained DFIR Report — FATAL
+    return f"""# Sentinel Unchained DFIR Report - FATAL
 
 The run aborted because a deterministic safety or runtime invariant failed.
 
@@ -102,7 +102,7 @@ evidence custody before relying on any preserved observations.
 
 def _invalid_report(reason: str) -> str:
     safe_reason = defang_untrusted_inline(reason)
-    return f"""# Sentinel Unchained DFIR Report — INVALID
+    return f"""# Sentinel Unchained DFIR Report - INVALID
 
 The input or configuration did not pass preflight: {safe_reason}
 
@@ -115,7 +115,7 @@ def _cap_report(error: CapExceeded, profile: EvidenceProfile | None) -> str:
         "not established" if profile is None else f"{profile.os} / {profile.shape}"
     )
     detail = defang_untrusted_inline(error.detail)
-    return f"""# Sentinel Unchained DFIR Report — PARTIAL
+    return f"""# Sentinel Unchained DFIR Report - PARTIAL
 
 The hard cap `{error.kind.value}` fired and the run stopped gracefully.
 

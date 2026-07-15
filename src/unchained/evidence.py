@@ -414,6 +414,14 @@ def _fixed_command_environment() -> dict[str, str]:
     environment.pop("PYTHONHOME", None)
     environment.pop("PYTHONPATH", None)
     environment["PYTHONSAFEPATH"] = "1"
+    interpreter_directory = str(Path(sys.executable).resolve().parent)
+    inherited_path = environment.get("PATH", "")
+    path_parts = [
+        part
+        for part in inherited_path.split(os.pathsep)
+        if part and os.path.normcase(part) != os.path.normcase(interpreter_directory)
+    ]
+    environment["PATH"] = os.pathsep.join((interpreter_directory, *path_parts))
     return environment
 
 
@@ -479,12 +487,16 @@ def _probe_filesystem_with_tsk(
 def _volatility_base_command() -> list[str] | None:
     """Find a Volatility 3 launcher without importing the former pipeline."""
 
-    for executable_name in ("vol", "vol.py"):
+    interpreter_directory = Path(sys.executable).resolve().parent
+    launcher_names = ("vol.exe", "vol", "vol.py") if os.name == "nt" else ("vol", "vol.py")
+    for executable_name in launcher_names:
+        adjacent = interpreter_directory / executable_name
+        if adjacent.is_file():
+            return [str(adjacent)]
+    for executable_name in launcher_names:
         executable = shutil.which(executable_name)
         if executable:
             return [executable]
-    if importlib.util.find_spec("volatility3") is not None:
-        return [sys.executable, "-m", "volatility3"]
     return None
 
 
@@ -1533,13 +1545,13 @@ def _capability_label(
     disk_present = any(item.kind == "disk" for item in items)
     disk_route = disk_present and (mounted or any(item.kind == "disk" for item in items))
     if conflict:
-        label = "OS conflict — generic disk/log inspection only; OS-specific analysis disabled"
+        label = "OS conflict - generic disk/log inspection only; OS-specific analysis disabled"
         return label if tool_families else f"{label}; no ready forensic tool family"
     tier = {
         "windows": "Windows tested path",
         "linux": "Linux experimental path",
         "macos": "macOS best-effort path",
-        "unknown": "Undetermined OS — limited generic capability",
+        "unknown": "Undetermined OS - limited generic capability",
     }[os_family]
     states: list[str] = []
     if memory_present:
@@ -1559,7 +1571,7 @@ def _capability_label(
         states.append("standalone logs only")
     if disk_present and not disk_route:
         states.append("disk unavailable")
-    label = f"{tier} — {', '.join(states) if states else 'no supported evidence route'}"
+    label = f"{tier} - {', '.join(states) if states else 'no supported evidence route'}"
     if not tool_families:
         label += "; no ready forensic tool family"
     return label
@@ -1585,7 +1597,7 @@ def _terminal_text(value: object) -> str:
 def print_case_card(profile: EvidenceProfile, stream: TextIO = sys.stdout) -> None:
     """Print the human-readable deterministic profile and full custody hashes."""
 
-    print("SENTINEL UNCHAINED — CASE CARD", file=stream)
+    print("SENTINEL UNCHAINED - CASE CARD", file=stream)
     print(f"OS: {profile.os}", file=stream)
     print(f"Shape: {profile.shape}", file=stream)
     print(f"Filesystems: {', '.join(profile.filesystems) or 'none resolved'}", file=stream)

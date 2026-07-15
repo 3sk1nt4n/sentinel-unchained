@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import sys
 import threading
@@ -14,7 +15,13 @@ import unchained._tool_worker as tool_worker_module
 import unchained.tools as tools_module
 from unchained.audit import AuditLog
 from unchained.caps import CapConfig, CapExceeded, CapKind, RunBudget
-from unchained.models import EvidenceItem, EvidenceProfile, FunctionCall
+from unchained.models import (
+    MODEL_TOOL_OUTPUT_MAX_BYTES,
+    EvidenceItem,
+    EvidenceProfile,
+    FunctionCall,
+    ToolResult,
+)
 from unchained.tools import (
     _EVENT_LOG_MAX_RETURN_BYTES,
     _WORKER_MAX_RESPONSE_BYTES,
@@ -106,6 +113,87 @@ def test_private_worker_returns_json_normalized_result(
     assert result == {"status": "ok", "records": [1, "two"]}
 
 
+def test_private_worker_removes_runner_local_evidence_paths(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Accepted tool output may identify evidence, never the host's private path."""
+
+    monkeypatch.setenv("UNCHAINED_TEST_TOOL_WORKER", "1")
+    evidence_path = str((tmp_path / "private" / "case.mem").resolve())
+    result = _run_isolated_worker(
+        {
+            "action": "test",
+            "operation": "echo",
+            "evidence_path": evidence_path,
+            "evidence_id": "E007",
+            "value": {
+                "evidence_path": evidence_path,
+                "message": f"read-only source {evidence_path}",
+            },
+        },
+        2.0,
+    )
+
+    assert isinstance(result, dict)
+    assert result["evidence_id"] == "E007"
+    assert result["message"] == "read-only source [E007]"
+    assert evidence_path not in str(result)
+
+
+def test_private_worker_removes_case_variant_path_from_error(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A failed collector must not leak its runner-local source path."""
+
+    monkeypatch.setenv("UNCHAINED_TEST_TOOL_WORKER", "1")
+    evidence_path = str((tmp_path / "Private" / "Case.mem").resolve())
+    result = _run_isolated_worker(
+        {
+            "action": "test",
+            "operation": "error",
+            "evidence_path": evidence_path,
+            "evidence_id": "E009",
+            "value": f"collector failed while reading {evidence_path.swapcase()}",
+        },
+        2.0,
+    )
+
+    assert result == {
+        "status": "error",
+        "error": "WorkerProtocolError: collector failed while reading [E009]",
+    }
+    assert evidence_path.lower() not in str(result).lower()
+
+
+def test_large_accepted_output_gets_a_bounded_explicit_model_view() -> None:
+    """The full receipt stays intact while provider input remains hard bounded."""
+
+    accepted = '{"output":"' + ("evidence-row\\n" * 20_000) + '"}'
+    result = ToolResult(
+        call_id="t-large",
+        tool_name="vol_netscan",
+        arguments={},
+        output=accepted,
+        output_sha256="a" * 64,
+        status="success",
+        started_at="2026-07-15T00:00:00+00:00",
+        ended_at="2026-07-15T00:00:01+00:00",
+        duration_ms=1_000,
+    )
+
+    model_view = result.model_output()
+    parsed = json.loads(model_view)
+
+    assert result.output == accepted
+    assert len(model_view.encode("utf-8")) <= MODEL_TOOL_OUTPUT_MAX_BYTES
+    assert parsed["delivery_receipt"]["model_view_complete"] is False
+    assert parsed["delivery_receipt"]["accepted_output_bytes"] == len(accepted.encode("utf-8"))
+    assert parsed["delivery_receipt"]["accepted_output_sha256"] == "a" * 64
+    assert accepted.startswith(parsed["accepted_output_prefix"])
+
+
 def test_private_worker_timeout_returns_promptly_and_kills_process(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -191,6 +279,7 @@ def test_tsk_executor_routes_a_sealed_spec_through_the_worker(
                 "action": "tsk",
                 "tool": "fsstat",
                 "evidence_path": "C:/evidence/disk.E01",
+                "evidence_id": "EVIDENCE",
                 "arguments": {},
                 "sector_offset": 0,
             },
@@ -301,6 +390,61 @@ def test_fsstat_is_withheld_when_no_matched_filesystem_offset_is_known(
 
     assert "tsk_fsstat" not in names
     assert {"tsk_img_stat", "tsk_mmls"}.issubset(names)
+
+
+def test_windows_direct_memory_tools_do_not_depend_on_dynamic_plugin_catalog(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The Linux/macOS dynamic catalog must not hide fixed Windows collectors."""
+
+    memory = tmp_path / "case.mem"
+    memory.write_bytes(b"synthetic")
+    item = EvidenceItem(
+        evidence_id="E001",
+        path=memory,
+        kind="memory",
+        size=memory.stat().st_size,
+        sha256="0" * 64,
+        os_hint="windows",
+        health="ready",
+        symbols="auto-download-ready",
+    )
+    profile = EvidenceProfile(
+        root=memory,
+        os="windows",
+        shape="memory-only",
+        filesystems=(),
+        sizes={"E001": item.size},
+        health={"E001": item.health},
+        symbols={"E001": item.symbols},
+        hashes={"E001": item.sha256},
+        available_tool_families=("volatility3.windows",),
+        capability_label="synthetic",
+        items=(item,),
+    )
+    monkeypatch.setattr(
+        tools_module,
+        "_load_qwen_catalog",
+        lambda _budget: {
+            "direct": {
+                "vol_pstree": {
+                    "has_pid": True,
+                    "required_args": [],
+                    "produces": ["process_tree"],
+                    "runtime_class": "fast",
+                }
+            },
+            # This mapping intentionally contains only dynamic Linux/macOS
+            # plugins in production and is therefore empty in this fixture.
+            "volatility_plugins": {},
+        },
+    )
+
+    definitions = tools_module.load_reference_tools(profile)
+
+    assert [definition.name for definition in definitions] == ["vol_pstree"]
+    assert definitions[0].parameters["required"] == ["pid"]
 
 
 def test_private_worker_does_not_inherit_host_credentials(

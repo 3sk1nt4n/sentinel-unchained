@@ -610,7 +610,7 @@ findings-table citation in that same bracketed form.
             raise AgentProtocolError("report model returned no Markdown")
         _validate_report_body(body, tuple(state.findings), verdicts)
         body = _sanitize_markdown(body)
-        report = f"# Sentinel Unchained DFIR Report — COMPLETE\n\n{body}\n"
+        report = f"# Sentinel Unchained DFIR Report - COMPLETE\n\n{body}\n"
         self.audit.append(
             "report.completed",
             {"status": "COMPLETE", "characters": len(report)},
@@ -641,7 +641,7 @@ findings-table citation in that same bracketed form.
         profile: EvidenceProfile, state: InvestigationState, exc: CapExceeded
     ) -> str:
         detail = defang_untrusted_inline(exc.detail)
-        return f"""# Sentinel Unchained DFIR Report — PARTIAL
+        return f"""# Sentinel Unchained DFIR Report - PARTIAL
 
 The investigation stopped gracefully because the hard cap `{exc.kind.value}` fired.
 
@@ -664,7 +664,7 @@ and model judgments require analyst review against `audit.jsonl`.
         profile: EvidenceProfile, state: InvestigationState, reason: str
     ) -> str:
         safe_reason = defang_untrusted_inline(reason)
-        return f"""# Sentinel Unchained DFIR Report — PARTIAL
+        return f"""# Sentinel Unchained DFIR Report - PARTIAL
 
 The model protocol could not complete safely: {safe_reason}
 

@@ -14,6 +14,7 @@ import inspect
 import json
 import math
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -312,6 +313,8 @@ def _run_test(spec: dict[str, Any]) -> Any:
     if operation == "block":
         threading.Event().wait()
         raise AssertionError("unreachable")
+    if operation == "error":
+        raise WorkerProtocolError(str(spec.get("value", "test worker error")))
     raise WorkerProtocolError("unknown test worker operation")
 
 
@@ -352,14 +355,66 @@ def _json_normalize(value: Any) -> Any:
     return repr(value)
 
 
+def _public_result(value: Any, spec: dict[str, Any]) -> Any:
+    """Remove runner-local evidence paths from the accepted public result."""
+
+    requested_id = spec.get("evidence_id")
+    evidence_id = (
+        requested_id
+        if isinstance(requested_id, str) and re.fullmatch(r"E[0-9]{3}", requested_id)
+        else "EVIDENCE"
+    )
+    private_paths = tuple(
+        path
+        for field in ("evidence_path", "mount_path")
+        if isinstance((path := spec.get(field)), str) and path
+    )
+
+    def scrub(item: Any) -> Any:
+        if isinstance(item, str):
+            result = item
+            for private_path in private_paths:
+                variants = {
+                    private_path,
+                    private_path.replace("\\", "/"),
+                    private_path.replace("/", "\\"),
+                }
+                for variant in variants:
+                    result = re.sub(
+                        re.escape(variant),
+                        lambda _match: f"[{evidence_id}]",
+                        result,
+                        flags=re.IGNORECASE,
+                    )
+            return result
+        if isinstance(item, list):
+            return [scrub(child) for child in item]
+        if isinstance(item, dict):
+            public: dict[str, Any] = {}
+            local_path_removed = False
+            for key, child in item.items():
+                if key in {"evidence_path", "mount_path"} and isinstance(child, str):
+                    local_path_removed = True
+                    continue
+                public[key] = scrub(child)
+            if local_path_removed:
+                public.setdefault("evidence_id", evidence_id)
+            return public
+        return item
+
+    return scrub(value)
+
+
 def main() -> int:
     """Read one sealed request and emit exactly one JSON protocol object."""
 
+    spec: dict[str, Any] = {}
     try:
         payload = sys.stdin.readline()
-        spec = json.loads(payload)
-        if not isinstance(spec, dict):
+        decoded = json.loads(payload)
+        if not isinstance(decoded, dict):
             raise WorkerProtocolError("worker request must be a JSON object")
+        spec = decoded
         # Imports and tool execution happen only after the parent has assigned
         # this process to its POSIX process group or Windows Job Object.
         with (
@@ -367,12 +422,20 @@ def main() -> int:
             contextlib.redirect_stdout(output_sink),
         ):
             result = _run(spec)
-        response = {"ok": True, "result": _json_normalize(result)}
+        response = {"ok": True, "result": _public_result(_json_normalize(result), spec)}
     except BaseException as exc:  # noqa: BLE001 - errors cross a JSON boundary
+        public_error = _public_result(
+            {
+                "error_type": type(exc).__name__,
+                "error": str(exc),
+            },
+            spec,
+        )
+        assert isinstance(public_error, dict)
         response = {
             "ok": False,
-            "error_type": type(exc).__name__,
-            "error": str(exc),
+            "error_type": public_error["error_type"],
+            "error": public_error["error"],
         }
     sys.stdout.write(json.dumps(response, ensure_ascii=False, allow_nan=False))
     sys.stdout.write("\n")
