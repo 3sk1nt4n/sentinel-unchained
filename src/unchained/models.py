@@ -145,6 +145,7 @@ class ModelResponse:
     """Provider-neutral response used by the agent and offline fakes."""
 
     response_id: str
+    provider_model: str | None = None
     text: str = ""
     function_calls: tuple[FunctionCall, ...] = ()
     usage: ModelUsage = ModelUsage()
@@ -219,6 +220,19 @@ class Finding:
 
 
 @dataclass(frozen=True, slots=True)
+class EvidenceQuote:
+    """Exact bounded receipt text used by the fresh judge for one verdict."""
+
+    tool_call_id: str
+    text: str
+
+    def public_dict(self) -> dict[str, JsonValue]:
+        """Return the quote in the stable proof-bundle representation."""
+
+        return {"tool_call_id": self.tool_call_id, "text": self.text}
+
+
+@dataclass(frozen=True, slots=True)
 class JudgeVerdict:
     """Fresh-model adjudication for one existing investigator finding."""
 
@@ -226,12 +240,14 @@ class JudgeVerdict:
     status: FindingStatus
     rationale: str
     cited_tool_call_ids: tuple[str, ...]
+    quoted_spans: tuple[EvidenceQuote, ...]
     annotations: tuple[str, ...] = ()
 
     def public_dict(self) -> dict[str, JsonValue]:
         data = asdict(self)
         data["status"] = self.status.value
         data["cited_tool_call_ids"] = list(self.cited_tool_call_ids)
+        data["quoted_spans"] = [quote.public_dict() for quote in self.quoted_spans]
         data["annotations"] = list(self.annotations)
         return data
 

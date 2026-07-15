@@ -15,6 +15,7 @@ from unchained.agent import (
     UnchainedAgent,
     _parse_investigation,
     _parse_verdicts,
+    _submit_judgment_schema,
 )
 from unchained.audit import AuditLog
 from unchained.caps import CapConfig, CapKind, RunBudget
@@ -111,6 +112,17 @@ class FakeInvestigatorModel:
         names = tool_names(request)
 
         if "submit_judgment" in names:
+            judge_packet = json.loads(str(request.input_items[0]["content"][0]["text"]))
+            opening_receipt = next(
+                receipt
+                for receipt in judge_packet["audit_tool_receipts"]
+                if receipt["tool_call_id"] == "opening-tool"
+            )
+            opening_excerpt = str(
+                opening_receipt.get("output_excerpt")
+                or opening_receipt.get("output_first_2kb")
+                or ""
+            )
             return ModelResponse(
                 response_id=f"response-{index}",
                 function_calls=(
@@ -124,6 +136,12 @@ class FakeInvestigatorModel:
                                     "status": "UNSUPPORTED",
                                     "rationale": "The cited process list does not prove execution.",
                                     "cited_tool_call_ids": ["opening-tool"],
+                                    "quoted_spans": [
+                                        {
+                                            "tool_call_id": "opening-tool",
+                                            "text": opening_excerpt,
+                                        }
+                                    ],
                                     "annotations": ["Acquire corroborating execution artifacts."],
                                 }
                             ]
@@ -253,6 +271,7 @@ def test_fresh_judge_downgrades_deliberately_unsupported_finding(tmp_path: Path)
     assert run.verdicts[0].finding_id == "F001"
     assert run.verdicts[0].status is FindingStatus.UNSUPPORTED
     assert run.verdicts[0].cited_tool_call_ids == ("opening-tool",)
+    assert run.verdicts[0].quoted_spans[0].text == "PID 4 System"
     assert "no deterministic validator by design" in run.report_markdown.lower()
 
     judge_requests = [
@@ -260,6 +279,11 @@ def test_fresh_judge_downgrades_deliberately_unsupported_finding(tmp_path: Path)
     ]
     assert len(judge_requests) == 1
     assert judge_requests[0].previous_response_id is None
+    judge_instructions = " ".join(judge_requests[0].instructions.split())
+    assert "bounded retained output excerpt" in judge_instructions
+    assert "not necessarily the complete native-tool stdout or stderr" in judge_instructions
+    assert "exact, nonempty substring" in judge_instructions
+    assert "at most 1024 UTF-8 bytes" in judge_instructions
 
     phases = [request.phase for request in model.requests]
     assert phases == [
@@ -412,6 +436,7 @@ def test_judge_requires_proof_for_every_verdict(
         "status": "UNSUPPORTED",
         "rationale": "The receipt does not prove the hypothesis.",
         "cited_tool_call_ids": ["t17"],
+        "quoted_spans": [{"tool_call_id": "t17", "text": "not established"}],
         "annotations": [],
         **override,
     }
@@ -423,16 +448,205 @@ def test_judge_requires_proof_for_every_verdict(
         _parse_verdicts(
             {"verdicts": [raw_verdict]},
             (finding,),
-            {"t17": "success", "t18": "success"},
+            {
+                "t17": {
+                    "tool_call_id": "t17",
+                    "status": "success",
+                    "output_first_2kb": "The hypothesis is not established.",
+                },
+                "t18": {
+                    "tool_call_id": "t18",
+                    "status": "success",
+                    "output_first_2kb": "unrelated receipt",
+                },
+            },
             audit,
         )
+
+
+def test_judge_schema_requires_strict_bounded_evidence_quotes() -> None:
+    schema = _submit_judgment_schema()
+    verdict_schema = schema["parameters"]["properties"]["verdicts"]["items"]
+    assert "quoted_spans" in verdict_schema["required"]
+    quote_schema = verdict_schema["properties"]["quoted_spans"]["items"]
+    assert quote_schema == {
+        "type": "object",
+        "properties": {
+            "tool_call_id": {"type": "string"},
+            "text": {"type": "string"},
+        },
+        "required": ["tool_call_id", "text"],
+        "additionalProperties": False,
+    }
+
+
+@pytest.mark.parametrize(
+    ("quoted_spans", "message"),
+    [
+        (None, "malformed quoted spans"),
+        (["not-an-object"], "malformed quoted span"),
+        ([{"tool_call_id": "", "text": "proof"}], "without a tool-call id"),
+        ([{"tool_call_id": "t17", "text": "   "}], "empty quoted span"),
+        (
+            [{"tool_call_id": "t17", "text": "é" * 513}],
+            "more than 1024 UTF-8 bytes",
+        ),
+        (
+            [{"tool_call_id": "t18", "text": "other proof"}],
+            "outside its citations",
+        ),
+        (
+            [
+                {"tool_call_id": "t17", "text": "exact proof"},
+                {"tool_call_id": "t17", "text": "exact proof"},
+            ],
+            "duplicated an evidence quote",
+        ),
+        ([{"tool_call_id": "t17", "text": "invented proof"}], "does not resolve"),
+    ],
+)
+def test_judge_rejects_invalid_evidence_quotes(
+    tmp_path: Path,
+    quoted_spans: object,
+    message: str,
+) -> None:
+    finding = _parse_investigation(
+        {
+            "status": "DONE",
+            "case_notes": "The exact proof is bounded [t17].",
+            "findings": [
+                {
+                    "finding_id": "F001",
+                    "title": "Bounded claim",
+                    "summary": "The exact proof is bounded [t17].",
+                    "proposed_status": "NEEDS-REVIEW",
+                    "severity": "LOW",
+                    "tool_call_ids": ["t17"],
+                    "iocs": [],
+                    "limitations": [],
+                }
+            ],
+            "limitations": [],
+            "unresolved_questions": [],
+        },
+        1,
+        {"t17": "success"},
+    ).findings[0]
+    raw_verdict = {
+        "finding_id": "F001",
+        "status": "NEEDS-REVIEW",
+        "rationale": "The bounded excerpt is not independently sufficient.",
+        "cited_tool_call_ids": ["t17"],
+        "quoted_spans": quoted_spans,
+        "annotations": [],
+    }
+    receipts = {
+        "t17": {
+            "tool_call_id": "t17",
+            "status": "success",
+            "output_excerpt": "prefix exact proof suffix",
+        },
+        "t18": {
+            "tool_call_id": "t18",
+            "status": "success",
+            "output_excerpt": "other proof",
+        },
+    }
+    with (
+        AuditLog(tmp_path / "quote-invalid.jsonl", "quote-invalid", fsync=False) as audit,
+        pytest.raises(AgentProtocolError, match=message),
+    ):
+        _parse_verdicts({"verdicts": [raw_verdict]}, (finding,), receipts, audit)
+
+
+def test_judge_requires_a_resolving_quote_for_every_citation(tmp_path: Path) -> None:
+    finding = _parse_investigation(
+        {
+            "status": "DONE",
+            "case_notes": "Two receipts constrain the claim [t17] [t18].",
+            "findings": [
+                {
+                    "finding_id": "F001",
+                    "title": "Two-receipt claim",
+                    "summary": "Two receipts constrain the claim [t17] [t18].",
+                    "proposed_status": "CONFIRMED",
+                    "severity": "LOW",
+                    "tool_call_ids": ["t17", "t18"],
+                    "iocs": [],
+                    "limitations": [],
+                }
+            ],
+            "limitations": [],
+            "unresolved_questions": [],
+        },
+        1,
+        {"t17": "success", "t18": "success"},
+    ).findings[0]
+    receipts = {
+        "t17": {
+            "tool_call_id": "t17",
+            "status": "success",
+            "output_excerpt": "first exact span",
+        },
+        "t18": {
+            "tool_call_id": "t18",
+            "status": "success",
+            "output_first_2kb": "legacy exact span",
+        },
+    }
+    base = {
+        "finding_id": "F001",
+        "status": "CONFIRMED",
+        "rationale": "Both bounded receipt excerpts support the claim.",
+        "cited_tool_call_ids": ["t17", "t18"],
+        "annotations": [],
+    }
+    with (
+        AuditLog(tmp_path / "quote-omitted.jsonl", "quote-omitted", fsync=False) as audit,
+        pytest.raises(AgentProtocolError, match="omitted exact evidence quotes.*t18"),
+    ):
+        _parse_verdicts(
+            {
+                "verdicts": [
+                    {
+                        **base,
+                        "quoted_spans": [{"tool_call_id": "t17", "text": "exact span"}],
+                    }
+                ]
+            },
+            (finding,),
+            receipts,
+            audit,
+        )
+
+    with AuditLog(tmp_path / "quote-valid.jsonl", "quote-valid", fsync=False) as audit:
+        verdicts = _parse_verdicts(
+            {
+                "verdicts": [
+                    {
+                        **base,
+                        "quoted_spans": [
+                            {"tool_call_id": "t17", "text": "first exact span"},
+                            {"tool_call_id": "t18", "text": "legacy exact span"},
+                        ],
+                    }
+                ]
+            },
+            (finding,),
+            receipts,
+            audit,
+        )
+    assert verdicts[0].public_dict()["quoted_spans"] == [
+        {"tool_call_id": "t17", "text": "first exact span"},
+        {"tool_call_id": "t18", "text": "legacy exact span"},
+    ]
 
 
 def test_prompt_two_canonical_rules_are_regression_protected() -> None:
     normalized = " ".join(INVESTIGATOR_PROMPT.split())
     assert "no shell" in normalized
     assert "no internet" in normalized
-    assert "up to 6 tools" in normalized
+    assert "1 to 6 distinct functions" in normalized
     assert "memory is UNAVAILABLE" in normalized
     assert "[t17]" in normalized
     assert "Dead ends are findings too" in normalized

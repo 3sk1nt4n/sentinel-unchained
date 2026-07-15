@@ -20,6 +20,7 @@ from .model import (
 )
 from .models import (
     EvidenceProfile,
+    EvidenceQuote,
     Finding,
     FindingStatus,
     FunctionCall,
@@ -104,6 +105,15 @@ def _submit_investigation_schema() -> dict[str, JsonValue]:
 
 
 def _submit_judgment_schema() -> dict[str, JsonValue]:
+    quoted_span = {
+        "type": "object",
+        "properties": {
+            "tool_call_id": {"type": "string"},
+            "text": {"type": "string"},
+        },
+        "required": ["tool_call_id", "text"],
+        "additionalProperties": False,
+    }
     verdict = {
         "type": "object",
         "properties": {
@@ -114,6 +124,7 @@ def _submit_judgment_schema() -> dict[str, JsonValue]:
             },
             "rationale": {"type": "string"},
             "cited_tool_call_ids": {"type": "array", "items": {"type": "string"}},
+            "quoted_spans": {"type": "array", "items": quoted_span},
             "annotations": {"type": "array", "items": {"type": "string"}},
         },
         "required": [
@@ -121,6 +132,7 @@ def _submit_judgment_schema() -> dict[str, JsonValue]:
             "status",
             "rationale",
             "cited_tool_call_ids",
+            "quoted_spans",
             "annotations",
         ],
         "additionalProperties": False,
@@ -496,14 +508,20 @@ when corroboration is absent or contradictory.
         schema = _submit_judgment_schema()
         instructions = f"""
 You are a fresh, adversarial DFIR judge. Re-examine every supplied investigator
-finding against the supplied audit receipts. Return exactly one verdict for
-every existing finding: CONFIRMED, NEEDS-REVIEW, or UNSUPPORTED. Cite only
-tool_call_ids present in the receipts and explain the proof or gap. You may keep
-or downgrade a proposed status and annotate it; never upgrade it and never add
-a finding. A parser success, a zero-record result, or a tool error is not
-affirmative proof by itself. If both healthy memory and disk evidence were
-available, prefer corroboration from both domains before retaining CONFIRMED;
-otherwise explain the single-domain limitation explicitly.
+finding against the supplied audit receipts. Each receipt exposes a bounded
+retained output excerpt, not necessarily the complete native-tool stdout or
+stderr. Return exactly one verdict for every existing finding: CONFIRMED,
+NEEDS-REVIEW, or UNSUPPORTED. Cite only tool_call_ids present in the receipts.
+For every cited call, include at least one quoted_spans object whose text is an
+exact, nonempty substring of that receipt's bounded excerpt and is at most 1024
+UTF-8 bytes; quote only what you can actually see and explain the proof or gap.
+You may keep or downgrade a proposed status and annotate it; never upgrade it
+and never add a finding. A parser success, a zero-record result, or a tool error
+is not affirmative proof by itself. If both healthy memory and disk evidence
+were available, prefer corroboration from both domains before retaining
+CONFIRMED; otherwise explain the single-domain limitation explicitly. Never
+characterize this review as a full-native-output review unless the receipt
+explicitly establishes that scope.
 
 {HOSTILE_DATA_RULE}
 """.strip()
@@ -539,7 +557,7 @@ otherwise explain the single-domain limitation explicitly.
         verdicts = _parse_verdicts(
             response.function_calls[0].arguments,
             tuple(state.findings),
-            {str(receipt.get("tool_call_id")): str(receipt.get("status")) for receipt in receipts},
+            {str(receipt.get("tool_call_id")): receipt for receipt in receipts},
             self.audit,
         )
         self.audit.append(
@@ -795,7 +813,7 @@ def _parse_investigation(
 def _parse_verdicts(
     arguments: dict[str, JsonValue],
     findings: tuple[Finding, ...],
-    receipt_statuses: dict[str, str],
+    receipts_by_call_id: dict[str, dict[str, JsonValue]],
     audit: AuditLog,
 ) -> tuple[JudgeVerdict, ...]:
     raw_verdicts = arguments.get("verdicts")
@@ -848,7 +866,7 @@ def _parse_verdicts(
             raise AgentProtocolError(
                 f"judge duplicated tool-call citations for {finding.finding_id}"
             )
-        invalid = sorted(set(citations) - set(receipt_statuses))
+        invalid = sorted(set(citations) - set(receipts_by_call_id))
         if invalid:
             raise AgentProtocolError(
                 f"judge cited nonexistent tool calls for {finding.finding_id}: {invalid}"
@@ -868,8 +886,76 @@ def _parse_verdicts(
             raise AgentProtocolError(
                 f"judge returned {status.value} for {finding.finding_id} without a rationale"
             )
+
+        raw_quotes = raw.get("quoted_spans")
+        if not isinstance(raw_quotes, list):
+            raise AgentProtocolError(
+                f"judge returned malformed quoted spans for {finding.finding_id}"
+            )
+        quotes: list[EvidenceQuote] = []
+        quote_pairs: set[tuple[str, str]] = set()
+        quoted_call_ids: set[str] = set()
+        for raw_quote in raw_quotes:
+            if not isinstance(raw_quote, dict):
+                raise AgentProtocolError(
+                    f"judge returned malformed quoted span for {finding.finding_id}"
+                )
+            quote_call_id = raw_quote.get("tool_call_id")
+            quote_text = raw_quote.get("text")
+            if not isinstance(quote_call_id, str) or not quote_call_id:
+                raise AgentProtocolError(
+                    f"judge returned quoted span without a tool-call id for {finding.finding_id}"
+                )
+            if not isinstance(quote_text, str) or not quote_text.strip():
+                raise AgentProtocolError(
+                    f"judge returned an empty quoted span for {finding.finding_id}"
+                )
+            try:
+                quote_size = len(quote_text.encode("utf-8"))
+            except UnicodeEncodeError as exc:
+                raise AgentProtocolError(
+                    f"judge returned a non-UTF-8 quoted span for {finding.finding_id}"
+                ) from exc
+            if quote_size > 1024:
+                raise AgentProtocolError(
+                    f"judge quoted more than 1024 UTF-8 bytes for {finding.finding_id}"
+                )
+            if quote_call_id not in citations:
+                raise AgentProtocolError(
+                    f"judge quoted a call outside its citations for {finding.finding_id}: "
+                    f"{quote_call_id}"
+                )
+            if quote_call_id not in finding.tool_call_ids:
+                raise AgentProtocolError(
+                    f"judge quoted a receipt outside {finding.finding_id}: {quote_call_id}"
+                )
+            quote_pair = (quote_call_id, quote_text)
+            if quote_pair in quote_pairs:
+                raise AgentProtocolError(
+                    f"judge duplicated an evidence quote for {finding.finding_id}"
+                )
+            receipt = receipts_by_call_id[quote_call_id]
+            excerpt = receipt.get("output_excerpt")
+            if not isinstance(excerpt, str):
+                excerpt = receipt.get("output_first_2kb")
+            if not isinstance(excerpt, str):
+                raise AgentProtocolError(f"receipt {quote_call_id} has no bounded output excerpt")
+            if quote_text not in excerpt:
+                raise AgentProtocolError(
+                    f"judge quote does not resolve in receipt {quote_call_id} "
+                    f"for {finding.finding_id}"
+                )
+            quote_pairs.add(quote_pair)
+            quoted_call_ids.add(quote_call_id)
+            quotes.append(EvidenceQuote(tool_call_id=quote_call_id, text=quote_text))
+        unquoted_citations = sorted(set(citations) - quoted_call_ids)
+        if unquoted_citations:
+            raise AgentProtocolError(
+                f"judge omitted exact evidence quotes for {finding.finding_id}: "
+                f"{unquoted_citations}"
+            )
         if status is FindingStatus.CONFIRMED and not any(
-            receipt_statuses[call_id] == "success" for call_id in citations
+            str(receipts_by_call_id[call_id].get("status")) == "success" for call_id in citations
         ):
             raise AgentProtocolError(
                 f"judge confirmed {finding.finding_id} without a successful receipt"
@@ -880,6 +966,7 @@ def _parse_verdicts(
                 status=status,
                 rationale=rationale,
                 cited_tool_call_ids=citations,
+                quoted_spans=tuple(quotes),
                 annotations=tuple(annotations),
             )
         )

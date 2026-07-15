@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 import math
 import os
+import time
+from collections.abc import Callable
 from dataclasses import asdict, dataclass, replace
 from typing import Any, Protocol
 
@@ -34,6 +36,11 @@ class ModelRequest:
 
 class ModelProviderError(RuntimeError):
     """Raised after a provider/protocol failure has been safely audited."""
+
+
+_MAX_TRANSIENT_RETRIES = 2
+_RETRY_BASE_DELAY_SECONDS = 0.25
+_RETRYABLE_STATUS_CODES = frozenset({408, 409, 429})
 
 
 class ModelClient(Protocol):
@@ -154,9 +161,16 @@ class OpenAIResponsesModel:
             )
 
         usage, usage_error = _parse_provider_usage(getattr(response, "usage", None))
-        request_id = getattr(response, "_request_id", None)
+        request_id = getattr(response, "_request_id", None) or getattr(
+            response,
+            "request_id",
+            None,
+        )
+        raw_provider_model = getattr(response, "model", None)
+        provider_model = str(raw_provider_model).strip() if raw_provider_model else None
         return ModelResponse(
             response_id=str(getattr(response, "id", "")),
+            provider_model=provider_model,
             text=str(getattr(response, "output_text", "") or ""),
             function_calls=tuple(function_calls),
             usage=usage,
@@ -172,10 +186,28 @@ class OpenAIResponsesModel:
 class AuditedModel:
     """Apply wall/token/cost caps and complete audit recording to every model call."""
 
-    def __init__(self, client: ModelClient, audit: AuditLog, budget: RunBudget) -> None:
+    def __init__(
+        self,
+        client: ModelClient,
+        audit: AuditLog,
+        budget: RunBudget,
+        *,
+        max_transient_retries: int = _MAX_TRANSIENT_RETRIES,
+        retry_sleeper: Callable[[float], None] | None = None,
+    ) -> None:
+        if (
+            isinstance(max_transient_retries, bool)
+            or max_transient_retries < 0
+            or max_transient_retries > _MAX_TRANSIENT_RETRIES
+        ):
+            raise ValueError(
+                f"max_transient_retries must be between 0 and {_MAX_TRANSIENT_RETRIES}"
+            )
         self.client = client
         self.audit = audit
         self.budget = budget
+        self._max_transient_retries = max_transient_retries
+        self._retry_sleeper = retry_sleeper or time.sleep
 
     @property
     def model_id(self) -> str:
@@ -197,7 +229,7 @@ class AuditedModel:
         )
         self.audit.model_request(
             phase=bounded.phase,
-            model=self.model_id,
+            requested_model=self.model_id,
             instructions=bounded.instructions,
             input_items=_redact_tool_outputs(bounded.input_items),
             tools=bounded.tools,
@@ -219,31 +251,12 @@ class AuditedModel:
             },
             actor="model-client",
         )
-        try:
-            response = self.client.create(bounded)
-        except Exception as exc:
-            self.audit.append(
-                "model.error",
-                {
-                    "phase": bounded.phase,
-                    "error_type": type(exc).__name__,
-                    "error": str(exc)[:2_000],
-                },
-                actor="model-client",
-            )
-            try:
-                self.budget.check()
-            except CapExceeded as cap_error:
-                self._record_cap(cap_error)
-                raise
-            raise ModelProviderError(
-                f"model request failed during {bounded.phase}: {type(exc).__name__}: {exc}"
-            ) from exc
+        response = self._create_with_transient_retries(bounded)
         if response.usage_error is not None:
             snapshot = self.budget.snapshot()
             self.audit.model_response(
                 phase=bounded.phase,
-                model=self.model_id,
+                requested_model=self.model_id,
                 response=response,
                 call_cost_usd=0.0,
                 running_cost_usd=snapshot.estimated_cost_usd,
@@ -266,7 +279,7 @@ class AuditedModel:
             snapshot = self.budget.snapshot()
             self.audit.model_response(
                 phase=bounded.phase,
-                model=self.model_id,
+                requested_model=self.model_id,
                 response=response,
                 call_cost_usd=0.0,
                 running_cost_usd=snapshot.estimated_cost_usd,
@@ -291,7 +304,7 @@ class AuditedModel:
         snapshot = self.budget.snapshot()
         self.audit.model_response(
             phase=bounded.phase,
-            model=self.model_id,
+            requested_model=self.model_id,
             response=response,
             call_cost_usd=call_cost,
             running_cost_usd=snapshot.estimated_cost_usd,
@@ -319,6 +332,111 @@ class AuditedModel:
             raise
         return response
 
+    def _create_with_transient_retries(self, request: ModelRequest) -> ModelResponse:
+        """Retry only transient provider dispatch failures before tool execution.
+
+        The controller receives only the final accepted response, so discarded
+        attempts cannot cause a forensic function to execute.  Once any
+        response object exists, usage and protocol validation happen outside
+        this loop and are never retried.
+        """
+
+        max_attempts = self._max_transient_retries + 1
+        for attempt in range(1, max_attempts + 1):
+            try:
+                self.budget.check()
+                remaining_wall = self.budget.remaining_wall_seconds()
+            except CapExceeded as cap_error:
+                self._record_cap(cap_error)
+                raise
+            attempt_request = replace(
+                request,
+                timeout_seconds=min(request.timeout_seconds or remaining_wall, remaining_wall),
+            )
+            try:
+                response = self.client.create(attempt_request)
+            except Exception as exc:
+                retryable = _is_transient_provider_error(exc)
+                metadata = _provider_error_metadata(
+                    exc,
+                    phase=request.phase,
+                    attempt=attempt,
+                    max_attempts=max_attempts,
+                    retryable=retryable,
+                )
+                self.audit.append("model.attempt.error", metadata, actor="model-client")
+                if not retryable or attempt >= max_attempts:
+                    self._record_terminal_provider_error(metadata)
+                    try:
+                        self.budget.check()
+                    except CapExceeded as cap_error:
+                        self._record_cap(cap_error)
+                        raise
+                    raise ModelProviderError(
+                        f"model request failed during {request.phase}: {type(exc).__name__}: {exc}"
+                    ) from exc
+
+                delay_seconds = _RETRY_BASE_DELAY_SECONDS * (2 ** (attempt - 1))
+                try:
+                    remaining_wall = self.budget.remaining_wall_seconds()
+                except CapExceeded as cap_error:
+                    self._record_cap(cap_error)
+                    raise
+                if remaining_wall <= delay_seconds:
+                    self.audit.append(
+                        "model.retry.skipped",
+                        {
+                            "phase": request.phase,
+                            "attempt": attempt,
+                            "reason": "insufficient wall time for bounded backoff",
+                            "delay_seconds": delay_seconds,
+                            "remaining_wall_seconds": remaining_wall,
+                        },
+                        actor="model-client",
+                    )
+                    self._record_terminal_provider_error(metadata)
+                    raise ModelProviderError(
+                        f"model request failed during {request.phase}: {type(exc).__name__}: {exc}"
+                    ) from exc
+                self.audit.append(
+                    "model.retry.scheduled",
+                    {
+                        "phase": request.phase,
+                        "attempt": attempt,
+                        "next_attempt": attempt + 1,
+                        "max_attempts": max_attempts,
+                        "delay_seconds": delay_seconds,
+                        "next_timeout_seconds": min(
+                            attempt_request.timeout_seconds or remaining_wall,
+                            max(0.0, remaining_wall - delay_seconds),
+                        ),
+                    },
+                    actor="model-client",
+                )
+                self._retry_sleeper(delay_seconds)
+                continue
+
+            if attempt > 1:
+                self.audit.append(
+                    "model.retry.succeeded",
+                    {
+                        "phase": request.phase,
+                        "attempt": attempt,
+                        "max_attempts": max_attempts,
+                        "response_id": response.response_id,
+                        "request_id": response.request_id,
+                        "provider_model": response.provider_model,
+                        "status": response.status,
+                    },
+                    actor="model-client",
+                )
+            return response
+
+        raise AssertionError("bounded provider-attempt loop exhausted without a result")
+
+    def _record_terminal_provider_error(self, metadata: dict[str, JsonValue]) -> None:
+        self.audit.append("model.error", metadata, actor="model-client")
+
     def _record_cap(self, error: CapExceeded) -> None:
         self.audit.append(
             "cap.fired",
@@ -330,6 +448,15 @@ class AuditedModel:
         )
 
     def _validate_response(self, response: ModelResponse, phase: str) -> None:
+        if isinstance(self.client, OpenAIResponsesModel) and not response.provider_model:
+            raise ModelProviderError(
+                f"model response during {phase} omitted provider-returned model identity"
+            )
+        if response.provider_model and not _is_gpt56_model(response.provider_model):
+            raise ModelProviderError(
+                f"model response during {phase} resolved to unexpected model "
+                f"{response.provider_model!r}"
+            )
         if response.status != "completed":
             raise ModelProviderError(
                 f"model response during {phase} was {response.status}: "
@@ -350,6 +477,72 @@ class AuditedModel:
 
 def _join_error(current: str | None, extra: str) -> str:
     return extra if current is None else f"{current}; {extra}"
+
+
+def _is_gpt56_model(value: str) -> bool:
+    """Accept the public alias and dated/provider GPT-5.6 snapshots only."""
+
+    return value == "gpt-5.6" or value.startswith("gpt-5.6-")
+
+
+def _provider_status_code(error: Exception) -> int | None:
+    value = getattr(error, "status_code", None)
+    if isinstance(value, int) and not isinstance(value, bool):
+        return value
+    response = getattr(error, "response", None)
+    value = getattr(response, "status_code", None)
+    return value if isinstance(value, int) and not isinstance(value, bool) else None
+
+
+def _provider_request_id(error: Exception) -> str | None:
+    value = getattr(error, "request_id", None) or getattr(error, "_request_id", None)
+    if value:
+        return str(value)
+    response = getattr(error, "response", None)
+    headers = getattr(response, "headers", None)
+    if headers is not None:
+        value = headers.get("x-request-id")
+        if value:
+            return str(value)
+    return None
+
+
+def _is_transient_provider_error(error: Exception) -> bool:
+    """Match the SDK's retry-safe transport and status failures only."""
+
+    if isinstance(error, ModelProviderError):
+        return False
+    status_code = _provider_status_code(error)
+    if status_code is not None:
+        return status_code in _RETRYABLE_STATUS_CODES or status_code >= 500
+    if isinstance(error, (ConnectionError, TimeoutError)):
+        return True
+    try:
+        from openai import APIConnectionError, APITimeoutError
+    except ImportError:
+        return False
+    return isinstance(error, (APIConnectionError, APITimeoutError))
+
+
+def _provider_error_metadata(
+    error: Exception,
+    *,
+    phase: str,
+    attempt: int,
+    max_attempts: int,
+    retryable: bool,
+) -> dict[str, JsonValue]:
+    return {
+        "phase": phase,
+        "attempt": attempt,
+        "max_attempts": max_attempts,
+        "retryable": retryable,
+        "status_code": _provider_status_code(error),
+        "request_id": _provider_request_id(error),
+        "error_type": type(error).__name__,
+        "error": str(error)[:2_000],
+        "billing_exposure": "unknown_after_dispatch",
+    }
 
 
 def _parse_provider_usage(raw: Any) -> tuple[ModelUsage, str | None]:
@@ -453,6 +646,8 @@ def model_response_dict(response: ModelResponse) -> dict[str, JsonValue]:
 
     return {
         "response_id": response.response_id,
+        "provider_model": response.provider_model,
+        "request_id": response.request_id,
         "text": response.text,
         "function_calls": [asdict(call) for call in response.function_calls],
         "usage": asdict(response.usage),

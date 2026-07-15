@@ -39,6 +39,7 @@ def sdk_response(
     *,
     output: list[dict[str, Any]] | None = None,
     output_text: str = "",
+    provider_model: str = "gpt-5.6",
     status: str = "completed",
     incomplete_details: Any = None,
     error: Any = None,
@@ -54,6 +55,7 @@ def sdk_response(
     )
     return SimpleNamespace(
         id="resp_test",
+        model=provider_model,
         output=output or [],
         output_text=output_text,
         usage=usage,
@@ -71,6 +73,52 @@ def adapter_for(endpoint: FakeResponsesEndpoint) -> OpenAIResponsesModel:
     adapter._model_id = "gpt-5.6"  # noqa: SLF001 - deliberate provider-seam injection
     adapter._client = SimpleNamespace(responses=endpoint)  # noqa: SLF001
     return adapter
+
+
+def mock_transport_adapter(
+    handler: Any,
+) -> tuple[OpenAIResponsesModel, httpx.Client]:
+    """Construct the real SDK adapter over an offline HTTP mock transport."""
+
+    from openai import OpenAI
+
+    http_client = httpx.Client(transport=httpx.MockTransport(handler))
+    adapter = object.__new__(OpenAIResponsesModel)
+    adapter._model_id = "gpt-5.6"  # noqa: SLF001 - deliberate provider-seam injection
+    adapter._client = OpenAI(  # noqa: SLF001 - deliberate provider-seam injection
+        api_key="test-key",
+        max_retries=0,
+        http_client=http_client,
+    )
+    return adapter, http_client
+
+
+def mock_response_json(
+    *,
+    response_id: str,
+    provider_model: str,
+    output: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    """Return a complete Responses payload accepted by the pinned SDK."""
+
+    return {
+        "id": response_id,
+        "created_at": 0,
+        "model": provider_model,
+        "object": "response",
+        "output": output or [],
+        "parallel_tool_calls": False,
+        "tool_choice": "auto",
+        "tools": [],
+        "status": "completed",
+        "usage": {
+            "input_tokens": 1,
+            "input_tokens_details": {"cached_tokens": 0},
+            "output_tokens": 1,
+            "output_tokens_details": {"reasoning_tokens": 0},
+            "total_tokens": 2,
+        },
+    }
 
 
 def permissive_budget() -> RunBudget:
@@ -152,6 +200,7 @@ def test_responses_adapter_sends_exact_options_and_parses_usage() -> None:
         }
     ]
     assert response.status == "completed"
+    assert response.provider_model == "gpt-5.6"
     assert response.output_items == (reasoning_item, function_item)
     assert response.function_calls[0].arguments == {"pid": 4}
     assert response.function_calls[0].arguments_valid is True
@@ -175,24 +224,11 @@ def test_responses_adapter_builds_request_with_real_sdk_without_network() -> Non
         captured_body.update(json.loads(request.content))
         return httpx.Response(
             200,
-            json={
-                "id": "resp_real_sdk",
-                "created_at": 0,
-                "model": "gpt-5.6",
-                "object": "response",
-                "output": [],
-                "parallel_tool_calls": False,
-                "tool_choice": "auto",
-                "tools": [],
-                "status": "completed",
-                "usage": {
-                    "input_tokens": 1,
-                    "input_tokens_details": {"cached_tokens": 0},
-                    "output_tokens": 1,
-                    "output_tokens_details": {"reasoning_tokens": 0},
-                    "total_tokens": 2,
-                },
-            },
+            headers={"x-request-id": "req_real_sdk"},
+            json=mock_response_json(
+                response_id="resp_real_sdk",
+                provider_model="gpt-5.6",
+            ),
         )
 
     http_client = httpx.Client(transport=httpx.MockTransport(handle))
@@ -219,10 +255,299 @@ def test_responses_adapter_builds_request_with_real_sdk_without_network() -> Non
         http_client.close()
 
     assert response.response_id == "resp_real_sdk"
+    assert response.provider_model == "gpt-5.6"
+    assert response.request_id == "req_real_sdk"
     assert captured_body["reasoning"] == {"context": "all_turns"}
     assert captured_body["prompt_cache_options"] == {"mode": "explicit"}
     assert captured_body["store"] is False
     assert captured_body["include"] == ["reasoning.encrypted_content"]
+
+
+def test_requested_alias_and_returned_model_are_audited_separately(tmp_path: Path) -> None:
+    """Retain the requested alias and the provider-resolved model without conflation."""
+
+    requested_bodies: list[dict[str, Any]] = []
+
+    def handle(request: httpx.Request) -> httpx.Response:
+        requested_bodies.append(json.loads(request.content))
+        return httpx.Response(
+            200,
+            headers={"x-request-id": "req_resolved"},
+            json=mock_response_json(
+                response_id="resp_resolved",
+                provider_model="gpt-5.6-sol-2026-07-14",
+            ),
+        )
+
+    adapter, http_client = mock_transport_adapter(handle)
+    audit_path = tmp_path / "audit.jsonl"
+    try:
+        with AuditLog(audit_path, "run-model-identity", fsync=False) as audit:
+            response = AuditedModel(adapter, audit, permissive_budget()).create(
+                ModelRequest(
+                    phase="investigate",
+                    instructions="Use only supplied typed tools.",
+                    input_items="bounded packet",
+                )
+            )
+    finally:
+        http_client.close()
+
+    assert requested_bodies[0]["model"] == "gpt-5.6"
+    assert response.provider_model == "gpt-5.6-sol-2026-07-14"
+    assert response.response_id == "resp_resolved"
+    assert response.request_id == "req_resolved"
+    assert response.status == "completed"
+    assert response.usage.provider_total_tokens == 2
+
+    entries = AuditLog.verify(audit_path)
+    request_entry = next(entry for entry in entries if entry["event_type"] == "model.request")
+    response_entry = next(entry for entry in entries if entry["event_type"] == "model.response")
+    assert request_entry["payload"]["requested_model"] == "gpt-5.6"
+    assert response_entry["payload"]["requested_model"] == "gpt-5.6"
+    assert response_entry["payload"]["provider_model"] == "gpt-5.6-sol-2026-07-14"
+    assert response_entry["payload"]["response_id"] == "resp_resolved"
+    assert response_entry["payload"]["request_id"] == "req_resolved"
+    assert response_entry["payload"]["status"] == "completed"
+    assert response_entry["payload"]["token_counts"]["provider_total_tokens"] == 2
+
+
+def test_transient_retry_is_bounded_audited_and_returns_only_final_tool_call(
+    tmp_path: Path,
+) -> None:
+    """A retry may repeat model dispatch, never a forensic tool execution."""
+
+    request_bodies: list[dict[str, Any]] = []
+
+    def handle(request: httpx.Request) -> httpx.Response:
+        request_bodies.append(json.loads(request.content))
+        if len(request_bodies) == 1:
+            return httpx.Response(
+                429,
+                headers={"x-request-id": "req_rate_limited"},
+                json={
+                    "error": {
+                        "message": "retry later",
+                        "type": "rate_limit_error",
+                        "param": None,
+                        "code": "rate_limit_exceeded",
+                    }
+                },
+            )
+        return httpx.Response(
+            200,
+            headers={"x-request-id": "req_retry_success"},
+            json=mock_response_json(
+                response_id="resp_retry_success",
+                provider_model="gpt-5.6-sol-2026-07-14",
+                output=[
+                    {
+                        "type": "function_call",
+                        "id": "fc_once",
+                        "call_id": "call_once",
+                        "name": "windows_pslist",
+                        "arguments": "{}",
+                        "status": "completed",
+                    }
+                ],
+            ),
+        )
+
+    adapter, http_client = mock_transport_adapter(handle)
+    audit_path = tmp_path / "audit.jsonl"
+    delays: list[float] = []
+    try:
+        with AuditLog(audit_path, "run-transient-retry", fsync=False) as audit:
+            response = AuditedModel(
+                adapter,
+                audit,
+                permissive_budget(),
+                retry_sleeper=delays.append,
+            ).create(
+                ModelRequest(
+                    phase="opening",
+                    instructions="Choose one supplied tool.",
+                    input_items="bounded profile",
+                )
+            )
+    finally:
+        http_client.close()
+
+    assert len(request_bodies) == 2
+    assert request_bodies[0] == request_bodies[1]
+    assert delays == [0.25]
+    assert [call.call_id for call in response.function_calls] == ["call_once"]
+    assert response.request_id == "req_retry_success"
+
+    entries = AuditLog.verify(audit_path)
+    event_types = [entry["event_type"] for entry in entries]
+    assert event_types == [
+        "model.request",
+        "model.request.options",
+        "model.attempt.error",
+        "model.retry.scheduled",
+        "model.retry.succeeded",
+        "model.response",
+    ]
+    attempt_error = entries[2]["payload"]
+    assert attempt_error["attempt"] == 1
+    assert attempt_error["max_attempts"] == 3
+    assert attempt_error["retryable"] is True
+    assert attempt_error["status_code"] == 429
+    assert attempt_error["request_id"] == "req_rate_limited"
+    assert entries[3]["payload"]["delay_seconds"] == 0.25
+    assert entries[4]["payload"]["attempt"] == 2
+    assert not any(event_type.startswith("tool.") for event_type in event_types)
+
+
+def test_transient_retries_stop_after_three_mock_transport_attempts(tmp_path: Path) -> None:
+    attempts = 0
+
+    def handle(_request: httpx.Request) -> httpx.Response:
+        nonlocal attempts
+        attempts += 1
+        return httpx.Response(
+            503,
+            headers={"x-request-id": f"req_unavailable_{attempts}"},
+            json={
+                "error": {
+                    "message": "temporarily unavailable",
+                    "type": "server_error",
+                    "param": None,
+                    "code": "service_unavailable",
+                }
+            },
+        )
+
+    adapter, http_client = mock_transport_adapter(handle)
+    audit_path = tmp_path / "audit.jsonl"
+    delays: list[float] = []
+    try:
+        with (
+            AuditLog(audit_path, "run-retry-exhausted", fsync=False) as audit,
+            pytest.raises(ModelProviderError, match="InternalServerError"),
+        ):
+            AuditedModel(
+                adapter,
+                audit,
+                permissive_budget(),
+                retry_sleeper=delays.append,
+            ).create(
+                ModelRequest(
+                    phase="report",
+                    instructions="Write the bounded report.",
+                    input_items="bounded packet",
+                )
+            )
+    finally:
+        http_client.close()
+
+    assert attempts == 3
+    assert delays == [0.25, 0.5]
+    entries = AuditLog.verify(audit_path)
+    attempt_entries = [entry for entry in entries if entry["event_type"] == "model.attempt.error"]
+    assert [entry["payload"]["attempt"] for entry in attempt_entries] == [1, 2, 3]
+    assert [entry["payload"]["request_id"] for entry in attempt_entries] == [
+        "req_unavailable_1",
+        "req_unavailable_2",
+        "req_unavailable_3",
+    ]
+    assert entries[-1]["event_type"] == "model.error"
+    assert entries[-1]["payload"]["attempt"] == 3
+
+
+def test_protocol_error_from_mock_transport_is_not_retried(tmp_path: Path) -> None:
+    attempts = 0
+
+    def handle(_request: httpx.Request) -> httpx.Response:
+        nonlocal attempts
+        attempts += 1
+        return httpx.Response(
+            200,
+            headers={"x-request-id": "req_bad_schema"},
+            json=mock_response_json(
+                response_id="resp_bad_schema",
+                provider_model="gpt-5.6-sol-2026-07-14",
+                output=[
+                    {
+                        "type": "function_call",
+                        "id": "fc_bad_schema",
+                        "call_id": "call_bad_schema",
+                        "name": "windows_pslist",
+                        "arguments": "{not-json",
+                        "status": "completed",
+                    }
+                ],
+            ),
+        )
+
+    adapter, http_client = mock_transport_adapter(handle)
+    audit_path = tmp_path / "audit.jsonl"
+    try:
+        with (
+            AuditLog(audit_path, "run-no-schema-retry", fsync=False) as audit,
+            pytest.raises(ModelProviderError, match="invalid function call"),
+        ):
+            AuditedModel(adapter, audit, permissive_budget()).create(
+                ModelRequest(
+                    phase="opening",
+                    instructions="Choose one supplied tool.",
+                    input_items="bounded profile",
+                )
+            )
+    finally:
+        http_client.close()
+
+    assert attempts == 1
+    entries = AuditLog.verify(audit_path)
+    assert not any(entry["event_type"].startswith("model.retry") for entry in entries)
+    assert [entry["event_type"] for entry in entries][-2:] == [
+        "model.response",
+        "model.error",
+    ]
+
+
+def test_unexpected_returned_model_is_audited_and_not_retried(tmp_path: Path) -> None:
+    attempts = 0
+
+    def handle(_request: httpx.Request) -> httpx.Response:
+        nonlocal attempts
+        attempts += 1
+        return httpx.Response(
+            200,
+            headers={"x-request-id": "req_wrong_model"},
+            json=mock_response_json(
+                response_id="resp_wrong_model",
+                provider_model="gpt-5.5",
+            ),
+        )
+
+    adapter, http_client = mock_transport_adapter(handle)
+    audit_path = tmp_path / "audit.jsonl"
+    try:
+        with (
+            AuditLog(audit_path, "run-wrong-model", fsync=False) as audit,
+            pytest.raises(ModelProviderError, match="unexpected model 'gpt-5.5'"),
+        ):
+            AuditedModel(adapter, audit, permissive_budget()).create(
+                ModelRequest(
+                    phase="investigate",
+                    instructions="Use one supplied tool.",
+                    input_items="bounded profile",
+                )
+            )
+    finally:
+        http_client.close()
+
+    assert attempts == 1
+    entries = AuditLog.verify(audit_path)
+    assert not any(entry["event_type"].startswith("model.retry") for entry in entries)
+    assert entries[-2]["event_type"] == "model.response"
+    assert entries[-2]["payload"]["requested_model"] == "gpt-5.6"
+    assert entries[-2]["payload"]["provider_model"] == "gpt-5.5"
+    assert entries[-2]["payload"]["request_id"] == "req_wrong_model"
+    assert entries[-1]["event_type"] == "model.error"
+    assert entries[-1]["payload"]["error_type"] == "response_protocol"
 
 
 @pytest.mark.parametrize(
@@ -352,7 +677,12 @@ def test_sdk_exception_is_audited_after_request_options(tmp_path: Path) -> None:
     audit_path = tmp_path / "audit.jsonl"
 
     with AuditLog(audit_path, "run-sdk-error", fsync=False) as audit:
-        model = AuditedModel(adapter_for(endpoint), audit, permissive_budget())
+        model = AuditedModel(
+            adapter_for(endpoint),
+            audit,
+            permissive_budget(),
+            max_transient_retries=0,
+        )
         with pytest.raises(ModelProviderError, match="ConnectionError"):
             model.create(
                 ModelRequest(
@@ -366,13 +696,16 @@ def test_sdk_exception_is_audited_after_request_options(tmp_path: Path) -> None:
     assert [entry["event_type"] for entry in entries] == [
         "model.request",
         "model.request.options",
+        "model.attempt.error",
         "model.error",
     ]
-    assert entries[2]["payload"] == {
-        "error": "offline provider failure",
-        "error_type": "ConnectionError",
-        "phase": "report",
-    }
+    assert entries[2]["payload"]["error"] == "offline provider failure"
+    assert entries[2]["payload"]["error_type"] == "ConnectionError"
+    assert entries[2]["payload"]["phase"] == "report"
+    assert entries[2]["payload"]["attempt"] == 1
+    assert entries[2]["payload"]["max_attempts"] == 1
+    assert entries[2]["payload"]["retryable"] is True
+    assert entries[3]["payload"] == entries[2]["payload"]
 
 
 def test_audit_redacts_tool_output_but_provider_receives_it(tmp_path: Path) -> None:
