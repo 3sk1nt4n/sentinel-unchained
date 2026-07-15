@@ -1298,3 +1298,14 @@ At the end of every substantial future session:
 Finish and publish the preregistration/freeze with server-timestamped digests.
 Only after that public freeze may DC01 be exposed to GPT-5.6 for the first valid
 post-freeze primary run. No viewer, video, or prose polish outranks this sequence.
+# Current rehearsal disclosure (2026-07-15)
+
+The first real DC01 attempt was a pre-freeze rehearsal, not a scored run. Run
+`20260715T040320Z-9b0f5864` reached the native Windows memory tools and opening
+book, retained hashed outputs, and finished with matching custody hashes. It
+terminated `PARTIAL` before judge/report because the Responses replay included
+the provider-only `status` field (`input[1].status`). Commit `57e6124` removes
+that field during replay and adds the exact regression test. This rehearsal is
+disclosed and cannot become primary. No further live DC01 rehearsal is planned
+before freeze. The first valid post-freeze `COMPLETE` run will be the primary;
+the judge and report phases receive their first full live exercise there.

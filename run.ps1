@@ -24,10 +24,17 @@ if (-not (Test-Path -LiteralPath $evidence -PathType Container)) {
 }
 
 $env:UNCHAINED_MODEL = "gpt-5.6"
-$env:MAX_TOOL_CALLS = "60"
-$env:MAX_TOTAL_TOKENS = "400000"
-$env:MAX_WALL_SECONDS = "1800"
-$env:MAX_COST_USD = "10"
+if ($Caps -eq "strict") {
+    $env:MAX_TOOL_CALLS = "20"
+    $env:MAX_TOTAL_TOKENS = "100000"
+    $env:MAX_WALL_SECONDS = "600"
+    $env:MAX_COST_USD = "2.50"
+} else {
+    $env:MAX_TOOL_CALLS = "60"
+    $env:MAX_TOTAL_TOKENS = "400000"
+    $env:MAX_WALL_SECONDS = "1800"
+    $env:MAX_COST_USD = "10"
+}
 
 if ($Live) {
     & (Join-Path $root "scripts\set-openai-key.ps1")
