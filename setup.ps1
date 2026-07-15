@@ -19,7 +19,6 @@ if (-not (Test-Path $python)) {
     & py -3.11 -m venv $venv
 }
 
-& $python -m pip install --upgrade pip setuptools wheel
 & $python -m pip install -r requirements/bootstrap.txt
 & $python -m pip install -c requirements/constraints.windows-amd64-cp311.txt -e ".[dev]"
 & $python -m pip check
