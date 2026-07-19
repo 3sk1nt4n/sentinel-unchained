@@ -1,0 +1,3 @@
+2026-07-18T12:00:00Z systemd[1]: Started synthetic Sentinel Docker fixture.
+2026-07-18T12:00:01Z sshd[42]: Accepted publickey for analyst from 192.0.2.10.
+2026-07-18T12:00:02Z kernel: audit: synthetic fixture contains no private evidence.

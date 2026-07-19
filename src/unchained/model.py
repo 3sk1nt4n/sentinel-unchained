@@ -44,6 +44,53 @@ class ModelProviderError(RuntimeError):
 _MAX_TRANSIENT_RETRIES = 2
 _RETRY_BASE_DELAY_SECONDS = 0.25
 _RETRYABLE_STATUS_CODES = frozenset({408, 409, 429})
+_MAX_API_KEY_BYTES = 8_192
+
+
+def is_gpt56_sol_model(value: str) -> bool:
+    """Return whether *value* is the public Sol alias or a Sol snapshot."""
+
+    return value == "gpt-5.6" or value == "gpt-5.6-sol" or value.startswith("gpt-5.6-sol-")
+
+
+def is_gpt56_luna_model(value: str) -> bool:
+    """Return whether *value* is the Luna alias or a Luna snapshot."""
+
+    return value == "gpt-5.6-luna" or value.startswith("gpt-5.6-luna-")
+
+
+def _load_openai_api_key(explicit_key: str | None = None) -> tuple[str | None, str | None]:
+    """Load one credential from an explicit value, environment, or bounded secret file."""
+
+    if explicit_key:
+        return explicit_key, "explicit"
+    environment_key = os.getenv("OPENAI_API_KEY")
+    if environment_key:
+        return environment_key, "environment"
+    secret_path = os.getenv("OPENAI_API_KEY_FILE")
+    if not secret_path:
+        return None, None
+    try:
+        with open(secret_path, encoding="utf-8") as secret_file:  # noqa: PTH123
+            raw_key = secret_file.read(_MAX_API_KEY_BYTES + 1)
+    except (OSError, UnicodeError) as exc:
+        raise ValueError("OPENAI_API_KEY_FILE is not a readable UTF-8 secret") from exc
+    if len(raw_key.encode("utf-8")) > _MAX_API_KEY_BYTES:
+        raise ValueError("OPENAI_API_KEY_FILE exceeds the bounded secret size")
+    key = raw_key.strip()
+    if not key or "\n" in key or "\r" in key:
+        raise ValueError("OPENAI_API_KEY_FILE must contain exactly one nonempty credential")
+    return key, "file"
+
+
+def openai_api_key_status() -> tuple[bool, str | None]:
+    """Return credential readiness and its safe source label, never the credential."""
+
+    try:
+        key, source = _load_openai_api_key()
+    except ValueError:
+        return False, None
+    return bool(key), source
 
 
 class ModelClient(Protocol):
@@ -75,15 +122,24 @@ def _json_value(value: Any) -> JsonValue:
 class OpenAIResponsesModel:
     """Lazy OpenAI SDK adapter using the Responses function-calling protocol."""
 
-    def __init__(self, *, model_id: str | None = None, api_key: str | None = None) -> None:
+    def __init__(
+        self,
+        *,
+        model_id: str | None = None,
+        api_key: str | None = None,
+        connectivity_smoke: bool = False,
+    ) -> None:
         configured_model = model_id or os.getenv("UNCHAINED_MODEL")
         if not configured_model:
             raise ValueError("UNCHAINED_MODEL is required (for example: gpt-5.6)")
-        if not (configured_model == "gpt-5.6" or configured_model.startswith("gpt-5.6-sol")):
+        if connectivity_smoke:
+            if not is_gpt56_luna_model(configured_model):
+                raise ValueError("connectivity smoke model must identify GPT-5.6 Luna")
+        elif not is_gpt56_sol_model(configured_model):
             raise ValueError("UNCHAINED_MODEL must identify GPT-5.6 Sol")
-        configured_key = api_key or os.getenv("OPENAI_API_KEY")
+        configured_key, _key_source = _load_openai_api_key(api_key)
         if not configured_key:
-            raise ValueError("OPENAI_API_KEY is required")
+            raise ValueError("OPENAI_API_KEY is required (or mount OPENAI_API_KEY_FILE)")
 
         # Import only for a live run. Tests and evidence profiling need no SDK import.
         from openai import OpenAI
@@ -504,9 +560,9 @@ def _join_error(current: str | None, extra: str) -> str:
 
 
 def _is_gpt56_model(value: str) -> bool:
-    """Accept the public alias and dated/provider GPT-5.6 snapshots only."""
+    """Accept only the public Sol alias and dated/provider Sol snapshots."""
 
-    return value == "gpt-5.6" or value.startswith("gpt-5.6-")
+    return is_gpt56_sol_model(value)
 
 
 def _provider_status_code(error: Exception) -> int | None:

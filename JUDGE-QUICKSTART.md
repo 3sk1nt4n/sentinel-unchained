@@ -375,3 +375,38 @@ and `audit.jsonl`, then preserve the partial bundle.
 
 **Large tool output:** use the full retained artifact and its completeness
 receipt. Never call a prefix the complete native output.
+
+## 13. Optional Docker protocol smoke
+
+This optional path verifies Linux/AMD64 packaging, the no-key CLI/profile/custody
+front door, and an explicitly nonqualifying cheap API canary. It does not
+replace the native Windows flagship instructions or prove an authentic GPT-5.6
+Sol DC01 investigation.
+
+Build and run the offline fixture with no network and no key:
+
+```powershell
+docker build --target test -t sentinel-unchained:test .
+docker compose build
+docker compose run --rm offline --help
+docker compose run --rm offline profile /evidence --json
+```
+
+Expected profile facts include `logs-only`, evidence ID `E001`,
+`openai_called=false`, and matching custody.
+
+For the one-request GPT-5.6 Luna typed-tool canary, store the key in a readable
+one-line file outside the repository and mount it as a Compose secret:
+
+```powershell
+$env:OPENAI_API_KEY_FILE = "C:\Secure\openai_api_key"
+docker compose --profile live run --rm live-smoke
+```
+
+The output must say `NONQUALIFYING_CONNECTIVITY_SMOKE`. It reads no evidence,
+creates no proof bundle, and cannot satisfy `--require-live-gpt56`. Do not call
+it the hackathon primary or include it in the Qwen benchmark.
+
+The safe container deliberately does not use `--privileged`, FUSE, loop
+devices, or `CAP_SYS_ADMIN`. Raw inspection remains available; mounted E01/NTFS
+parity is outside this smoke.

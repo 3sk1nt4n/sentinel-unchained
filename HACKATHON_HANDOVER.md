@@ -7,11 +7,14 @@ risks, and the next-session startup procedure.
 Priority, sequence, positioning, preregistration, and go/no-go logic are in
 [docs/WINNER_ROADMAP.md](docs/WINNER_ROADMAP.md). The detailed product strategy,
 experiment, proof contract, prompts, judge path, and submission doctrine are in
-[docs/HACKATHON_MASTER_PLAN.md](docs/HACKATHON_MASTER_PLAN.md). Architecture
-details remain in [README.md](README.md), and durable technical decisions remain
-in [DECISIONS.md](DECISIONS.md). Those files describe what the system is intended
-to do. This handover records what is implemented, what has been verified, what
-has been demonstrated to a judge, and what is still missing.
+[docs/HACKATHON_MASTER_PLAN.md](docs/HACKATHON_MASTER_PLAN.md). The judge-first
+product path is in [README.md](README.md), the comprehensive published-release
+record is in
+[docs/OPENAI_VNEXT_RELEASE_HANDOFF.md](docs/OPENAI_VNEXT_RELEASE_HANDOFF.md), and
+durable technical decisions remain in [DECISIONS.md](DECISIONS.md). Those files
+describe what the system is intended to do. This handover records what is
+implemented, what has been verified, what has been demonstrated to a judge, and
+what is still missing.
 
 > **Update requirement:** every material implementation, verification, artifact,
 > scope, schedule, or submission-status change must update this file in the same
@@ -23,16 +26,17 @@ has been demonstrated to a judge, and what is still missing.
 | Field | Current value |
 |---|---|
 | Last live-rule verification | 2026-07-14 22:04 ET, direct current 2026 Official Rules plus official GPT-5.6, pricing, and Responses API references |
-| Last repository verification | 2026-07-18, OpenAI-native vNext offline checkpoint |
+| Last repository verification | 2026-07-18, vNext published to `main`; Linux/AMD64 Docker test/runtime/profile/custody follow-up green locally |
 | Current event day | Submission Day 6 (2026-07-18) |
 | Hard deadline | 2026-07-21 17:00 PT / 20:00 ET |
 | Time remaining at 2026-07-14 22:22 ET | Approximately 165.6 hours |
 | Internal submission deadline | 2026-07-20; July 21 is emergency buffer only |
 | Selected track | Developer Tools |
 | Current decision | **CONDITIONAL GO with frozen scope; registry alternative parked** |
-| Flagship-run readiness | **NOT READY: vNext is verified offline; freeze, funded credentials, authentic complete run, OS sandbox, and external attestation remain red** |
+| Flagship-run readiness | **NOT READY: vNext and Docker preflight are verified offline; freeze, authorized credentials, authentic complete Sol run, semantic score, and external attestation remain red** |
 | Submission readiness | **NOT READY** |
-| Current `/feedback` Session ID | `019f61e5-5755-7a02-adb4-618d32baab27` |
+| Retained successful `/feedback` Session ID | `019f61e5-5755-7a02-adb4-618d32baab27` |
+| Current Docker/README follow-up thread ID | `019f76f3-a19f-71d1-81b2-eed6305857f6` — not yet a successful `/feedback` receipt |
 
 The local screenshot supporting that ID is outside this repository in the
 workspace parent under the filename
@@ -42,7 +46,9 @@ It is 124,837 bytes with SHA-256
 visibly shows the valid ID above. This is local provenance only. It is not
 committed, hosted, or judge-accessible. After final core work, the final
 successful `/feedback` must be run from the true majority-core Codex thread;
-do not assume this earlier ID remains the final submission ID.
+do not assume this earlier ID remains the final submission ID. The current
+Docker/README follow-up thread ID is recorded separately so it cannot be
+mistaken for a successful upload.
 
 ### Evidence-state vocabulary
 
@@ -65,9 +71,10 @@ does not prove that GPT-5.6 produced the original run.
 
 Proceed conditionally with Sentinel Unchained for Build Week. Do not pivot to a
 new dynamic model-registry project now. Unchained is no longer a from-scratch
-concept: it is a substantial controller prototype with 17 source modules,
-13,383 physical source lines, 12,259 nonblank physical source lines, 267 passing
-tests, clean lint and formatting, a buildable package path, a verified CPython 3.11.9 environment,
+concept: it is a substantial controller prototype with 17 source modules, an
+independently verified proof protocol, 274 passing tests after the Docker/Luna
+canary follow-up, clean lint and formatting, a buildable package path, and a
+verified CPython 3.11.9 Linux container environment,
 exact dependency records, and a verified Codex feedback thread. The
 OpenAI-native vNext adds stateless model packets, exact evidence spans,
 evidence-bound receipts, lifecycle-complete verification, deterministic reports,
@@ -1307,13 +1314,14 @@ At the end of every substantial future session:
 | 2026-07-14 22:22 | Refreshed the independent lock-check environment against Gate A commit `6e696a0` | The stale installed project correctly failed the two new worker-privacy regressions; reinstalling the current constrained editable package restored 128 passing tests, clean `pip check`, Ruff, and format. No source fix was required | Preserve this as evidence that the second environment detects stale installs; publish unchanged history |
 | 2026-07-14 22:24 | Committed the synchronized winner strategy, handover, provenance, README, and environment record | Commit `207a039836cdaf3045e92a2b74e541a7dd2be77f`; public rules/API references, exact Gate A receipts, Windows memory-only scope, two-axis scoring, evaluator authorship, and all remaining red gates are aligned | Push and verify public provenance, then complete and publish C4 |
 | 2026-07-14 22:32 | Verified public provenance after user push | `origin/main` exactly matches `3506d29003262f22fee2144f12352749fc6cd06f`; GitHub metadata reports `visibility=public`; browser fetch returned a stale 404 and is retained as a non-authoritative discrepancy; API key is not present in this Codex process | Freeze the protocol and rubric before any GPT-5.6 DC01 call |
+| 2026-07-18 | Published OpenAI-native vNext foundation and completed the bounded Docker/UX follow-up | Foundation `ed4d3f5` fast-forwarded to public `main`; 274 tests plus Ruff/format/`pip check` in Linux/AMD64 test image; non-root runtime; no-network synthetic profile `E001`; custody match; secret scan pass; Luna canary implemented but no authorized key/live receipt | Push the synchronized follow-up, publish the experiment freeze, retain the Luna canary, then run one harmless complete Sol lifecycle before DC01 |
 
-## Single next action
+## Historical next action before the vNext publication
 
 Finish and publish the preregistration/freeze with server-timestamped digests.
 Only after that public freeze may DC01 be exposed to GPT-5.6 for the first valid
 post-freeze primary run. No viewer, video, or prose polish outranks this sequence.
-# Current rehearsal disclosure (2026-07-15)
+## Current rehearsal disclosure (2026-07-15)
 
 The first real DC01 attempt was a pre-freeze rehearsal, not a scored run. Run
 `20260715T040320Z-9b0f5864` reached the native Windows memory tools and opening
@@ -1327,8 +1335,11 @@ the judge and report phases receive their first full live exercise there.
 
 ## Superseding OpenAI-native vNext checkpoint (2026-07-18)
 
-This section supersedes current-state rows above while preserving their July 14
-historical truth. No source commit or push was created during this checkpoint.
+This section records the pre-publication vNext verification checkpoint and
+supersedes earlier current-state rows while preserving their historical truth.
+The verified tree was subsequently published as commit
+`ed4d3f540a27171c04a7321f4f85efea23d905de`, first on
+`agent/openai-native-vnext` and then by safe fast-forward to public `main`.
 
 ### Repositories reviewed
 
@@ -1474,7 +1485,7 @@ remains **NOT DEMONSTRATED**.
     cross-browser QA is still pending because the in-app browser failed before
     loading the local file.
 
-### Next highest-leverage action
+### Historical next highest-leverage action before Docker preflight
 
 After review and an authorized key are available, run one harmless synthetic
 GPT-5.6 smoke through all five model phases, verify it, and visually inspect its
@@ -1491,3 +1502,79 @@ sentinel view C:\path\to\run
 Do not call the result provider-authenticated solely because the strict offline
 flags pass. Preserve the provider-side record and add a signature/timestamp or
 other independently controlled attestation before making that claim.
+
+## Published vNext and Docker/UX handoff (2026-07-18)
+
+### Publication provenance
+
+| Field | Verified state |
+|---|---|
+| Public repository | `https://github.com/3sk1nt4n/sentinel-unchained` |
+| vNext foundation | `ed4d3f540a27171c04a7321f4f85efea23d905de` |
+| Working branch | `agent/openai-native-vnext`, remote equal at publication |
+| Default branch | `main`, safely fast-forwarded from `2b256a7` to `ed4d3f5` |
+| History behavior | No force-push and no history rewrite |
+| Publication exclusions | No API key, evidence image, private key, or generated case bundle |
+
+The complete completed-jobs inventory, architectural comparison, winning
+narrative, judge demo, benchmark contract, Docker/cheap-model preflight,
+scorecard, limitations, and submission sequence are in
+[docs/OPENAI_VNEXT_RELEASE_HANDOFF.md](docs/OPENAI_VNEXT_RELEASE_HANDOFF.md).
+
+### Docker preflight result
+
+The Linux/AMD64 multi-stage container now passes the full CPython 3.11 gate:
+
+- 274 tests;
+- Ruff lint and formatting;
+- `pip check`;
+- final-image installation from pre-resolved wheels with Git absent;
+- non-root UID/GID 10001;
+- Tini entrypoint;
+- read-only root and evidence under Compose;
+- all Linux capabilities dropped and `no-new-privileges` enabled;
+- offline/no-network help, doctor, synthetic profile, public `E001`, and matching
+  pre/post custody;
+- no credential-like value in image environment or history.
+
+The safe container supports raw Volatility and Sleuth Kit routes. It does not
+enable E01/FUSE/loop/device mounting, which would require elevated authority and
+would weaken the default isolation story. Native Windows remains the flagship
+DC01 memory path.
+
+### Cheap-model decision
+
+`sentinel smoke-openai` performs one forced strict typed-tool request with
+`gpt-5.6-luna`, low reasoning/verbosity, 128 output tokens maximum,
+`store=false`, no evidence, and no proof bundle. It is permanently labeled
+`NONQUALIFYING_CONNECTIVITY_SMOKE` and cannot satisfy the Sol-specific strict
+proof gate.
+
+This machine had no authorized API key. The canary implementation and mocked
+container contract are verified, but no authentic provider receipt is claimed.
+The exact next live command is:
+
+```powershell
+$env:OPENAI_API_KEY_FILE = "C:\Secure\openai_api_key"
+docker compose --profile live run --rm live-smoke
+```
+
+### Current next action
+
+1. Push this synchronized Docker/README/handoff follow-up to public `main`.
+2. Publish the experiment freeze binding code, prompts, Sol alias/snapshot,
+   schemas/catalog, caps, retries, prices, evidence digest, evaluator, and
+   run-selection rule.
+3. Run and retain the authentic Luna canary; keep it outside scored results.
+4. Run one harmless synthetic Sol lifecycle through all five model phases,
+   strict verification, custody, and viewer.
+5. Run the first valid frozen evidence primary once.
+6. Benchmark the same evidence fairly against Qwen and score semantic accuracy
+   separately.
+7. Complete viewer visual QA, video, hosted artifact, and submission links.
+
+The current winning line is:
+
+> Sentinel is not an LLM pretending to be evidence. It is GPT-5.6 directing a
+> bounded investigation whose actions, citations, custody, and final report can
+> be checked independently.

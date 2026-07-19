@@ -1,0 +1,51 @@
+name: sentinel-unchained
+
+x-sentinel-runtime: &sentinel-runtime
+  image: sentinel-unchained:local
+  build:
+    context: .
+    target: runtime
+    args:
+      VCS_REF: ${SENTINEL_VCS_REF:-development}
+      BUILD_DATE: ${SENTINEL_BUILD_DATE:-unknown}
+  read_only: true
+  cap_drop:
+    - ALL
+  security_opt:
+    - no-new-privileges:true
+  pids_limit: 256
+  user: "10001:10001"
+  tmpfs:
+    - /tmp:rw,nosuid,nodev,noexec,size=512m
+    - /home/sentinel/.cache:rw,nosuid,nodev,size=512m
+
+services:
+  offline:
+    <<: *sentinel-runtime
+    network_mode: none
+    volumes:
+      - type: bind
+        source: ${SENTINEL_EVIDENCE_PATH:-./docker/fixtures}
+        target: /evidence
+        read_only: true
+      - type: volume
+        source: sentinel-runs
+        target: /workspace/unchained-runs
+    command: ["doctor", "--json"]
+
+  live-smoke:
+    <<: *sentinel-runtime
+    profiles: ["live"]
+    environment:
+      OPENAI_API_KEY_FILE: /run/secrets/openai_api_key
+      SENTINEL_SMOKE_MODEL: ${SENTINEL_SMOKE_MODEL:-gpt-5.6-luna}
+    secrets:
+      - openai_api_key
+    command: ["smoke-openai", "--json"]
+
+volumes:
+  sentinel-runs:
+
+secrets:
+  openai_api_key:
+    file: ${OPENAI_API_KEY_FILE:-./.secrets/openai_api_key}

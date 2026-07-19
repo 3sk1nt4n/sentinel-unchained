@@ -877,7 +877,9 @@ Apply cuts in this order:
 1. **Already applied:** cut the scored flagship scope to Windows memory-only,
    matching the demonstrated route; C4 must still freeze it publicly, and
    paired disk is future work.
-2. Remove Linux, macOS, Plaso, Docker, Qwen reruns, and extra tool families.
+2. Remove Linux/macOS forensic breadth, Plaso, privileged/generalized Docker
+   support, Qwen reruns, and extra tool families. Retain only the already-tested
+   synthetic Linux/AMD64 container preflight and nonqualifying Luna canary.
 3. Keep one authentic primary run and label it a single-run, single-case study.
 4. Cut replicates before cutting primary proof.
 5. Simplify viewer styling, but never remove the functioning hosted and offline
@@ -1118,14 +1120,15 @@ an invoice guarantee, or present replay as authentic execution.
 
 ## 18. Single next action
 
-Review and merge the OpenAI-native vNext branch. Then publicly freeze the
-protocol, rubric, exact code, prompts, eligible
+Publish the synchronized Docker/README/handoff follow-up on public `main`. Then
+freeze the protocol, rubric, exact code, prompts, Sol alias/snapshot, eligible
 catalog, caps, retries, scorer, exact 16,000,000-byte worker ceiling,
 case-insensitive slash-variant public-path sanitization across success/failure
 surfaces, exact 65,536-byte UTF-8 model-view ceiling with native-order prefix
 selection and explicit completeness receipt, and first-valid-run selection
-rule. After an authorized key is available, run one harmless synthetic live
-smoke through opening, investigation, finalization, judge, report, custody,
-verification, and viewer inspection. Do not expose DC01 to GPT-5.6 before the
-freeze and successful harmless smoke. The first valid post-freeze evidence run
-remains primary even when its semantic result is disappointing.
+rule. After an authorized key is available, retain the explicitly nonqualifying
+Luna canary, then run one harmless synthetic live Sol lifecycle through opening,
+investigation, finalization, review, report, custody, verification, and viewer
+inspection. Do not expose DC01 to GPT-5.6 before the freeze and successful Sol
+smoke. The first valid post-freeze evidence run remains primary even when its
+semantic result is disappointing.

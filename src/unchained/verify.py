@@ -1985,8 +1985,10 @@ class _Verifier:
                     )
 
     @staticmethod
-    def _gpt56_model(value: Any) -> bool:
-        return isinstance(value, str) and (value == "gpt-5.6" or value.startswith("gpt-5.6-"))
+    def _gpt56_sol_model(value: Any) -> bool:
+        return isinstance(value, str) and (
+            value == "gpt-5.6" or value == "gpt-5.6-sol" or value.startswith("gpt-5.6-sol-")
+        )
 
     def _verify_complete_lifecycle(
         self,
@@ -2372,10 +2374,10 @@ class _Verifier:
                 self.error(f"{label} does not match the normalized response shape")
             requested = payload.get("requested_model")
             provider = payload.get("provider_model")
-            if not self._gpt56_model(requested):
-                self.error(f"{label} requested_model is not GPT-5.6")
-            if not self._gpt56_model(provider):
-                self.error(f"{label} provider_model is not GPT-5.6")
+            if not self._gpt56_sol_model(requested):
+                self.error(f"{label} requested_model is not GPT-5.6 Sol")
+            if not self._gpt56_sol_model(provider):
+                self.error(f"{label} provider_model is not GPT-5.6 Sol")
             if payload.get("status") != "completed":
                 self.error(f"{label} status must equal completed")
             if payload.get("incomplete_details") is not None or payload.get("error") is not None:
@@ -2707,8 +2709,8 @@ class _Verifier:
         }
         if set(payload) != required:
             self.error(f"{label} does not match the audited request shape")
-        if not self._gpt56_model(payload.get("requested_model")):
-            self.error(f"{label} requested_model is not GPT-5.6")
+        if not self._gpt56_sol_model(payload.get("requested_model")):
+            self.error(f"{label} requested_model is not GPT-5.6 Sol")
         if not isinstance(payload.get("instructions"), str) or not payload["instructions"].strip():
             self.error(f"{label} instructions must be nonempty text")
         if not isinstance(payload.get("input"), (list, str)):
@@ -4207,10 +4209,10 @@ class _Verifier:
             if requested is None:
                 requested = payload.get("model")
             provider = payload.get("provider_model")
-            if not self._gpt56_model(requested):
-                self.error(f"{label} requested model is not GPT-5.6")
-            if not self._gpt56_model(provider):
-                self.error(f"{label} provider_model is not an explicit GPT-5.6 identifier")
+            if not self._gpt56_sol_model(requested):
+                self.error(f"{label} requested model is not GPT-5.6 Sol")
+            if not self._gpt56_sol_model(provider):
+                self.error(f"{label} provider_model is not an explicit GPT-5.6 Sol identifier")
             response_id = payload.get("response_id")
             request_id = payload.get("request_id")
             if not isinstance(response_id, str) or not response_id:

@@ -40,6 +40,17 @@ This is the current majority-core implementation thread. Re-evaluate that fact
 near submission after material later work. Use the final successful `/feedback`
 ID from the thread where the majority of core functionality was actually built.
 
+The current Docker, Luna-canary, README, and release-handoff follow-up is being
+completed in Codex thread:
+
+```text
+019f76f3-a19f-71d1-81b2-eed6305857f6
+```
+
+That identifier is thread provenance only. It must not be represented as a
+successful `/feedback` receipt unless `/feedback` is submitted successfully
+from that thread.
+
 The screenshot of the successful upload is retained outside the repository. It
 must not be used as a substitute for source history, working code, or an
 authentic GPT-5.6 runtime proof.

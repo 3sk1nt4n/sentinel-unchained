@@ -2303,6 +2303,19 @@ def test_strict_live_gpt56_rejects_unproven_provider_receipts(
     _assert_failed_with(strict, expected)
 
 
+def test_complete_proof_rejects_luna_as_a_sol_forensic_response(tmp_path: Path) -> None:
+    run_directory = tmp_path / "run"
+    _build_bundle(
+        run_directory,
+        complete_lifecycle=True,
+        model_overrides={"provider_model": "gpt-5.6-luna-2026-07-14"},
+    )
+
+    result = verify_run(run_directory, require_complete=True)
+
+    _assert_failed_with(result, "provider_model is not GPT-5.6 Sol")
+
+
 def test_strict_live_requires_complete_terminal(tmp_path: Path) -> None:
     run_directory = tmp_path / "run"
     _build_bundle(

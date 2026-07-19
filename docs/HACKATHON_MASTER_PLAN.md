@@ -32,8 +32,8 @@ an explicitly historical baseline and must not be quoted as the present build.
 
 | Area | Evidence-backed state | Public claim boundary |
 |---|---|---|
-| Local provenance | Reviewed upstream `main` at `2b256a7`; historical commits retain the public Gate A path; vNext is published on `agent/openai-native-vnext` without rewriting history | Review and merge the vNext branch, then establish a distinct protocol-freeze tag; do not imply the review branch is the immutable experiment freeze |
-| Implementation | 17 Python source modules, 13,383 physical source lines and 12,259 nonblank source lines, 267 passing tests across 32 Python files, Ruff/format, `pip check`, wheel/sdist build, and diff check passing | Strong local implementation evidence, not an authentic GPT-5.6 investigation |
+| Local provenance | Reviewed upstream `main` at `2b256a7`; vNext foundation `ed4d3f5` is published on both `agent/openai-native-vnext` and fast-forwarded public `main` without rewriting history | Establish a distinct protocol-freeze tag; do not imply the release foundation is already the immutable experiment freeze |
+| Implementation | 17 Python source modules plus Docker/UX follow-up, 274 passing tests in the Linux/AMD64 CPython 3.11 test image, Ruff/format, `pip check`, runtime image, native wheel/sdist, and diff checks passing | Strong local implementation and packaging evidence, not an authentic GPT-5.6 investigation |
 | Python environment | Official CPython 3.11.9; clean primary and lockcheck virtual environments; `pip check` clean in both; exact Windows CPython 3.11 constraints and `pylock` committed | Reproducible tested Windows Python environment, not universal host portability |
 | Native-tool readiness | **GREEN LOCALLY:** verified DC01 memory-only profile, resolved Windows symbols, 14 sealed Windows-memory tools, real `vol_pstree`, `vol_psscan`, and post-fix `vol_netscan` results, and matching custody | Deterministic pre-freeze engineering proof only; no GPT-5.6 or scored run occurred |
 | C2 proof contract | Durable outputs, evidence-bound receipts, exact byte spans, retry-aware model windows, canonical profile/custody, rebuilt summary, locally recomputed cost/budget, and exact report/viewer reconstruction are implemented and tested | Local integrity and recorded metadata are verified; local estimates are not provider billing and offline checks cannot authenticate OpenAI |
@@ -43,14 +43,15 @@ an explicitly historical baseline and must not be quoted as the present build.
 | Downstream submission work | Static viewer code exists; no public freeze/rubric, authentic primary bundle/viewer, hosted path, video, or Devpost submission | All external/demonstration gates remain open and must follow the gate order in this document |
 
 The immediate priority is not another native adapter or more controller breadth.
-Review and merge the published vNext branch, establish the freeze commit and its
-server-timestamped digest, then run one harmless synthetic live
-smoke before the authentic evidence path. DC01 remains off-limits before the
-public freeze.
+The vNext foundation is now on public `main`, and the bounded Docker/cheap-model
+preflight is implemented. Publish the synchronized follow-up, establish the
+freeze commit and its server-timestamped digest, run the nonqualifying Luna
+canary, then run one harmless complete Sol smoke before the authentic evidence
+path. DC01 remains off-limits before the public freeze.
 
 Proceed with this project. Do not pivot to a registry project. Do not add
-Linux, macOS, Plaso, Docker portability, or broad new tool families before the
-flagship proof and judge path are complete.
+general Linux/macOS forensic breadth, Plaso, privileged Docker mount parity, or
+broad new tool families before the flagship proof and judge path are complete.
 
 The winning version is not framed as an unsafe analyst whose failure is always
 a victory. It is framed as an auditable runtime and evaluation harness for
@@ -318,6 +319,12 @@ video are green:
 - a large interactive dashboard;
 - unrelated product pivots.
 
+A single Linux/AMD64 synthetic container preflight and explicitly
+nonqualifying GPT-5.6 Luna protocol canary are the narrow exception. They test
+installation, the offline CLI/profile/custody path, and API-contract readiness
+only. They do not expand the scored evidence/host scope, prove the Windows DC01
+route, enable privileged E01/FUSE mounting, or enter the Qwen comparison.
+
 ### Evidence-OS capability truth
 
 | Evidence route | Current honest state | Public claim allowed now |
@@ -348,16 +355,17 @@ Host OS and evidence OS are different axes.
 | Existing fixed Volatility console adapter | VERIFIED LOCALLY on real DC01 memory: symbols ready, 14 sealed Windows-memory tools, real `vol_pstree`, `vol_psscan`, and post-fix `vol_netscan` output, and matching custody |
 | Earlier Windows Python 3.14 environment | Historical development environment only; it is not the target proof environment |
 | Windows 11 plus WSL2 | Optional disk-support route; TSK was observed while `ewfmount` and `ntfs-3g` were missing at the earlier checkpoint |
-| Native Ubuntu/Linux | Plausible target, not yet clean-machine demonstrated |
+| Native Ubuntu/Linux | Not a scored host; the Linux/AMD64 Docker test/runtime/profile path is now verified locally |
 | Native macOS runner | Unverified |
 | Browser static viewer | Implemented with a positive inert-HTML policy and automated tests; human visual and cross-browser QA remain pending because the in-app browser runtime failed before loading the local file |
-| Docker | No current demonstrated Unchained image or portable E01 mount contract |
+| Docker | Linux/AMD64 CPython 3.11 test image, non-root runtime, offline help/doctor/profile/custody, and raw Sleuth Kit substrate verified locally; no authentic OpenAI receipt or portable E01 mount contract |
 
-Do not say Docker makes the runner work identically on every laptop. A
-Dockerfile alone would still require rebuilding and would not prove privileged
-FUSE/EWF mounting on Docker Desktop. The cross-platform judge experience is the
-static browser viewer. The live runner support matrix must list only hosts that
-were actually tested.
+Do not say Docker makes the runner work identically on every laptop. The tested
+image proves a bounded Linux/AMD64 CLI/raw-inspection preflight; it does not
+prove privileged FUSE/EWF mounting, DC01 Windows parity, or equivalent
+performance on Docker Desktop binds. The cross-platform judge experience is the
+static browser viewer. The live runner support matrix must list only hosts and
+routes that were actually tested.
 
 ## 6. Current implementation truth
 
@@ -1423,13 +1431,13 @@ memory-only scope. A fake replay is never acceptable as proof.
 
 The single highest-leverage next action is now:
 
-> Review and intentionally commit the OpenAI-native vNext. Publish without
-> rewriting history and establish a server timestamp. Then freeze the protocol, rubric, code,
-> prompts, catalog, caps, retries, scorer, the exact 16,000,000-byte worker
-> ceiling, success/failure public-path sanitization contract, exact 65,536-byte
-> UTF-8 model-view prefix/completeness rules, and first-valid-run selection rule.
-> With an authorized key, run one harmless complete GPT-5.6 smoke and inspect its
-> sealed viewer. Do not run GPT-5.6 on DC01 before that public freeze and smoke.
+> Publish the synchronized Docker/README/handoff follow-up on `main`, then freeze
+> the protocol, rubric, code, prompts, Sol alias/snapshot, catalog, caps, retries,
+> scorer, exact 16,000,000-byte worker ceiling, success/failure public-path
+> sanitization contract, exact 65,536-byte model-view rule, and first-valid-run
+> selection rule. With an authorized key, retain the nonqualifying Luna canary,
+> then run one harmless complete Sol lifecycle and inspect its sealed viewer. Do
+> not run GPT-5.6 on DC01 before that public freeze and Sol smoke.
 
 ## 18. Change control
 

@@ -1147,3 +1147,36 @@ pending a real multi-image scheduler. In-app browser visual QA also remains
 unavailable despite exact viewer rerendering and automated HTML/security tests.
 These are consolidated prototype boundaries, not deferred evidence for a claim
 of production readiness.
+
+## D-031 - Docker and Luna are bounded preflights, not flagship proof
+
+**Status: implemented and verified offline on 2026-07-18; authentic Luna
+provider receipt pending.**
+
+The project permits one narrow container exception to the frozen breadth scope:
+a Linux/AMD64 CPython 3.11 packaging/profile/custody preflight and one explicitly
+nonqualifying GPT-5.6 Luna Responses canary. The container test target runs the
+full suite, lint, format, and dependency gate. The final runtime installs from a
+pre-resolved wheelhouse, contains no Git, runs as UID/GID 10001 under Tini, and
+uses read-only roots/evidence, dropped capabilities, `no-new-privileges`, bounded
+PIDs, and a network-denied offline Compose service.
+
+`sentinel smoke-openai` is a separate one-request typed-tool handshake. It uses
+Luna with low reasoning and verbosity, a 128-output-token maximum,
+`store=false`, no evidence, no proof bundle, and a fixed strict function schema.
+It reports provider model, request/response identity, and normalized usage, and
+labels itself `NONQUALIFYING_CONNECTIVITY_SMOKE`. It can read an API key from a
+bounded `OPENAI_API_KEY_FILE` Docker secret without printing the value.
+
+This exception does not generalize the audited investigator to arbitrary
+models. `sentinel run`, the Sol price table, phase policy, and
+`--require-live-gpt56` completion proof remain Sol-specific. Luna cannot produce
+a qualifying bundle, enter the scored Qwen comparison, prove Windows/DC01 tool
+parity, or substitute for the harmless Sol lifecycle smoke.
+
+Safe Docker mode supports offline CLI/profile/custody plus raw Volatility and
+Sleuth Kit inspection. It does not enable E01/FUSE/loop/device mounting, root,
+`CAP_SYS_ADMIN`, the Docker socket, or privileged mode. Native Windows remains
+the flagship evidence route. A Linux dependency lock, final base-image digest,
+OCI digest/revision proof binding, authentic API receipt, and full containerized
+Sol lifecycle remain freeze or production-hardening work.

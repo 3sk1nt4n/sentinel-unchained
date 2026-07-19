@@ -27,7 +27,14 @@ from .artifacts import (
 from .audit import AuditLog
 from .caps import CapConfig, CapExceeded, RunBudget
 from .evidence import CustodyError, EvidenceDiscoveryError, EvidenceError, EvidenceSession
-from .model import OpenAIResponsesModel
+from .model import (
+    ModelProviderError,
+    ModelRequest,
+    OpenAIResponsesModel,
+    is_gpt56_luna_model,
+    is_gpt56_sol_model,
+    openai_api_key_status,
+)
 from .models import EvidenceProfile, RunStatus
 from .tools import ToolRegistry
 from .viewer import render_viewer_html
@@ -36,6 +43,9 @@ EXIT_COMPLETE = 0
 EXIT_FATAL = 1
 EXIT_INVALID = 2
 EXIT_PARTIAL = 3
+_SMOKE_MODEL = "gpt-5.6-luna"
+_SMOKE_TOKEN = "SENTINEL_SMOKE_OK"
+_SMOKE_MAX_OUTPUT_TOKENS = 128
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -65,7 +75,7 @@ def build_root_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "command",
         nargs="?",
-        choices=("doctor", "profile", "run", "verify", "view"),
+        choices=("doctor", "profile", "smoke-openai", "run", "verify", "view"),
         help="lifecycle command; run 'sentinel <command> --help' for details",
     )
     return parser
@@ -89,6 +99,23 @@ def build_doctor_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="sentinel doctor",
         description="Check local runtime and live-run configuration without reading evidence.",
+    )
+    parser.add_argument("--json", action="store_true", dest="json_output")
+    return parser
+
+
+def build_smoke_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="sentinel smoke-openai",
+        description=(
+            "Run one cheap, non-forensic GPT-5.6 Luna typed-tool protocol canary. "
+            "This never creates a proof bundle."
+        ),
+    )
+    parser.add_argument(
+        "--model",
+        default=os.getenv("SENTINEL_SMOKE_MODEL", _SMOKE_MODEL),
+        help="allowlisted Luna alias or snapshot (default: gpt-5.6-luna)",
     )
     parser.add_argument("--json", action="store_true", dest="json_output")
     return parser
@@ -125,22 +152,21 @@ def build_view_parser() -> argparse.ArgumentParser:
 
 def _doctor(*, json_output: bool) -> int:
     configured_model = os.getenv("UNCHAINED_MODEL")
+    key_present, key_source = openai_api_key_status()
     checks = {
         "python_3_11": sys.version_info[:2] == (3, 11),
         "openai_sdk": importlib.util.find_spec("openai") is not None,
         "volatility3": importlib.util.find_spec("volatility3") is not None,
         "qwen_tool_package": importlib.util.find_spec("sift_sentinel") is not None,
-        "model_is_gpt56_sol": bool(
-            configured_model
-            and (configured_model == "gpt-5.6" or configured_model.startswith("gpt-5.6-sol"))
-        ),
-        "openai_api_key_present": bool(os.getenv("OPENAI_API_KEY")),
+        "model_is_gpt56_sol": bool(configured_model and is_gpt56_sol_model(configured_model)),
+        "openai_api_key_present": key_present,
     }
     ready = all(checks.values())
     payload = {
         "ready_for_live_run": ready,
         "checks": checks,
         "configured_model": configured_model,
+        "openai_api_key_source": key_source,
         "python": sys.version.split()[0],
         "secrets_printed": False,
     }
@@ -151,8 +177,117 @@ def _doctor(*, json_output: bool) -> int:
         for name, passed in checks.items():
             print(f"{'PASS' if passed else 'FAIL':<4}  {name}")
         if not ready:
-            print("Next: set UNCHAINED_MODEL=gpt-5.6 and OPENAI_API_KEY, then rerun doctor.")
+            print(
+                "Next: set UNCHAINED_MODEL=gpt-5.6 and OPENAI_API_KEY "
+                "(or OPENAI_API_KEY_FILE), then rerun doctor."
+            )
     return EXIT_COMPLETE if ready else EXIT_INVALID
+
+
+def _smoke_openai(*, model_id: str, json_output: bool) -> int:
+    """Exercise one bounded Luna Responses call without creating forensic authority."""
+
+    if not is_gpt56_luna_model(model_id):
+        raise ValueError("--model must identify GPT-5.6 Luna")
+    model = OpenAIResponsesModel(model_id=model_id, connectivity_smoke=True)
+    tool = {
+        "type": "function",
+        "name": "sentinel_smoke_ok",
+        "description": "Confirm the bounded Sentinel OpenAI protocol canary.",
+        "strict": True,
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string",
+                    "enum": [_SMOKE_TOKEN],
+                    "description": "The exact fixed canary token.",
+                }
+            },
+            "required": ["token"],
+            "additionalProperties": False,
+        },
+    }
+    response = model.create(
+        ModelRequest(
+            phase="connectivity-smoke",
+            instructions=(
+                "This is a non-forensic connectivity test. Call sentinel_smoke_ok exactly once "
+                f"with token {_SMOKE_TOKEN}. Do not return narrative text."
+            ),
+            input_items="Perform the fixed typed-tool connectivity canary now.",
+            tools=(tool,),
+            parallel_tool_calls=False,
+            tool_choice={"type": "function", "name": "sentinel_smoke_ok"},
+            max_output_tokens=_SMOKE_MAX_OUTPUT_TOKENS,
+            timeout_seconds=30.0,
+            store=False,
+            reasoning_effort="low",
+            text_verbosity="low",
+            max_tool_calls=1,
+        )
+    )
+    problems: list[str] = []
+    if response.status != "completed":
+        problems.append(f"response status was {response.status!r}")
+    if not response.response_id:
+        problems.append("response ID was absent")
+    if not response.request_id:
+        problems.append("request ID was absent")
+    if not response.provider_model or not is_gpt56_luna_model(response.provider_model):
+        problems.append("provider-returned model was absent or not GPT-5.6 Luna")
+    if response.usage_error:
+        problems.append(f"usage accounting was invalid: {response.usage_error}")
+    if response.usage.output_tokens > _SMOKE_MAX_OUTPUT_TOKENS:
+        problems.append("reported output tokens exceeded the request ceiling")
+    if response.text.strip():
+        problems.append("model returned narrative text instead of only the forced tool call")
+    if len(response.function_calls) != 1:
+        problems.append("model did not return exactly one typed tool call")
+    else:
+        call = response.function_calls[0]
+        if not call.arguments_valid:
+            problems.append(f"tool arguments were invalid: {call.parse_error}")
+        if call.name != "sentinel_smoke_ok" or call.arguments != {"token": _SMOKE_TOKEN}:
+            problems.append("typed tool name or fixed arguments did not match")
+    if problems:
+        raise ModelProviderError("; ".join(problems))
+
+    payload = {
+        "ok": True,
+        "qualification": "NONQUALIFYING_CONNECTIVITY_SMOKE",
+        "forensic_evidence_read": False,
+        "proof_bundle_created": False,
+        "provider_requests": 1,
+        "requested_model": model_id,
+        "provider_model": response.provider_model,
+        "response_id": response.response_id,
+        "request_id": response.request_id,
+        "status": response.status,
+        "typed_tool_call_valid": True,
+        "store": False,
+        "max_output_tokens": _SMOKE_MAX_OUTPUT_TOKENS,
+        "usage": asdict(response.usage),
+        "secrets_printed": False,
+        "does_not_prove": [
+            "a completed forensic lifecycle",
+            "semantic forensic accuracy",
+            "Windows/DC01 native-tool parity",
+            "eligibility for --require-live-gpt56",
+        ],
+    }
+    if json_output:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+    else:
+        print("OPENAI SMOKE: PASS")
+        print("Qualification: NONQUALIFYING_CONNECTIVITY_SMOKE")
+        print(f"Requested model: {model_id}")
+        print(f"Provider model: {response.provider_model}")
+        print("Responses calls: 1")
+        print("Typed tool call: PASS")
+        print("Proof bundle: not created")
+        print("Forensic evidence: not read")
+    return EXIT_COMPLETE
 
 
 def _profile(evidence: Path, *, mount: bool, json_output: bool) -> int:
@@ -663,6 +798,21 @@ def main(argv: Sequence[str] | None = None) -> int:
     if raw_arguments[:1] == ["doctor"]:
         arguments = build_doctor_parser().parse_args(raw_arguments[1:])
         return _doctor(json_output=arguments.json_output)
+
+    if raw_arguments[:1] == ["smoke-openai"]:
+        arguments = build_smoke_parser().parse_args(raw_arguments[1:])
+        try:
+            return _smoke_openai(model_id=arguments.model, json_output=arguments.json_output)
+        except ValueError as exc:
+            print(f"Sentinel OpenAI smoke configuration invalid: {exc}", file=sys.stderr)
+            return EXIT_INVALID
+        except Exception as exc:  # noqa: BLE001 - never print provider text or credentials
+            print(
+                f"Sentinel OpenAI smoke failed: {type(exc).__name__}; "
+                "credential and provider-response text suppressed",
+                file=sys.stderr,
+            )
+            return EXIT_FATAL
 
     if raw_arguments[:1] == ["profile"]:
         arguments = build_profile_parser().parse_args(raw_arguments[1:])
