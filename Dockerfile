@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 
-ARG PYTHON_IMAGE=python:3.11.9-slim-bookworm
+ARG PYTHON_IMAGE=python:3.11.9-slim-bookworm@sha256:8fb099199b9f2d70342674bd9dbccd3ed03a258f26bbd1d556822c6dfc60c317
 
 FROM ${PYTHON_IMAGE} AS wheels
 
@@ -29,7 +29,20 @@ RUN python -m pip wheel --wheel-dir /wheels . \
 
 FROM wheels AS test
 
-RUN python -m pip install --no-index --find-links=/wheels /wheels/*.whl \
+# The release tests intentionally inspect the freeze/controller documentation,
+# setup entrypoint, Docker policy, and pinned requirements. They are copied only
+# into this disposable test stage; the final runtime still receives wheels only.
+COPY .gitattributes .dockerignore Dockerfile setup.ps1 ./
+COPY docs ./docs
+COPY requirements ./requirements
+COPY scripts ./scripts
+
+RUN git init \
+    && git config user.name "Unchained Docker Gate" \
+    && git config user.email "docker-gate@example.invalid" \
+    && git add --all \
+    && git commit -m "Docker test context" \
+    && python -m pip install --no-index --find-links=/wheels /wheels/*.whl \
     && python -m pip install --no-index --no-deps /sentinel-wheel/*.whl \
     && python -m pip install \
        build==1.5.1 \
@@ -40,6 +53,7 @@ RUN python -m pip install --no-index --find-links=/wheels /wheels/*.whl \
     && python -m pytest -q \
     && python -m ruff check . \
     && python -m ruff format --check . \
+    && python -m unchained onboard --json >/dev/null \
     && python -m build
 
 
@@ -48,7 +62,7 @@ FROM ${PYTHON_IMAGE} AS runtime
 ARG VCS_REF=unknown
 ARG BUILD_DATE=unknown
 
-LABEL org.opencontainers.image.title="Sentinel Unchained" \
+LABEL org.opencontainers.image.title="Unchained" \
       org.opencontainers.image.description="Bounded GPT-5.6 DFIR investigator with offline-verifiable proof" \
       org.opencontainers.image.source="https://github.com/3sk1nt4n/sentinel-unchained" \
       org.opencontainers.image.revision="${VCS_REF}" \
@@ -83,6 +97,7 @@ RUN /opt/sentinel/bin/python -m pip install \
     && /opt/sentinel/bin/python -m pip install \
        --no-index --no-deps /sentinel-wheel/*.whl \
     && /opt/sentinel/bin/python -m pip check \
+    && /opt/sentinel/bin/sentinel onboard --json >/dev/null \
     && rm -rf /wheels /sentinel-wheel \
     && mkdir -p /workspace/unchained-runs /home/sentinel/.cache \
     && chown -R sentinel:sentinel /workspace /home/sentinel

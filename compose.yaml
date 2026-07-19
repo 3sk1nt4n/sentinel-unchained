@@ -2,6 +2,7 @@ name: sentinel-unchained
 
 x-sentinel-runtime: &sentinel-runtime
   image: sentinel-unchained:local
+  platform: linux/amd64
   build:
     context: .
     target: runtime
@@ -31,7 +32,9 @@ services:
       - type: volume
         source: sentinel-runs
         target: /workspace/unchained-runs
-    command: ["doctor", "--json"]
+    # The zero-argument Compose experience must succeed without a key and teach
+    # the next safe step. Live readiness remains an explicit `doctor --json`.
+    command: ["onboard", "--json"]
 
   live-smoke:
     <<: *sentinel-runtime
