@@ -15,7 +15,7 @@ PROFILE + ROUTE [deterministic]
       |
       v
 OPENING BOOK [GPT-5.6]
-  choose one to six distinct route-valid typed tools; the batch is all-or-none
+  choose up to twelve distinct route-valid typed tools; the batch is all-or-none
       |
       v
 PARALLEL TYPED EXECUTION [deterministic authority]

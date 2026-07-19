@@ -94,6 +94,9 @@ _REQUIRED_COMPLETE_EVENTS = (
 )
 _MODEL_PHASE_PREFIX = ("opening",)
 _MODEL_PHASE_SUFFIX = ("investigation-finalize", "judge", "report")
+# Kept in lock-step with models.MAX_OPENING_TOOLS; the verifier is intentionally
+# standalone (stdlib only), so the ceiling is mirrored rather than imported.
+_MAX_OPENING_TOOLS = 12
 
 _SHA256_RE = re.compile(r"[0-9a-f]{64}\Z")
 _INLINE_CITATION_RE = re.compile(r"\[([^\[\]\r\n]+)\]")
@@ -2855,7 +2858,7 @@ class _Verifier:
             self.error(f"{label} does not match a supported audited options shape")
         phase = payload.get("phase")
         policies: dict[str, tuple[Any, ...]] = {
-            "opening": (True, "required", 2_048, "low", "low", 6),
+            "opening": (True, "required", 4_096, "low", "low", _MAX_OPENING_TOOLS),
             "investigate": (False, "required", 4_096, "medium", "low", 1),
             "investigation-finalize": (
                 False,
@@ -3145,8 +3148,11 @@ class _Verifier:
 
         opening_index, opening_response = responses[0]
         opening_calls = self._response_calls(opening_response, require_valid=True)
-        if not 1 <= len(opening_calls) <= 6:
-            self.error("opening response must contain between one and six typed function calls")
+        if not 1 <= len(opening_calls) <= _MAX_OPENING_TOOLS:
+            self.error(
+                "opening response must contain between one and "
+                f"{_MAX_OPENING_TOOLS} typed function calls"
+            )
         opening_names = [call.get("name") for call in opening_calls]
         if len(opening_names) != len(set(opening_names)):
             self.error("opening response must select distinct typed function tools")

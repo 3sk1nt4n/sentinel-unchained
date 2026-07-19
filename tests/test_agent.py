@@ -429,7 +429,7 @@ def test_fresh_judge_downgrades_deliberately_unsupported_finding(tmp_path: Path)
         "low",
     ]
     assert [request.max_output_tokens for request in model.requests] == [
-        2_048,
+        4_096,
         4_096,
         12_288,
         12_288,
@@ -978,7 +978,7 @@ def test_prompt_two_canonical_rules_are_regression_protected() -> None:
     normalized = " ".join(INVESTIGATOR_PROMPT.split())
     assert "no shell" in normalized
     assert "no internet" in normalized
-    assert "1 to 6 distinct functions" in normalized
+    assert "broad, high-value opening" in normalized
     assert "memory is UNAVAILABLE" in normalized
     assert "[t17]" in normalized
     assert "Dead ends are findings too" in normalized

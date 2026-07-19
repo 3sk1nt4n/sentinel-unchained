@@ -22,6 +22,7 @@ from ._tool_worker import DIRECT_TOOL_TARGETS
 from .audit import AuditLog, canonical_json, sha256_text
 from .caps import CapExceeded, RunBudget
 from .models import (
+    MAX_OPENING_TOOLS,
     EvidenceProfile,
     FunctionCall,
     JsonValue,
@@ -145,13 +146,15 @@ class ToolRegistry:
         return self._execute_reserved(call)
 
     def execute_batch(self, calls: Iterable[FunctionCall]) -> tuple[ToolResult, ...]:
-        """Run one-to-six calls concurrently and return results in request order."""
+        """Run the all-or-none opening batch concurrently, results in request order."""
 
         batch = tuple(calls)
         if not batch:
             return ()
-        if len(batch) > 6:
-            raise ToolProtocolError("opening batch exceeds the hard maximum of six")
+        if len(batch) > MAX_OPENING_TOOLS:
+            raise ToolProtocolError(
+                f"opening batch exceeds the hard maximum of {MAX_OPENING_TOOLS}"
+            )
         for call in batch:
             self.validate(call)
         self._claim_calls(batch)

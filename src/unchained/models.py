@@ -15,6 +15,10 @@ EvidenceShape: TypeAlias = Literal["memory-only", "disk-only", "both", "logs-onl
 MODEL_TOOL_OUTPUT_MAX_BYTES = 64 * 1024
 CASE_LEDGER_UPDATE_MAX_BYTES = 8_192
 INVESTIGATION_FINISH_TOOL_NAME = "finish_investigation"
+# Maximum high-value typed tools GPT-5.6 may fire in the all-or-none parallel
+# opening. Raised past a memory-only floor so a cross-domain opening can span
+# both memory and disk high-value views in one shot.
+MAX_OPENING_TOOLS = 12
 OS_EVIDENCE_CONFLICT_WARNING = (
     "OS CONFLICT: disk and memory content disagree; OS-specific tool families are disabled."
 )

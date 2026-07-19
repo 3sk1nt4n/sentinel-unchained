@@ -15,6 +15,7 @@ from unchained.artifacts import build_summary
 from unchained.caps import CapConfig, estimate_usage_cost
 from unchained.models import (
     INVESTIGATION_FINISH_TOOL_NAME,
+    MAX_OPENING_TOOLS,
     EvidenceItem,
     EvidenceProfile,
     EvidenceQuote,
@@ -496,7 +497,7 @@ def _complete_events(
                 )
             ]
         effort, verbosity, maximum, parallel, choice = {
-            "opening": ("low", "low", 2_048, True, "required"),
+            "opening": ("low", "low", 4_096, True, "required"),
             "investigate": (
                 "medium",
                 "low",
@@ -526,7 +527,7 @@ def _complete_events(
                 {"type": "function", "name": "submit_report_draft"},
             ),
         }[phase]
-        max_tool_calls = 6 if phase == "opening" else 1
+        max_tool_calls = MAX_OPENING_TOOLS if phase == "opening" else 1
         response_payload = _model_payload(
             phase=phase,
             ordinal=f"{ordinal:03d}",
@@ -1518,7 +1519,7 @@ def test_strict_rejects_phase_labels_with_no_model_function_calls(tmp_path: Path
 
     result = verify_run(run_directory, require_complete=True)
 
-    _assert_failed_with(result, "opening response must contain between one and six")
+    _assert_failed_with(result, "opening response must contain between one and 12")
 
 
 @pytest.mark.parametrize(

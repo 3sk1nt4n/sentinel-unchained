@@ -22,6 +22,7 @@ from .model import (
 from .models import (
     CASE_LEDGER_UPDATE_MAX_BYTES,
     INVESTIGATION_FINISH_TOOL_NAME,
+    MAX_OPENING_TOOLS,
     EvidenceProfile,
     EvidenceQuote,
     EvidenceSpan,
@@ -277,12 +278,15 @@ class UnchainedAgent:
         instructions = f"""
 {INVESTIGATOR_PROMPT}
 
-This is TURN 0, the OPENING BOOK. Choose up to six distinct,
+This is TURN 0, the OPENING BOOK. Choose up to {MAX_OPENING_TOOLS} distinct,
 highest-information forensic functions for this exact OS and evidence shape.
-Select at least one because this phase starts only when a ready typed function
-exists. Use only functions provided in this request. Do not finish, report, or
-invent unavailable capability in this turn. The controller will execute accepted
-calls concurrently and return every output at once.
+Favor a broad, high-value opening: when both memory and disk are ready, span
+both domains in one shot (process/network/injection from memory; execution,
+timeline, and persistence from disk). Select at least one because this phase
+starts only when a ready typed function exists. Use only functions provided in
+this request. Do not finish, report, or invent unavailable capability in this
+turn. The controller will execute accepted calls concurrently and return every
+output at once.
 
 {HOSTILE_DATA_RULE}
 """.strip()
@@ -298,10 +302,10 @@ calls concurrently and return every output at once.
                 tools=self.tools.schemas(),
                 parallel_tool_calls=True,
                 tool_choice="required",
-                max_output_tokens=2_048,
+                max_output_tokens=4_096,
                 reasoning_effort="low",
                 text_verbosity="low",
-                max_tool_calls=6,
+                max_tool_calls=MAX_OPENING_TOOLS,
             )
         )
         if not response.function_calls:
@@ -328,8 +332,8 @@ calls concurrently and return every output at once.
                     actor="investigator",
                 )
                 raise AgentProtocolError(reason)
-            if len(accepted) >= 6:
-                reason = "opening response exceeded six function calls"
+            if len(accepted) >= MAX_OPENING_TOOLS:
+                reason = f"opening response exceeded {MAX_OPENING_TOOLS} function calls"
                 self.audit.append(
                     "model.protocol_error",
                     {

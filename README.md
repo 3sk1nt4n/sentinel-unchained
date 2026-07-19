@@ -40,10 +40,11 @@
 - 🔍 **Deterministic code goes first** — before any model call, the evidence is
   enumerated, content-probed, routed, and SHA-256-hashed into custody, locally
   and read-only. Zero OpenAI calls until this front door is green.
-- 🧠 **Then GPT-5.6 runs the investigation** — it opens with up to six typed
-  forensic tools fired in parallel, reads the retained results, chooses the
-  next tool one audited action at a time, and finally proposes structured
-  findings that a fresh-context reviewer may only preserve or downgrade.
+- 🧠 **Then GPT-5.6 runs the investigation** — it opens with up to twelve
+  high-value typed forensic tools (memory and disk) fired in parallel, reads
+  the retained results, chooses the next tool one audited action at a time, and
+  finally proposes structured findings that a fresh-context reviewer may only
+  preserve or downgrade.
 - 🔒 **Code owns the evidence the whole way** — read-only access, hard caps,
   all-or-none validation, exact byte-span citations. The model is never
   allowed to *be* the evidence.
@@ -343,7 +344,7 @@ final-report phases under the intended submission caps.
 
 1. **Case card** — evidence is classified by bounded content probes, assigned
    public IDs, routed by OS/shape, and SHA-256 hashed before any model call.
-2. **Opening book** — GPT-5.6 chooses one to six eligible typed tools. Code
+2. **Opening book** — GPT-5.6 chooses up to twelve eligible typed tools. Code
    validates the complete decision and starts valid calls concurrently.
 3. **Visible investigation** — each adaptive turn is
    `PLAN → one ACT → OBSERVE → UPDATE`; growing provider transcripts are not
@@ -432,7 +433,7 @@ cited.**
 ```mermaid
 flowchart TD
     E[Evidence folder] --> P[Profile · route · initial SHA-256]
-    P --> O[GPT-5.6 opening book<br/>choose 1–6 typed tools]
+    P --> O[GPT-5.6 opening book<br/>choose up to 12 typed tools]
     O --> X[All-or-none validation<br/>parallel deterministic execution]
     X --> L[Plan → one action → observe → visible update]
     L --> D{Typed action is<br/>finish status DONE?}
@@ -596,8 +597,8 @@ required**. Local performance is decided by CPU, RAM, and the disk path:
 
 | Component | Minimum | Recommended | Why it matters |
 |---|---|---|---|
-| CPU | 4 cores / 8 threads | 6+ cores | The opening book executes up to **six typed tools concurrently**, each in its own private child process |
-| RAM | 8 GB | **16 GB** | Up to six Volatility processes read the same multi-GiB memory image at once; 16 GB keeps the six-way opening out of swap |
+| CPU | 4 cores / 8 threads | 8+ cores | The opening fires up to **twelve typed tools**, executed in bounded concurrent waves, each in its own private child process |
+| RAM | 8 GB | **16 GB** | Several Volatility processes read the same multi-GiB memory image at once; 16 GB keeps the opening out of swap (the OS page cache shares the image bytes) |
 | Disk | SSD, local path | NVMe, non-synced folder | Full SHA-256 custody hashing plus parallel image reads; a OneDrive/cloud-synced or network path can dominate total runtime |
 | GPU | none | none | Model inference is an OpenAI API call, not local |
 | Network | stable HTTPS egress | — | Used only for GPT-5.6 requests; evidence bytes never leave the machine |
