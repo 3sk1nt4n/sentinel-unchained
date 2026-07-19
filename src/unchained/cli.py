@@ -573,6 +573,7 @@ class _AuditNarrator:
         self._audit = audit
         self._console = console
         self._phase_seen: str | None = None
+        self._proposed: dict[str, dict[str, object]] = {}
 
     def __getattr__(self, name: str) -> object:
         return getattr(self._audit, name)
@@ -600,7 +601,44 @@ class _AuditNarrator:
             elif event_type == "custody.final.completed":
                 self._console.ok("final custody re-hash matched the baseline")
             elif event_type == "opening.completed" and isinstance(payload, dict):
-                self._console.ok("opening book executed; all typed calls accounted for")
+                selected = payload.get("selected")
+                executed = payload.get("executed")
+                rejected = payload.get("rejected")
+                self._console.ok(
+                    f"opening book: {selected} selected · {executed} executed · "
+                    f"{rejected} rejected — all-or-none validated"
+                )
+            elif event_type == "investigator.finished" and isinstance(payload, dict):
+                findings = [f for f in payload.get("findings") or [] if isinstance(f, dict)]
+                self._proposed = {str(f.get("finding_id")): f for f in findings}
+                self._console.ok(
+                    f"typed DONE accepted · {len(findings)} structured finding(s) proposed"
+                )
+                for finding in findings:
+                    self._console.detail(
+                        f"● {finding.get('finding_id')} · {finding.get('proposed_status')} · "
+                        f"{finding.get('severity')} · {str(finding.get('title', ''))[:56]}"
+                    )
+            elif event_type == "judge.completed" and isinstance(payload, dict):
+                for verdict in payload.get("verdicts") or []:
+                    if not isinstance(verdict, dict):
+                        continue
+                    fid = str(verdict.get("finding_id"))
+                    status = str(verdict.get("status"))
+                    proposed = str(self._proposed.get(fid, {}).get("proposed_status", "?"))
+                    rationale = str(verdict.get("rationale", ""))[:48]
+                    if status == proposed:
+                        self._console.ok(f"{fid} · {proposed} → preserved · {rationale}")
+                    else:
+                        self._console.warn(
+                            f"{fid} · {proposed} → downgraded to {status} · {rationale}"
+                        )
+            elif event_type == "report.completed" and isinstance(payload, dict):
+                report_bytes = payload.get("report_bytes")
+                digest = str(payload.get("report_sha256", ""))[:12]
+                self._console.ok(
+                    f"deterministic report sealed · {report_bytes:,} bytes · sha256 {digest}…"
+                )
             elif event_type == "judge.started":
                 self._phase_header("judge")
             elif event_type == "report.started":
@@ -630,10 +668,13 @@ class _AuditNarrator:
         def render() -> None:
             response = kwargs.get("response")
             usage = getattr(response, "usage", None)
-            tokens = getattr(usage, "total_tokens", 0)
+            tokens_in = getattr(usage, "input_tokens", 0)
+            tokens_out = getattr(usage, "output_tokens", 0)
+            provider = getattr(response, "provider_model", None) or "response"
             running = kwargs.get("running_cost_usd", 0.0)
             self._console.detail(
-                f"↓ response received · {tokens:,} tokens · ${float(running):.4f} est. total"
+                f"↓ {provider} · in {tokens_in:,} / out {tokens_out:,} tokens · "
+                f"${float(running):.4f} est. total"
             )
 
         self._narrate(render)
@@ -1121,6 +1162,10 @@ def run_cli(
         )
         stdout_console.kv("Proof bundle", str(run_directory))
         stdout_console.kv("Verification", "PASS — report, viewer, custody, and audit chain")
+        stdout_console.kv(
+            "Strict gates",
+            "packets · receipts · spans · usage · cost · report bytes · viewer bytes",
+        )
         stdout_console.kv("Verify again", f'sentinel verify "{run_directory}" --require-complete')
         stdout_console.kv("Open viewer", f'sentinel view "{run_directory}"')
         stdout_console.rule()
