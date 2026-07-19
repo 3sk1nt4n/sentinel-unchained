@@ -55,10 +55,9 @@
 > freeze, the authentic run, or the honesty rails.
 
 ### A. Blockers — do first (cheap, no API key, huge visibility/eligibility gain)
-1. **[ ] Push the vNext + rebrand work to the public repo.**
-   All of it is committed locally only; GitHub still shows the older, weaker
-   project — judges would walk the wrong repo. Fast-forward push to
-   `origin`, no history rewrite.
+1. **[x] Push the vNext + rebrand work to the public repo.**
+   Done — `main` and `agent/openai-native-vnext` are fast-forwarded to the
+   same head on `origin`; no history rewrite.
 2. **[x] Add a "Built with Codex + GPT-5.6" section to `README.md`.**
    Done — "Built with Codex" section with the core-work Session ID, plus a
    "For judges" table linking it near the top.
