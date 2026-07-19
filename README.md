@@ -58,7 +58,7 @@ content-addressed proof bundle.
 |---|---|
 | OpenAI-native controller and independent offline verifier | ✅ Verified offline |
 | Linux/AMD64 Docker build, 274-test gate, CLI, profile, and custody | ✅ Verified locally |
-| Cheap GPT-5.6 Luna typed-tool canary | ✅ Demonstrated live; independent-reviewer-attested sanitized receipt |
+| Cheap GPT-5.6 Luna typed-tool canary | ✅ Demonstrated live; second-reviewer-attested (project-affiliated) sanitized receipt |
 | Authentic GPT-5.6 Sol capped opening on real Windows memory | ✅ Retained bundle verifies `VALID`; terminal state is intentionally `PARTIAL` |
 | Authentic `COMPLETE` GPT-5.6 Sol evidence bundle | ⏳ Opening/tool path proven; findings → reviewer → final report still pending |
 | Same-evidence speed/cost/accuracy comparison with Qwen | ⏳ Fail-closed comparison scaffold ready; fact set, freeze lock, and measurements pending |
@@ -84,35 +84,82 @@ offline verifier understands historical literal-DONE-v1 bundles but requires
 the new runtime's typed catalog, `tool_choice=required`, and exact terminal
 schema. A live `COMPLETE` v2 bundle remains pending.
 
+## For judges — the submission at a glance
+
+| Field | Value |
+|---|---|
+| Track | **Developer Tools** — OpenAI Build Week |
+| Built with | **Codex** (implementation + adversarial review) and **GPT-5.6** (Sol investigator/reviewer, Luna canary) |
+| Codex Session ID | `019f61e5-5755-7a02-adb4-618d32baab27` — see [Built with Codex](#built-with-codex) |
+| Fastest no-key test | Three commands, zero spend — top of the [judge quickstart](JUDGE-QUICKSTART.md) |
+| Live receipts | [Sol capped opening on real memory](docs/runs/sol-capped-dc01-opening.json) · [Luna canary](docs/runs/luna-canary-receipt.json) |
+| Honest gaps | `COMPLETE` bundle, benchmark, and video are pending; the [proof status](#proof-status) table never overstates |
+
+**Where each judging criterion lives:**
+
+| Criterion | Look at |
+|---|---|
+| Technological Implementation | [How it works](#how-it-works) · typed opening book, stateless loop, typed `DONE` v2, byte-exact offline verifier |
+| Design | `sentinel onboard` guided front door · live investigation narration · static inert proof viewer |
+| Potential Impact | [Why Unchained is different](#why-unchained-is-different) — inspectable autonomy for any high-consequence agent, not just DFIR |
+| Quality of the Idea | The authority split: the model chooses strategy; code owns evidence, execution, citations, custody, and the report |
+
 ## Quickstart
 
-Choose the smallest path that answers your question.
+**Pick your machine. Every lane starts with zero keys and zero spend.**
 
-### 1. Recommended: guided, profile-first onboarding
+| Your machine | Lane | First result in | Spend | Verified state |
+|---|---|---|---|---|
+| 🪟 **Windows 10/11** | Native CPython 3.11 — the flagship forensic lane | ~5 min | $0 until you type the launch phrase | ✅ Tested; the live Sol run happened here |
+| 🐧 **Linux (AMD64)** | Hardened Docker offline lane | ~3 min | $0 | ✅ Tested: 274-test in-container gate |
+| 🍎 **macOS** | Same Docker lane via Docker Desktop | ~3 min | $0 | ⚠️ Expected via Docker's `linux/amd64` emulation; not yet verified on Mac hardware |
 
-On native Windows, the setup script installs the pinned CPython 3.11
-environment and finishes by printing the exact onboarding command. Setup reads
-no evidence, asks for no key, and makes no OpenAI call.
+Every lane converges on the same experience: a colorful guided onboarding, a
+SHA-256 case card, an explicit two-key launch gate, and — after a run — an
+offline-verifiable proof bundle.
+
+### 🪟 Windows — the flagship lane
+
+**The one-liner** — clone, install the pinned toolchain, optionally paste your
+key with hidden input, and land in the guided onboarding:
+
+```powershell
+irm https://raw.githubusercontent.com/3sk1nt4n/sentinel-unchained/main/get.ps1 | iex
+```
+
+Prefer to see every step? The manual path is identical:
+
+**Step 1 — install (reads no evidence, asks for no key, makes no OpenAI call):**
 
 ```powershell
 git clone https://github.com/3sk1nt4n/sentinel-unchained.git
 cd sentinel-unchained
 powershell -NoProfile -ExecutionPolicy Bypass -File .\setup.ps1
+```
 
+**Step 2 — meet the analyst-friendly front door:**
+
+```powershell
 $sentinel = "$env:LOCALAPPDATA\venvs\sentinel-unchained-py311\Scripts\sentinel.exe"
 & $sentinel onboard
+```
+
+A full-color welcome walks you through preparing one case, what the safe
+preview does, and exactly what a paid run would cost — before anything is read.
+
+**Step 3 — profile one case and get the verified case card:**
+
+```powershell
 & $sentinel onboard "C:\Evidence\CASE-A"
 ```
 
-The second onboarding command profiles exactly one case locally, classifies by
-bounded content probes, assigns public evidence IDs, and performs a full
-pre/post SHA-256 custody check. It does not need a key or start a paid run.
-Archives are not unpacked; unsupported documents are hashed and listed, then
-set aside. The current router accepts at most one ready memory image and one
-ready disk image per case; same-class multiples fail closed.
+This classifies by bounded content probes, assigns public evidence IDs, and
+performs a full pre/post SHA-256 custody check — locally, with no key and no
+paid run. Archives are not unpacked; unsupported documents are hashed, listed,
+and set aside. The router accepts at most one ready memory image and one ready
+disk image per case; same-class multiples fail closed.
 
-When the case card is ready, choose a hard ceiling—not a different model or a
-quality promise:
+**Step 4 — choose a hard ceiling (not a different model, not a quality promise):**
 
 | Choice | Option | Default hard ceilings |
 |---|---|---|
@@ -120,22 +167,36 @@ quality promise:
 | **FLAGSHIP** | `--caps default` | 60 tools · 400,000 tokens · 30 min · $10 estimated cost |
 
 Both use GPT-5.6 Sol. Environment overrides can change the effective ceilings,
-which the case card prints. A paid run starts only with an interactive command
-such as the following and the exact phrase `LAUNCH GPT-5.6 SOL`:
+which the case card prints.
+
+**Step 5 — launch, deliberately.** A paid run starts only interactively, and
+only after you type the exact phrase `LAUNCH GPT-5.6 SOL`:
 
 ```powershell
 & $sentinel onboard "C:\Evidence\CASE-A" --launch --caps strict
 ```
 
+You then watch the investigation live: the opening book, each typed tool with
+retained bytes and timing, cap and custody checkpoints, and a final status
+badge with the exact `verify` and `view` commands.
+
 Read the concise [Start Here guide](docs/START-HERE.md) for evidence formats,
-mount outcomes, the optional no-evidence Luna canary, cloud boundaries, and the
-post-run verify/view steps.
+mount outcomes, cloud boundaries, and the post-run verify/view steps.
 
-### 2. No key: prove the container and evidence front door work
+### 🐧 Linux — the hardened container lane
 
-Requirements: Git and Docker Desktop (or Docker Engine + Compose).
+Requirements: Git, Docker Engine + Compose (or Docker Desktop).
 
-```powershell
+**The one-liner** — clone, build the hardened image, optionally store a key
+with hidden input for the live canary, and open the onboarding:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/3sk1nt4n/sentinel-unchained/main/get.sh | bash
+```
+
+Or step by step:
+
+```bash
 git clone https://github.com/3sk1nt4n/sentinel-unchained.git
 cd sentinel-unchained
 docker compose build
@@ -144,23 +205,42 @@ docker compose run --rm offline profile /evidence --json
 ```
 
 The first run command uses the container's friendly `onboard --json` default:
-no key, no evidence read, no network, and exit `0`. The last command profiles
-the committed synthetic log fixture with **no
-network**, **no API key**, and **zero OpenAI calls**. It should report
-`logs-only`, public evidence ID `E001`, and matching custody.
+no key, no evidence read, no network, exit `0`. The last command profiles the
+committed synthetic fixture with **no network**, **no API key**, and **zero
+OpenAI calls** — it should report `logs-only`, public evidence ID `E001`, and
+matching custody. The service runs non-root with a read-only filesystem and
+every Linux capability dropped.
+
+Profile your own folder read-only:
+
+```bash
+SENTINEL_EVIDENCE_PATH=/cases/CASE-A docker compose run --rm offline profile /evidence --json
+```
 
 `docker compose run --rm offline doctor --json` is an explicit live-readiness
-check. It correctly reports not ready when the offline service has no key/model;
-that is not the default onboarding result or an installation failure.
+check; it correctly reports not ready when the offline service has no
+key/model. That is the isolation working, not an installation failure.
 
-To profile your own folder read-only:
+### 🍎 macOS — same container lane, honestly labeled
 
-```powershell
-$env:SENTINEL_EVIDENCE_PATH = "C:\Evidence\CASE-A"
+The identical Compose commands above run under Docker Desktop for Mac. On
+Apple Silicon, Docker executes the `linux/amd64` image through emulation.
+
+```bash
+git clone https://github.com/3sk1nt4n/sentinel-unchained.git
+cd sentinel-unchained
+docker compose build
 docker compose run --rm offline profile /evidence --json
 ```
 
-### 3. Cheap live check: one GPT-5.6 Luna request
+The `get.sh` one-liner above works here too.
+
+> **Honest label:** this lane is expected to work because it is the same
+> hardened Linux/AMD64 image, but it has not yet been verified on macOS
+> hardware, and emulation makes large-image work slower. The claim here is
+> "same container, same commands" — not a tested macOS forensic route.
+
+### 💡 Cheap live check: one GPT-5.6 Luna request
 
 This canary tests only container → OpenAI authentication, the Responses API,
 returned model/request identity, usage accounting, and one forced strict typed
@@ -206,7 +286,7 @@ docker compose --profile live run --rm live-smoke
 
 </details>
 
-### 4. Real investigation: GPT-5.6 Sol proof path
+### 🔬 Real investigation: the GPT-5.6 Sol proof path
 
 The flagship path is native Windows + CPython 3.11 for Windows memory evidence.
 Use an authorized project key and the public `gpt-5.6` alias, which currently
@@ -430,8 +510,8 @@ sentinel view <bundle>
 - A real Sol evidence bundle now proves the live opening/tool/cap/custody path,
   but it is `PARTIAL`; no authentic `COMPLETE` GPT-5.6 vNext bundle is published
   yet.
-- The Luna receipt is an independent-reviewer attestation because its raw JSON
-  response was not retained; it is not bundle-derived proof.
+- The Luna receipt is a second-reviewer attestation (project-affiliated) because
+  its raw JSON response was not retained; it is not bundle-derived proof.
 - No frozen same-evidence Qwen latency/cost/accuracy benchmark is published yet.
 - Exact receipts establish execution and citation support, not forensic truth.
 - The fresh reviewer is a same-family model call, not independent ground truth.
@@ -480,6 +560,26 @@ The package requires CPython `>=3.11,<3.12`. The Qwen reference-tool dependency
 is pinned to commit
 `9f309c6134e857f7b86f3e6b9c6709ce954944a5`; Docker resolves it only in the
 builder and installs the final image from prebuilt wheels.
+
+## Built with Codex
+
+Codex was the primary implementation and adversarial-review collaborator for
+the Build Week work in this repository: the evidence lifecycle, Responses API
+adapter, typed execution boundary, caps, retry/usage accounting, typed-DONE-v2
+protocol, forced serializer, exact evidence spans, fresh-context downgrade-only
+review, report/viewer renderers, independent verifier, CLI, Docker isolation,
+tests, benchmark design, and documentation.
+
+The human owner chose the product thesis, Developer Tools track, DFIR testbed,
+evidence case, authority split, benchmark, scope cuts, claim language, and
+final submission decisions. The dated boundary between prior MIT-licensed work
+and new Build Week work is in [BUILD_PROVENANCE.md](BUILD_PROVENANCE.md).
+
+**Codex Session ID (core functionality build):**
+`019f61e5-5755-7a02-adb4-618d32baab27`
+
+A later Docker/README follow-up thread
+(`019f76f3-a19f-71d1-81b2-eed6305857f6`) is retained as thread provenance.
 
 ## Provenance and license
 
