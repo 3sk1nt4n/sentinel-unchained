@@ -86,8 +86,9 @@ evidence:
 & "$venv\Scripts\vol.exe" -h
 ```
 
-The validated tree has 128 passing tests. A failure should be fixed or reported
-with its environment details. Do not silently switch interpreters.
+The OpenAI-native vNext tree has 267 passing tests across 32 Python files. A
+failure should be fixed or reported with its environment details. Do not
+silently switch interpreters.
 
 ## 4. Verify a completed proof bundle without rebuilding
 
@@ -110,7 +111,8 @@ investigation and does not prove GPT-5.6 participation.
 For a supplied completed run:
 
 ```powershell
-& $python -m unchained verify-run C:\path\to\completed-run
+& "$venv\Scripts\sentinel.exe" verify C:\path\to\completed-run
+& "$venv\Scripts\sentinel.exe" view C:\path\to\completed-run
 ```
 
 The same verifier is available as a one-command wrapper:
@@ -122,13 +124,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\verify.ps1 C:\path\to\comp
 For strict submission-strength verification:
 
 ```powershell
-& $python -m unchained verify-run C:\path\to\completed-run `
+& "$venv\Scripts\sentinel.exe" verify C:\path\to\completed-run `
     --require-complete --require-live-gpt56
 ```
 
-The current synthetic `INVALID` fixture must fail the strict command. That is
-intentional and proves the verifier does not confuse a fake or incomplete run
-with an authentic complete run.
+The current synthetic `INVALID` fixture must fail the strict command. That proves
+the verifier does not confuse a marked fake or incomplete lifecycle with a
+complete one. Offline verification cannot independently authenticate OpenAI from
+locally recorded IDs; retain the genuine provider/operator record separately.
 
 ## 5. Configure an authentic run
 
@@ -174,6 +177,12 @@ $env:MAX_COST_USD = "10"
 Codex build credits and API runtime billing are separate. Runtime calls use the
 funded OpenAI project associated with the key.
 
+Run the configuration check without printing the key:
+
+```powershell
+& "$venv\Scripts\sentinel.exe" doctor
+```
+
 ## 6. Acquire permitted public evidence outside Git
 
 Use the official DFIR Madness source page:
@@ -192,11 +201,25 @@ The directory should contain the extracted Windows memory image. The program
 profiles content rather than trusting a filename extension and prints a case
 card containing OS, shape, readiness, sizes, hashes, and available tools.
 
+Profile and route it before spending an API call:
+
+```powershell
+& "$venv\Scripts\sentinel.exe" profile C:\Evidence\sentinel\dc01
+```
+
 ## 7. Run the bounded investigator
 
 The simplest live run is one command. It performs the environment check,
 prompts for the API key invisibly, sets the hard caps, and launches the
 investigator:
+
+> Prototype boundary: use an externally read-only or immutable evidence copy
+> and a restricted nonsynchronized case workspace. The current router accepts
+> at most one ready memory image and one ready disk image per case; same-class
+> multiples fail closed. Parser children are credential-scrubbed and bounded
+> but do not yet have OS-enforced network denial or scratch-only writes. OpenAI
+> requests use implicit prompt caching, so review the provider's cache/retention
+> policy before sending sensitive derived content.
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\run.ps1 `
@@ -210,19 +233,27 @@ command has already passed in the same checkout.
 ```powershell
 Set-Location "$env:USERPROFILE\src\sentinel-unchained"
 $python = "$env:LOCALAPPDATA\venvs\sentinel-unchained-py311\Scripts\python.exe"
-& $python -m unchained C:\Evidence\sentinel\dc01 --caps default
+& "$venv\Scripts\sentinel.exe" run C:\Evidence\sentinel\dc01 --caps default
 ```
 
 The run creates `unchained-runs\<run-id>\` beside the repository. A complete
 run contains a report, append-only audit log, manifest, summary, environment
-record, custody receipts, and retained content-addressed tool outputs.
+record, custody receipts, retained content-addressed tool outputs, and a
+self-contained `viewer.html`.
+
+The GPT-5.6 opening is intentionally all-or-none: it must choose one to six
+distinct route-valid typed calls. An unknown, duplicate, malformed, or seventh
+call rejects the whole opening rather than running a valid-looking subset. In
+the adaptive loop, only raw assistant text exactly equal to `DONE` terminates;
+whitespace or commentary around that token is a protocol failure.
 
 Exit meanings:
 
 - `0`: complete lifecycle finished.
 - `1`: deterministic fatal invariant or cleanup failure.
 - `2`: invalid input or configuration. This is not a forensic finding.
-- `3`: a hard cap fired. The result is `PARTIAL`, not complete.
+- `3`: the result is `PARTIAL`, not complete. A hard cap or an unsafe failure in
+  a mandatory model/provider/tool protocol phase can produce this exit.
 
 ## 8. Verify the run
 
@@ -230,13 +261,47 @@ Exit meanings:
 $run = (Get-ChildItem .\unchained-runs -Directory |
     Sort-Object LastWriteTime -Descending |
     Select-Object -First 1).FullName
-& $python -m unchained verify-run $run --require-complete --require-live-gpt56
+& "$venv\Scripts\sentinel.exe" verify $run --require-complete --require-live-gpt56
+& "$venv\Scripts\sentinel.exe" view $run
 ```
 
-The strict verification must establish provider-returned model identity,
-response IDs, usage, cost metadata, artifact hashes, quote resolution, custody,
-cleanup, and an authentic complete terminal state. If any check fails, retain
-the failed run and report its actual state.
+Strict verification establishes retry-aware model transaction windows: each
+request and exact phase-options record may contain only the bounded retry
+error/scheduled pairs permitted by policy, plus a recovery receipt when retried,
+before its one accepted response. The audited response authority is the
+normalized assistant message and function-call list; raw provider `output_items`
+are not stored as a second representation. Status-less retries must name a
+code-owned transport/timeout class, HTTP retries must use an eligible status,
+and retry timeouts must remain positive, within the run wall cap, and
+nonincreasing.
+
+The verifier reconstructs the exact opening, adaptive, finalizer, judge, and
+report inputs—including every adaptive ledger, receipt index, budget snapshot,
+latest observation, and full finalizer observation sequence—and binds accepted
+output usage to the paired request ceiling. It binds strict tool schemas/phase
+options, model function calls, tool receipts, visible case-ledger updates, raw
+literal `DONE`, forced
+investigation/judge/report serializers, full artifact descriptors, mandatory
+judge quotes, recomputed byte spans/occurrence counts, custody, cleanup, and the
+complete terminal state. A claimed `COMPLETE` run may contain no `capped` or
+`rejected` receipt, and lifecycle count fields must equal the verified finding,
+verdict, and receipt collections. Typed argument values use the same bool-safe
+JSON primitive-type contract as runtime. It reconstructs the canonical public
+profile from the
+profile event, binds its inventory to the initial and final custody receipts,
+rederives OS/shape/filesystems/route warnings, validates `profile.json`, rebuilds
+`summary.json`, and deterministically
+rerenders the report and viewer; both must match the sealed bytes exactly. It
+independently recomputes local GPT-5.6 cost estimates from audited token usage
+and the configured price table, reconciles cumulative totals, and binds the
+final budget snapshot to the configured caps. Those costs are local cap
+estimates, not proof of provider billing.
+
+It also validates recorded provider-returned model identity and response IDs,
+but it does not independently query or authenticate OpenAI. `sentinel view`
+forces this strict lifecycle verification whenever a bundle claims `COMPLETE`,
+even if the operator did not pass a strict flag. If any check fails, retain the
+failed run and report its actual state.
 
 ## 9. Host and evidence capability truth
 
@@ -255,11 +320,13 @@ the failed run and report its actual state.
 |---|---|---|
 | Profile and route | `src/unchained/evidence.py` | Case card, capability profile, hashes |
 | Typed runner | `tools.py`, `_tool_worker.py` | Function calls, retained output, delivery receipt |
-| Opening book and loop | `agent.py`, `model.py` | Parallel opening, plan-act-observe turns, notes |
+| Opening book and loop | `agent.py`, `model.py` | Parallel opening, stateless plan-act-observe packets, case ledger |
 | Audit | `audit.py` | Ordered append-only `audit.jsonl` |
 | Caps | `caps.py` | Graceful partial stop and cap receipt |
-| Judge | `agent.py`, `prompts.py` | Preserve or downgrade with exact quotes |
-| Report and proof | `artifacts.py`, `verify.py`, CLI | `report.md`, manifest, summary, verifier result |
+| Judge | `agent.py`, `prompts.py` | Preserve or downgrade with exact byte-located spans |
+| Report | `reporting.py` | Strict narrative draft and deterministic authoritative Markdown |
+| Proof viewer | `viewer.py`, `viewer_policy.py` | Generated inert HTML plus independent positive-policy verification |
+| Proof and verification | `artifacts.py`, `verify.py`, CLI | Manifest, summary, lifecycle/span verification |
 
 ## 11. Review of the Qwen and SANS examples
 
@@ -275,11 +342,13 @@ Unchained adopts those communication strengths while tightening the experiment:
 - content-based evidence classification;
 - fixed private-worker and model-view byte ceilings;
 - full accepted output separated from bounded model delivery;
+- controller-resolved byte spans instead of judge-visible 2,048-byte prefixes;
+- stateless adaptive packets instead of full provider transcript replay;
 - case-insensitive success and exception path scrubbing;
 - requested and provider-returned model identity separated;
 - custody, quote, and artifact hashes independently verified;
 - factual correctness separated from receipt support;
-- authentic proof kept distinct from replay.
+- recorded provider metadata kept distinct from external authenticity.
 
 Only the reviewed typed forensic layer is reused from Qwen, pinned in
 `pyproject.toml`. The Qwen pipeline, validator, prompts, and report code are not
@@ -300,8 +369,9 @@ open a new terminal, and run the presence-only check again.
 **Symbols unavailable:** do not claim memory findings. The router must label
 memory `UNAVAILABLE` and continue only with a supported route.
 
-**Exit code 3:** a hard cap fired. Inspect `audit.jsonl` and preserve the
-partial bundle.
+**Exit code 3:** the run is `PARTIAL`. A hard cap or a mandatory
+model/provider/tool/protocol failure can cause it. Inspect the terminal reason
+and `audit.jsonl`, then preserve the partial bundle.
 
 **Large tool output:** use the full retained artifact and its completeness
 receipt. Never call a prefix the complete native output.

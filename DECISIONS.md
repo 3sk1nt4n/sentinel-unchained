@@ -3,7 +3,7 @@
 This is the design contract for the Python 3.11 prototype. It records the
 choices made without interrupting the kickoff for questions.
 
-Status date: 2026-07-14.
+Status date: 2026-07-18.
 
 ## D-001 - Product boundary
 
@@ -19,11 +19,17 @@ not prove that an intrusion occurred or that an artifact is malicious.
 ## D-002 - Package and CLI contract
 
 The distribution is `sentinel-unchained`; the import package is `unchained`,
-using the source-layout path `src/unchained`. The canonical entry point is:
+using the source-layout path `src/unchained`. The canonical installed lifecycle is:
 
 ```text
-python -m unchained /path/to/evidence [--caps default|strict]
+sentinel doctor
+sentinel profile <evidence>
+sentinel run <evidence> [--caps default|strict]
+sentinel verify <run>
+sentinel view <run>
 ```
+
+`sentinel-unchained` and `python -m unchained` remain compatibility entry points.
 
 The main module boundaries are:
 
@@ -35,8 +41,11 @@ The main module boundaries are:
 | `unchained.caps` | Atomic hard-cap accounting and cost estimation |
 | `unchained.model` | Narrow OpenAI Responses API adapter and offline-fake protocol |
 | `unchained.prompts` | Project-owned authoritative investigator and hostile-evidence instructions |
-| `unchained.agent` | Opening book, single-tool loop, literal-DONE transition, structured serialization, fresh judge, report request |
-| `unchained.cli` / `unchained.__main__` | Run setup, status, custody recheck, artifacts, and exit-code propagation |
+| `unchained.agent` | Opening book, stateless single-tool loop, literal-DONE transition, structured serialization, exact spans, fresh judge, report draft |
+| `unchained.reporting` | Deterministic authoritative Markdown rendering |
+| `unchained.viewer` | Inert static proof viewer rendering |
+| `unchained.verify` | Offline lifecycle, artifact, receipt, span, and custody verification |
+| `unchained.cli` / `unchained.__main__` | Doctor/profile/run/verify/view dispatch, custody, artifacts, and exit-code propagation |
 | `unchained.models` | Dependency-free typed records shared by the runtime |
 
 Extra helpers may exist, but orchestration from the prior Qwen project must not
@@ -300,8 +309,12 @@ to the same function is a duplicate even when its arguments differ. Memory
 functions stay within the detected OS namespace, while disk selection favors
 execution, timeline, and persistence artifacts. If memory is marked
 `UNAVAILABLE`, it is skipped; disk analysis continues when available and the
-missing-or-unresolved-symbol limitation is recorded. Accepted opening functions
-execute concurrently.
+missing-or-unresolved-symbol limitation is recorded. Selection is all-or-none:
+zero calls, more than six calls, any duplicate, unavailable function, invalid
+argument object, or other invalid call rejects the whole batch before an opening
+executor starts. A `COMPLETE` lifecycle consequently requires one to six
+distinct valid calls, `rejected=0`, and concurrent execution of that accepted
+batch.
 
 The iterative phase repeats PLAN → ACT with exactly one forensic function →
 OBSERVE → UPDATE CASE NOTES. Factual visible notes and finding summaries cite
@@ -313,10 +326,10 @@ stop criterion: the model stops when more calls no longer change its
 conclusions.
 
 Normal termination is not a control function. The investigator must return no
-function call and the literal text `DONE`, with no other text. A no-call
-response containing anything else, or `DONE` accompanying a function call, is
-a protocol error. Once accepted, `DONE` is irreversible for that run's
-investigative phase.
+function call and raw text equal to exactly the four ASCII characters `DONE`.
+Whitespace, including a trailing newline, additional text, any other no-call
+response, or `DONE` accompanying a function call is a protocol error. Once
+accepted, `DONE` is irreversible for that run's investigative phase.
 
 The controller then makes a separate, forced `submit_investigation` call to
 serialize the completed notes and findings. This is protocol-only: the request
@@ -337,54 +350,50 @@ tools, phase rules, or verdict criteria.
 ## D-008 - Fresh adversarial judge
 
 Judging is a new GPT-5.6 request with no investigator response chain. The judge
-receives the case profile, the investigator's existing structured findings,
-and relevant audit tool receipts including output excerpts and hashes. Each
-receipt excerpt is the exact UTF-8 prefix capped at 2,048 bytes. It is distinct
-from both the investigator's maximum 65,536-byte tool view and the complete
-content-addressed sanitized accepted output. The judge must not claim it
-reviewed unseen native output.
+receives the case profile, the investigator's existing structured findings, and
+only the exact evidence spans controller code resolved from their cited tool
+outputs. Each span binds the tool call, full artifact SHA-256, byte start/end,
+exact text, occurrence count, and stable span ID. The 2,048-byte audit excerpt
+remains an audit convenience and is not the judge's evidence boundary.
 
 For each existing finding it returns `CONFIRMED`, `NEEDS-REVIEW`, or
 `UNSUPPORTED`, with rationale and cited tool-call IDs. It may downgrade or
 annotate; it may not add findings or upgrade beyond the investigator's proposed
 status. Controller checks enforce identity and monotonic status without making
-an independent semantic judgment. Every status requires a nonblank rationale
-and one or more unique citations; those IDs must exist and must be a subset of
-that finding's own receipts. A `CONFIRMED` verdict must cite at least one
-successful receipt. Missing or malformed verdicts are reported as incomplete,
-never silently accepted.
+an independent semantic judgment. Every status requires a nonblank rationale,
+known span IDs belonging to that finding, and quotes contained inside those
+spans. Unknown, omitted, or duplicate finding IDs are protocol errors. The
+offline verifier reopens the full artifact and rechecks each digest, byte range,
+decoded span, span ID, finding relationship, and judge quote. This proves
+structural provenance, not forensic truth.
 
 The judge is an adversarial model pass, not an independent human examiner or a
 truth oracle, and may share failure modes with the investigator.
 
 ## D-009 - Report contract
 
-After judging, GPT-5.6 writes `report.md` from the profile, existing findings,
-judge verdicts, and audit receipts. The report contains:
+After judging, GPT-5.6 submits a strict `ReportDraft` from the profile, existing
+findings, judge verdicts, and evidence spans. It contains:
 
-- investigative narrative;
-- a findings table with tool-call-ID citations;
-- IOC list;
-- limitations and unavailable capabilities.
+- an executive summary and investigative narrative;
+- IOC and limitation commentary;
+- exact existing finding and span references.
 
-The limitations must state that the design has no deterministic validator. The
-report cannot add findings or promote judge-downgraded claims. When a hard cap
-prevents normal completion, the controller emits/preserves a visibly `PARTIAL`
-report without pretending the full model phase completed.
-
-Before a `COMPLETE` model-written report is delivered, code performs structural
-reference checks and defangs active Markdown without judging forensic truth. It
-escapes raw HTML angle brackets; removes inline and reference-form images;
-removes inline and reference-form link targets plus reference definitions;
-rewrites bare HTTP(S) text to `hxxp(s)`; and blocks `javascript:`, `data:`, and
-`file:` schemes. Every controller-generated `PARTIAL`, `FATAL`, or `INVALID`
-fallback independently renders hostile provider, parser, mount, cap, and
-configuration diagnostics as a single inert line: control characters and
-newlines are made visible, active Markdown/HTML is removed, and punctuation is
-escaped. The model-written report precedes the final deterministic custody pass,
-so it cannot claim final custody success; the CLI/audit records that result and
-may replace the terminal status with `FATAL`. The resulting text remains
-untrusted output for analyst review.
+Code requires the reference sets to equal the adjudicated finding/span sets and
+then deterministically renders `report.md`. Code owns the status banner,
+authoritative findings table, investigator-to-judge transitions, citations,
+IOCs, limitations, and custody wording. GPT cannot add a row, omit a finding,
+promote a verdict, or invent a citation through formatting. Model narrative is
+defanged before insertion and appears only below headings explicitly labeled
+`model-authored, nonauthoritative`. `report.completed` records the exact
+normalized report SHA-256 and byte count. Strict verification reconstructs the
+renderer input from the verified canonical profile, `investigator.finished`,
+`judge.completed`, evidence spans, and submitted `ReportDraft`; reruns the
+code-owned renderer; and requires byte-for-byte equality while rebinding the
+submitted references and prose. A self-consistent replacement report with
+rewritten hashes is therefore rejected.
+`PARTIAL`, `FATAL`, and `INVALID` fallbacks use the same inert rendering
+boundary. The resulting text remains untrusted output for analyst review.
 
 ## D-010 - Audit semantics
 
@@ -406,11 +415,12 @@ propagating that failure.
 Every completion receipt records the artifact's relative path, SHA-256, byte
 count, UTF-8 encoding, media type, and complete-retention flag, plus the longest
 valid UTF-8 prefix no larger than 2,048 bytes. Model request audit records keep
-function-call outputs bounded to receipts. That audit prefix is the scope of the
-fresh reviewer packet. It is not the separately bounded investigator view,
-which may contain up to 65,536 bytes and explicitly reports incompleteness, and
-neither is the complete accepted artifact. The exact full sanitized artifact
-remains available for verification and judge-facing inspection.
+function-call outputs bounded to receipts. That audit prefix is not the fresh
+reviewer's evidence boundary. The investigator view may contain up to 65,536
+bytes and explicitly reports incompleteness. After finalization, controller code
+resolves supporting quotes against the exact full sanitized artifact; the judge
+receives those byte-located spans, and the artifact remains available for
+verification and viewer inspection.
 
 The writer uses append mode, a process lock, flush/`fsync`, and end-to-end
 sequence/hash verification. Calls denied by a prelaunch cap still receive a
@@ -444,13 +454,17 @@ input, $6.25/M cache-write, and $30.00/M output tokens. Cache writes therefore
 cost 1.25x uncached input. A request with more than 272,000 input tokens applies
 2x input and 1.5x output pricing to its full request.
 
-Live requests disable prompt caching, so model-request preflight prices
-estimated input at the ordinary uncached GPT-5.6 Sol rate. After a response,
-provider-reported cached-input and cache-write usage fields remain audited and
-are priced defensively if unexpectedly nonzero. These code-owned rates produce
-a local safety estimate based on the published GPT-5.6 Sol rules; provider
-usage and billing are authoritative, and pricing or usage-field semantics may
-change.
+Live requests use implicit prompt caching, but every model-request preflight
+still prices estimated input at the ordinary uncached GPT-5.6 Sol rate because
+a cache hit is never guaranteed. After a response, provider-reported
+cached-input and cache-write usage fields are audited and reconciled. Strict
+complete verification recomputes each call estimate and the cumulative estimate
+from those audited token counts and the code-owned price table, then binds the
+totals to the final budget snapshot and configured tool, token, wall, and cost
+caps. These rates produce a local safety estimate based on the published GPT-5.6
+Sol rules. They do not reproduce or authenticate an OpenAI invoice; provider
+usage and billing are authoritative, and pricing, cache retention, tokenizer
+behavior, or usage-field semantics may change.
 Source:
 [GPT-5.6 Sol model and pricing](https://developers.openai.com/api/docs/models/gpt-5.6-sol).
 
@@ -495,21 +509,20 @@ rejected during configuration; Sol pricing is therefore the sole built-in
 pricing contract.
 
 All requests use `store=false` and do not rely on provider-stored response
-state; the API is instructed not to retain a stored Response object for later
-retrieval. Investigator continuity is maintained by replaying prior user inputs
-and every response output item locally. Requests include
-`reasoning.encrypted_content`, and returned encrypted reasoning items are
-replayed with those outputs. Opening, fresh judge, and report phases use
-`reasoning.context="current_turn"`; the stable-goal investigation loop and its
-post-`DONE` structured serializer use `reasoning.context="all_turns"`. The judge
-remains fresh because it receives a new packet rather than the investigator
-response chain.
+state. Each adaptive turn is a new request containing a controller-owned case
+ledger, compact receipt index, latest observation, public profile, and remaining
+budget. Prior provider output items and encrypted reasoning items are not
+replayed. The final serializer receives retained observations once; the judge
+receives only findings and resolved evidence spans. Every phase uses
+`reasoning.context="current_turn"`, which keeps context growth bounded and the
+judge independent.
 
-Requests set `prompt_cache_options.mode="explicit"` and contain no explicit
-cache breakpoint. Under GPT-5.6's cache rules, this disables cache reads and
-writes and avoids prompt-cache storage and write charges. It does not keep
-forensic content local: evidence-derived profiles and raw tool output are sent
-to OpenAI for inference. Provider and organization retention, Zero Data
+Requests set `prompt_cache_options.mode="implicit"`. Under GPT-5.6's cache
+rules this permits automatic reuse of matching stable prefixes without making
+cache availability part of the protocol. It may produce cache reads or writes,
+both of which are audited and priced. It does not keep forensic content local:
+evidence-derived profiles and bounded tool output are sent to OpenAI for
+inference. Provider and organization cache/retention policy, Zero Data
 Retention eligibility, residency, and access controls remain external
 deployment boundaries.
 
@@ -532,8 +545,12 @@ Turn-0 calls allow parallel function requests; iterative and judge control
 requests enforce at most one function call. The requested model is recorded
 separately from the provider-returned `response.model`. A live response is not
 accepted unless the latter is an explicit GPT-5.6 identifier. Response IDs,
-request IDs, status, output items, and mandatory validated usage are audited.
-The provider URL and API secret are never made model-controlled tool arguments.
+request IDs, status, the canonical normalized message/function calls, and
+mandatory validated usage are audited. Raw SDK/provider `output_items` remain
+adapter-local transport data: they are normalized once, neither retained as a
+second proof authority nor replayed, and cannot contradict the canonical proof
+fields inside a bundle. The provider URL and API secret are never made
+model-controlled tool arguments.
 
 The SDK is constructed with `max_retries=0`. `AuditedModel` owns the only retry
 policy: no more than two retries, for no more than three total dispatch
@@ -543,27 +560,39 @@ scheduled or skipped retry, terminal error, and eventual retry success is
 audited with bounded provider metadata. Remaining wall time gates every attempt
 and delay. Once a response exists, usage, identity, schema, and protocol errors
 are never retried. Only the final accepted response reaches the controller, so
-no discarded attempt can execute a forensic tool.
+no discarded attempt can execute a forensic tool. Strict lifecycle verification
+recognizes this bounded retry window between a request/options pair and its one
+accepted response and rejects orphan, reordered, excessive, or ineligible retry
+receipts.
 
 ## D-013 - Status and artifacts
 
 Each run has an isolated writable directory at
 `<working-directory>/unchained-runs/<UTC-timestamp>-<id>/`. Finalization writes
-`report.md`, `audit.jsonl`, `environment.json`, `summary.json`,
+`report.md`, `viewer.html`, `audit.jsonl`, `environment.json`, `summary.json`,
 `manifest.json`, and `manifest.sha256`; `profile.json` is present when profiling
 succeeds, and `tool-outputs/` contains exact sanitized accepted outputs when tools
 complete. If the working directory is the evidence folder or is nested beneath
 it, the run-directory base moves to the evidence folder's parent.
 
-`summary.json` derives counters from the audit rather than parallel mutable
-state. `environment.json` is an allowlisted record of Python, dependencies,
-lock match, Git state, requested model, native-tool availability, prompt digest,
-tool-catalog digest, and caps; it does not dump the host environment. The
-non-self-referential manifest explicitly binds artifact paths, hashes, byte
-counts, media types, audit entry count and tip, terminal status, and recorded
-custody state. `manifest.sha256` is the detached checksum for the manifest.
-Findings cite completed tool-call IDs, and judge verdicts include structured
-exact quotes.
+`profile.json` is canonical JSON of the exact public profile in
+`profile.completed`; strict verification round-trips that profile and binds its
+evidence IDs, SHA-256 values, sizes, and item count to the initial custody
+receipt. `summary.json` derives counters from the audit rather than parallel
+mutable state, and verification rebuilds its canonical bytes instead of trusting
+the stored counters. `environment.json` is an allowlisted record of Python,
+dependencies, lock match, Git state, requested model, native-tool availability,
+prompt digest, tool-catalog digest, and caps; it does not dump the host
+environment. The non-self-referential manifest explicitly binds artifact paths,
+hashes, byte counts, media types, audit entry count and tip, terminal status, and
+recorded custody state. `manifest.sha256` is the detached checksum for the
+manifest.
+Findings cite completed tool-call IDs and exact byte-located spans; judge
+verdicts cite those spans and include structured exact quotes. The deterministic
+viewer is a required manifest artifact with role `proof-viewer`, contains no
+scripts or external resources, and is opened only after bundle verification. It
+is rerendered from verified state and byte-compared in addition to its inert HTML
+policy.
 
 | Status | Exit | Meaning |
 |---|---:|---|
@@ -582,18 +611,21 @@ custody mismatch supersedes an earlier partial result as `FATAL`/exit `1`.
 
 The test suite performs no network calls. Its behavioral coverage includes:
 
-- all four cap paths, real opening overlap, distinct-by-function-name opening
-  enforcement, and complete deterministic receipts for issued calls capped
-  before launch;
+- all four cap paths, real opening overlap, all-or-none
+  distinct-by-function-name opening enforcement with `rejected=0` in
+  `COMPLETE`, and complete deterministic receipts for issued calls capped before
+  launch;
 - complete, hash-valid, ordered audit events under concurrency, atomic exact
-  output retention, duplicate-content races, persistence failures, literal
-  `DONE` plus forced serialization, protocol-error preservation, and a fresh
+  output retention, duplicate-content races, persistence failures, raw text
+  exactly equal to four-ASCII-character `DONE` plus forced serialization,
+  protocol-error preservation, and a fresh
   judge downgrading a deliberately unsupported finding while enforcing
   nonblank rationale, finding-scoped receipts, and exact quoted spans;
 - mandatory nonnegative and internally consistent provider usage,
-  provider-returned model identity, bounded audited transient retries that
-  cannot duplicate tool execution, and code-owned price rates that price-like
-  environment variables cannot zero;
+  provider-returned model identity, retry-aware transaction windows for bounded
+  audited transient retries that cannot duplicate tool execution, and
+  per-call/cumulative/final-budget recomputation from code-owned price rates that
+  price-like environment variables cannot zero;
 - the real OpenAI 2.31.0 SDK over `httpx.MockTransport`, proving
   `reasoning.context` and `prompt_cache_options` survive wire serialization
   without a network call;
@@ -611,10 +643,11 @@ The test suite performs no network calls. Its behavioral coverage includes:
   large-output model view;
 - one-line hostile-diagnostic fallback defanging plus removal of inline and
   reference links/images and dangerous schemes from complete reports; and
-- artifact-store, environment, summary, manifest, detached-checksum, and
-  standard-library verifier failures across path traversal, symlinks, hashes,
-  byte counts, excerpts, citations, quotes, terminal state, recorded custody,
-  and strict live-GPT-5.6 requirements.
+- artifact-store, canonical profile/custody, rebuilt summary, exact report and
+  viewer rerender, environment, manifest, detached-checksum, and standard-library
+  verifier failures across path traversal, symlinks, hashes, byte counts,
+  excerpts, citations, quotes, terminal state, recorded custody, and strict
+  live-GPT-5.6 requirements.
 
 The fake forensic executors used to prove opening parallelism are intentionally
 in-process. Their behavior validates dependency injection, ordering, and cap
@@ -625,13 +658,14 @@ the isolated-worker tests and boundary above.
 Ruff and type hints/docstrings keep the implementation reviewable, but static
 quality checks do not validate forensic truth.
 
-`python -m unchained verify-run <bundle>` is intentionally dependency-light and
-offline. It verifies the terminal state the bundle actually declares. The
-stricter `--require-complete --require-live-gpt56` mode is the submission-proof
-gate. A finalized `INVALID` synthetic bundle may pass base integrity while
-correctly failing strict proof. The verifier does not independently rehash
-original evidence bytes absent from the bundle; it validates the retained
-custody receipts and emits that limitation.
+`sentinel verify <bundle>` is intentionally dependency-light and offline. It
+verifies the terminal state the bundle actually declares. The stricter
+`--require-complete --require-live-gpt56` mode is the submission-integrity gate
+for complete recorded GPT-5.6 metadata, not independent provider authentication.
+A finalized `INVALID` synthetic bundle may pass base integrity while correctly
+failing strict verification. The verifier does not independently rehash original
+evidence bytes absent from the bundle; it validates the retained custody
+receipts and emits that limitation.
 
 ## D-015 - Trust and threat boundaries
 
@@ -780,12 +814,11 @@ integrity rather than independently rehashing the original evidence.
 
 **Status: implemented and verified offline on 2026-07-14.**
 
-Model-authored Markdown is reduced to a link-free safe subset by making every
-attacker-controlled square bracket inert after escaping existing ampersands and
-raw HTML delimiters. This structurally disables inline, reference, nested,
-escaped, and malformed Markdown links and images while preserving readable
-headings, lists, emphasis, tables, and visible tool citations. Adversarial tests
-render through CommonMark and reject active elements or URL-bearing attributes.
+The original C1 implementation reduced model-authored Markdown to a link-free
+safe subset and adversarially rendered it through CommonMark. D-009 now
+supersedes that report-authority design: GPT submits a structured narrative
+draft and code renders the authoritative Markdown. The original defanging helper
+remains as a defense-in-depth and legacy-fallback boundary.
 
 Filesystem classification now retains the exact byte offset whose fixed probe
 identified the filesystem. That value is carried into the model-safe evidence
@@ -807,19 +840,21 @@ and `7b05d6a`.**
 
 The proof product is the retained receipt graph, not merely the generated
 report. Complete sanitized accepted tool output is content-addressed and bound
-into the audit before a completion can exist. The fresh reviewer must return structured
-quotes for each cited receipt. Trusted code proves that each quote occurs in
-the bounded exact excerpt, and the offline verifier proves occurrence in both
-that excerpt and the full retained artifact. These checks establish integrity
-and traceability. They do not establish semantic entailment or forensic truth.
+into the audit before a completion can exist. The vNext serializer returns
+supporting quotes that trusted code resolves into exact full-artifact byte spans;
+the fresh reviewer cites those spans. The offline verifier rechecks the artifact
+digest, range, decoded text, span ID, finding relationship, and judge quote.
+These checks establish integrity and traceability. They do not establish
+semantic entailment or forensic truth.
 
 Every finalized lifecycle, including an honest `INVALID`, `PARTIAL`, or
 `FATAL`, receives an allowlisted environment record, audit-derived summary,
 explicit non-self-referential manifest, and detached manifest checksum. The
 standard-library verifier checks artifact inventory and hashes, audit chain,
-tool receipts, findings, citations, reviewer quotes and downgrade-only
-semantics, terminal state, and recorded custody. Strict flags separately demand
-a `COMPLETE` lifecycle and authentic provider-returned GPT-5.6 receipts.
+evidence-bound tool receipts, findings, exact spans, downgrade-only semantics,
+the ordered model lifecycle, terminal state, and recorded custody. Strict flags
+demand `COMPLETE` plus internally consistent recorded GPT-5.6 metadata; they do
+not independently authenticate the provider.
 
 The successfully verified empty-evidence bundle is deliberately `INVALID`. It
 proves finalization and verifier behavior only. It is not a native-tool proof,
@@ -945,11 +980,170 @@ investigator call would receive. It is exactly 65,536 bytes and contains 55,732
 native-order prefix characters plus a delivery receipt with the full accepted
 byte count and hash, `model_view_complete=false`, the maximum view size, and the
 selection rule. No investigator, model, or fresh judge received either payload
-because no model was invoked. In an authentic run, the fresh judge receives the
-separate audit receipt excerpt capped at 2,048 bytes. The full sanitized
-accepted artifact remains available to `verify-run` and the future viewer.
+because no model was invoked. In an authentic vNext run, the fresh judge receives
+controller-resolved evidence spans from the full sanitized accepted artifact.
+That artifact remains available to `sentinel verify` and the deterministic viewer.
 
 This three-layer contract prevents high-volume output from consuming the model
 budget while preserving complete inspectable evidence. It does not prove model
 use, model interpretation, an authentic GPT-5.6 response, a scored run, or a
 public artifact.
+
+## D-026 - OpenAI-native vNext is a bounded Unchained evolution
+
+**Status: implemented and verified offline on 2026-07-18; authentic GPT-5.6
+evidence run still pending.**
+
+The Qwen repository remains a source of typed forensic adapters and useful
+patterns, not the successor's orchestration base. Preserve Unchained's single
+state machine, deterministic profiling, code-owned typed authority, hard caps,
+literal `DONE`, fresh downgrade-only judge, and content-addressed bundle. Do not
+carry forward Qwen's dual conductors, 20-to-35-tool opening floor, per-call MCP
+process churn, raw report authority, fail-open repair layers, or early custody
+rehash.
+
+The default GPT-5.6 phase policy is intentionally asymmetric:
+
+| Phase | Reasoning | Text verbosity | Max output tokens | Max tool calls |
+|---|---|---|---:|---:|
+| Opening | low | low | 2,048 | 6 |
+| Adaptive investigation | medium | low | 4,096 | 1 |
+| Forced finalization | medium | low | 12,288 | 1 schema call |
+| Fresh judge | high | low | 12,288 | 1 schema call |
+| Report draft | low | medium | 8,192 | 1 schema call |
+
+Code still enforces the case-wide call, token, wall-time, and cost caps. Model
+configuration is recorded per request so later verification does not infer it
+from global defaults. Every nonterminal adaptive call must include a visible,
+valid-UTF-8 case-ledger update no larger than 8,192 bytes; code records and
+strict verification rebinds that update before tool execution. Implicit prompt
+caching may accelerate repeated stable prefixes, while conservative preflight
+continues to assume an uncached request. The six-call maximum parallel opening,
+stateless bounded turns, one-tool adaptive loop, and cache-compatible prefixes
+are designed to reduce avoidable work; no live latency/cost benchmark or faster
+result is measured or guaranteed.
+
+## D-027 - Custody and tool provenance use evidence IDs
+
+**Status: implemented and verified offline on 2026-07-18.**
+
+Initial and final custody maps use the same public evidence-ID namespace. The
+private relative-path-to-ID mapping never crosses the public profile boundary.
+Every route-specific tool definition carries controller-owned `(evidence_id,
+sha256)` references, and the same references must survive `tool.started` through
+`tool.completed`. Strict verification requires those digests to match the
+initial custody receipt.
+
+The current adapters support one ready memory image and one ready disk image per
+case. A profile containing multiple ready images of either class now fails
+closed with a split-case instruction instead of silently analyzing the first
+item. True multi-image scheduling is future work and must not be inferred from
+complete inventory hashing.
+
+## D-028 - Offline verification proves integrity, not provider authenticity
+
+**Status: implemented and verified offline on 2026-07-18.**
+
+Strict verification requires the complete ordered lifecycle and treats each
+request/options pair plus its one accepted response as a retry-aware transaction
+window. The only intervening events allowed are the controller's bounded,
+policy-shaped transient-error/scheduled-retry receipts and eventual success
+receipt; orphan, reordered, ineligible, or excessive retries fail verification.
+Status-less attempts must use a code-owned transport/timeout class; HTTP status,
+backoff, and positive nonincreasing retry timeouts are bounded by the paired
+request and wall cap. Each accepted response's output usage must be no greater
+than the exact request maximum.
+It revalidates the closed strict tool schemas and asymmetric phase policy;
+requires an all-or-none opening of one to six distinct valid functions with
+no `capped` or `rejected` receipt in `COMPLETE`; binds opening/adaptive model
+call IDs, names, and arguments to
+complete tool receipts and controller actions; requires every nonterminal visible
+ledger update; and accepts terminal raw text only when it is exactly the four
+ASCII characters `DONE`.
+
+Runtime and verifier share one primitive JSON Schema type function, including
+the rule that a JSON boolean is not an integer or number. The verifier also
+rederives the public OS route, evidence shape, canonical filesystem set, and
+route-conflict warnings from the retained evidence items instead of accepting
+those profile fields as independent assertions.
+
+The verifier reconstructs and byte-compares every exact model input: the opening
+profile; each adaptive profile/ledger/receipt-index/budget/latest-observation
+packet; the finalizer packet and complete observation sequence; the fresh judge
+packet; and the report packet. Lifecycle count fields are bound to the verified
+finding, verdict, and receipt collections.
+
+The verifier requires canonical `profile.json` to equal `profile.completed`,
+round-trips the public profile, and binds its evidence IDs, SHA-256 values, sizes,
+and count to initial custody. It binds forced-finalizer, judge, and report
+arguments to their controller events; recomputes full-artifact span occurrence
+counts from identity-and-digest-verified rereads; requires exact judge quotes;
+rebuilds canonical `summary.json`; reconstructs and byte-compares the exact
+deterministic report and viewer; and compares every root and nested artifact
+descriptor to the manifest. It also recomputes each local GPT-5.6 call and
+cumulative cost estimate from audited token counts and code-owned prices, binds
+the final usage/cost/tool totals to the terminal budget snapshot and configured
+caps, and requires unique phase-paired request and response IDs. These are local
+safety estimates, not provider billing records. Raw SDK/provider `output_items`
+are deliberately outside the proof contract; only their normalized canonical
+message and function calls are authoritative inside the audit.
+
+An offline verifier can validate only the provider metadata recorded inside the
+bundle. It cannot contact or cryptographically authenticate OpenAI, so
+`--require-live-gpt56` means "require complete, internally consistent recorded
+GPT-5.6 metadata and reject explicit fake/replay markers." It is not an
+independent proof that OpenAI issued those fields. External authenticity needs a
+provider retrieval mechanism, signed operator record, trusted timestamp, or
+immutable external anchor.
+
+## D-029 - The local viewer is deterministic and verification-gated
+
+**Status: implemented and verified offline on 2026-07-18; in-app visual browser
+QA unavailable because the browser runtime failed before loading the file.**
+
+Every finalized bundle contains a required `viewer.html` artifact with manifest
+role `proof-viewer`. It is generated from trusted structured state before the
+manifest is sealed. It contains no JavaScript, external resource, frame, image,
+or live link; all dynamic values are HTML-escaped and a restrictive CSP is
+embedded. Verification applies a positive passive-element policy, rejects
+active/URL/event attributes and active CSS, requires the exact inert CSP and
+valid document structure, and rereads the file against its earlier
+device/inode/digest before acceptance. It also rerenders the viewer from verified
+run status, canonical profile, rebuilt summary, exact report, and the applicable
+audit prefix, then requires byte-for-byte equality. `sentinel view` invokes
+verification before it opens the required manifest artifact; if the bundle
+claims `COMPLETE`, the command forces the complete strict lifecycle verifier even
+when the caller supplies no strict flag. Automated parser/security tests replace
+the viewer, report, audit hashes, manifest descriptor, and detached checksum
+together to prove both self-consistent active content and a passive but
+nonauthoritative replacement viewer are rejected.
+
+## D-030 - Remaining containment and immutability limits are explicit
+
+**Status: open production-hardening work.**
+
+Typed adapters run in owned child process trees with scrubbed credentials and
+bounded transport, but the host OS does not yet deny their network access or
+limit their filesystem writes to scratch. The initial/final rehash also cannot
+prevent a privileged concurrent actor from swapping a pathname and restoring
+the original bytes before final verification. The local hash chain and detached
+manifest checksum are unsigned and lack an external timestamp. Production use
+therefore requires OS-enforced sandboxing, stable evidence handles or immutable
+snapshots, and an external signature/timestamp/WORM anchor appropriate to the
+deployment threat model. The same-user/administrator concurrent-mutation
+boundary also applies between proof verification and an external browser
+opening a pathname. Per-call parser subprocess startup and unclassified
+six-way opening I/O remain performance work; a persistent worker pool is
+deferred until its network, filesystem, scratch, and ownership sandbox can be
+enforced rather than merely assumed.
+
+No retained authentic end-to-end GPT-5.6 run, controlled latency/cost benchmark,
+public experiment freeze, or frozen-reference score exists yet. The architecture
+is designed to reduce avoidable work, but it does not establish or guarantee
+that vNext is faster, cheaper, or forensically more accurate. Offline metadata
+cannot authenticate OpenAI, and the downgrade-only model judge is not ground
+truth. Multiple ready memory images or multiple ready disk images fail closed
+pending a real multi-image scheduler. In-app browser visual QA also remains
+unavailable despite exact viewer rerendering and automated HTML/security tests.
+These are consolidated prototype boundaries, not deferred evidence for a claim
+of production readiness.

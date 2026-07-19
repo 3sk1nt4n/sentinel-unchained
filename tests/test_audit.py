@@ -40,6 +40,14 @@ def test_audit_is_complete_ordered_and_hash_chained(tmp_path: Path) -> None:
             FunctionCall(call_id="call-001", name="windows.pslist", arguments={"pid": None}),
         ),
         usage=ModelUsage(input_tokens=80, output_tokens=20, cached_input_tokens=30),
+        output_items=(
+            {
+                "type": "function_call",
+                "call_id": "raw-contradictory-call",
+                "name": "windows.netscan",
+                "arguments": "{}",
+            },
+        ),
     )
     result = completed_tool(output)
 
@@ -59,8 +67,14 @@ def test_audit_is_complete_ordered_and_hash_chained(tmp_path: Path) -> None:
             call_cost_usd=0.001,
             running_cost_usd=0.001,
         )
-        audit.tool_started(result.call_id, result.tool_name, result.arguments)
-        audit.tool_completed(result)
+        evidence_refs = [{"evidence_id": "E001", "sha256": "a" * 64}]
+        audit.tool_started(
+            result.call_id,
+            result.tool_name,
+            result.arguments,
+            evidence_refs=evidence_refs,
+        )
+        audit.tool_completed(result, evidence_refs=evidence_refs)
 
     entries = AuditLog.verify(path)
     assert [entry["sequence"] for entry in entries] == [1, 2, 3, 4]
@@ -79,6 +93,8 @@ def test_audit_is_complete_ordered_and_hash_chained(tmp_path: Path) -> None:
     model_payload = entries[1]["payload"]
     assert model_payload["message"] == response.text
     assert model_payload["function_calls"][0]["call_id"] == "call-001"
+    assert model_payload["function_calls"][0]["name"] == "windows.pslist"
+    assert "output_items" not in model_payload
     assert model_payload["token_counts"] == {
         "cached_input_tokens": 30,
         "cache_write_tokens": 0,
@@ -90,6 +106,7 @@ def test_audit_is_complete_ordered_and_hash_chained(tmp_path: Path) -> None:
 
     tool_payload = entries[3]["payload"]
     assert tool_payload["arguments"] == {"pid": None}
+    assert tool_payload["evidence_refs"] == [{"evidence_id": "E001", "sha256": "a" * 64}]
     assert tool_payload["output_sha256"] == result.output_sha256
     assert len(tool_payload["output_first_2kb"].encode()) == 2_048
     assert tool_payload["output_bytes"] == len(output.encode("utf-8"))

@@ -23,14 +23,14 @@ has been demonstrated to a judge, and what is still missing.
 | Field | Current value |
 |---|---|
 | Last live-rule verification | 2026-07-14 22:04 ET, direct current 2026 Official Rules plus official GPT-5.6, pricing, and Responses API references |
-| Last repository verification | 2026-07-14 22:24 ET |
-| Current event day | Submission Day 2, not Day 8 |
+| Last repository verification | 2026-07-18, OpenAI-native vNext offline checkpoint |
+| Current event day | Submission Day 6 (2026-07-18) |
 | Hard deadline | 2026-07-21 17:00 PT / 20:00 ET |
 | Time remaining at 2026-07-14 22:22 ET | Approximately 165.6 hours |
 | Internal submission deadline | 2026-07-20; July 21 is emergency buffer only |
 | Selected track | Developer Tools |
 | Current decision | **CONDITIONAL GO with frozen scope; registry alternative parked** |
-| Flagship-run readiness | **NOT READY: local Gate A and public provenance are green; freeze, funded credentials, and authentic run are red** |
+| Flagship-run readiness | **NOT READY: vNext is verified offline; freeze, funded credentials, authentic complete run, OS sandbox, and external attestation remain red** |
 | Submission readiness | **NOT READY** |
 | Current `/feedback` Session ID | `019f61e5-5755-7a02-adb4-618d32baab27` |
 
@@ -65,11 +65,13 @@ does not prove that GPT-5.6 produced the original run.
 
 Proceed conditionally with Sentinel Unchained for Build Week. Do not pivot to a
 new dynamic model-registry project now. Unchained is no longer a from-scratch
-concept: it is a substantial controller prototype with 14 source modules,
-7,889 nonblank physical source lines, 128 passing tests, clean lint and
-formatting, a buildable wheel, a verified CPython 3.11.9 environment, exact
-dependency records, and a verified Codex feedback thread. The winner story and
-experiment are now
+concept: it is a substantial controller prototype with 17 source modules,
+13,383 physical source lines, 12,259 nonblank physical source lines, 267 passing
+tests, clean lint and formatting, a buildable package path, a verified CPython 3.11.9 environment,
+exact dependency records, and a verified Codex feedback thread. The
+OpenAI-native vNext adds stateless model packets, exact evidence spans,
+evidence-bound receipts, lifecycle-complete verification, deterministic reports,
+a static proof viewer, and a user-facing CLI. The winner story and experiment are now
 governed by the Winner Roadmap and corrected master plan: a trust-measurement
 harness for model-directed investigators, not a generic autonomous analyst and
 not a clean causal Qwen-versus-GPT-5.6 ablation.
@@ -391,12 +393,13 @@ The runtime flow is:
 CLI / budget
     -> evidence inventory, classification, routing, and pre-run hashes
     -> typed tool registry and bounded private workers
-    -> GPT-5.6 opening selection and adaptive investigator loop
-    -> literal DONE and structured investigation serialization
-    -> fresh downgrade-only judge
-    -> report generation and defanging
+    -> GPT-5.6 opening selection (all-or-none, at most six) and adaptive investigator loop
+    -> literal DONE and forced investigation serialization
+    -> deterministic exact evidence-span resolution
+    -> fresh downgrade-only judge over those spans
+    -> strict report draft and deterministic rendering
     -> cleanup and deterministic post-run custody verification
-    -> report.md + audit.jsonl + profile.json
+    -> sealed report.md + viewer.html + audit/profile/summary/manifest
 ```
 
 | Module | Responsibility |
@@ -405,14 +408,16 @@ CLI / budget
 | `src/unchained/evidence.py` | Inventory, content classification, OS/shape routing, hashes, mounts, readiness probes |
 | `src/unchained/tools.py` | Typed tool schemas, allowlisting, caps, execution, receipts |
 | `src/unchained/_tool_worker.py` | Fixed private-worker dispatch for approved forensic functions |
-| `src/unchained/model.py` | OpenAI Responses adapter, state replay, wire options, usage validation |
-| `src/unchained/agent.py` | Opening book, investigator loop, serialization, judge, report safety |
+| `src/unchained/model.py` | OpenAI Responses adapter, phase-specific wire options, usage validation |
+| `src/unchained/agent.py` | Opening book, stateless ledger loop, serialization, span resolution, judge, structured report draft |
+| `src/unchained/reporting.py` | Deterministic authoritative Markdown rendering and hostile-prose defanging |
+| `src/unchained/viewer.py` | Deterministic inert static proof viewer |
 | `src/unchained/audit.py` | Single-writer hash-chained event log and output receipts |
 | `src/unchained/artifacts.py` | Atomic summary, environment record, allowlisted manifest, and detached manifest digest |
 | `src/unchained/caps.py` | Atomic tool/token/time/cost enforcement and cost estimates |
 | `src/unchained/models.py` | Typed domain records and schemas |
 | `src/unchained/prompts.py` | Project-owned authoritative investigator prompt |
-| `src/unchained/verify.py` | Standard-library, offline proof-bundle and citation verifier |
+| `src/unchained/verify.py` | Standard-library lifecycle, proof-bundle, evidence-binding, and exact-span verifier |
 | `src/unchained/__main__.py` | Module CLI entry point |
 
 ## Current implementation and proof ledger
@@ -422,17 +427,17 @@ Verified on July 14, 2026 unless otherwise stated.
 | Capability or artifact | State | Evidence | Next proof/action |
 |---|---|---|---|
 | Python package | IMPLEMENTED + VERIFIED | CPython 3.11.9 primary and independent lockcheck environments; `pip check` clean; wheel build passes | Retain transcript with final submission commit |
-| CLI/controller | IMPLEMENTED + VERIFIED offline | 128 tests pass | Genuine run artifact |
-| Opening parallel tools | IMPLEMENTED + VERIFIED offline | Controller tests | Authentic audit trace |
+| CLI/controller | IMPLEMENTED + VERIFIED offline | 267 tests pass; `sentinel doctor/profile/run/verify/view` CLI tests | Genuine run artifact |
+| Opening parallel tools | IMPLEMENTED + VERIFIED offline | The opening is accepted all-or-none; a `COMPLETE` lifecycle has 1–6 distinct valid calls and zero rejected calls | Authentic audit trace |
 | Literal `DONE` protocol | IMPLEMENTED + VERIFIED offline | Controller tests | Authentic trace |
 | Typed/no-shell authority | IMPLEMENTED + VERIFIED offline | Schema and worker tests | Native forensic demo |
 | Evidence inventory/custody | IMPLEMENTED + VERIFIED locally on real evidence | DC01 profile is Windows memory-only, ready, symbols ready; final custody matches | Publish only the non-evidence proof receipts after freeze |
 | Hard caps | IMPLEMENTED + VERIFIED offline | Cap tests | Recorded `PARTIAL` demo |
-| Downgrade-only judge | IMPLEMENTED + VERIFIED offline | Simulated `CONFIRMED -> UNSUPPORTED` test; exact bounded-excerpt quote checks | Authentic model example plus external semantic scoring |
+| Downgrade-only judge | IMPLEMENTED + VERIFIED offline | Simulated preserve/downgrade lattice; exact content-addressed byte spans beyond 2,048 bytes; unknown findings rejected | Authentic model example plus external semantic scoring |
 | Hash-chained audit | IMPLEMENTED + VERIFIED offline | Audit tests | Genuine retained audit |
 | Provider-returned model identity | IMPLEMENTED + VERIFIED offline | Requested alias and provider-returned model, response/request IDs, status, and usage propagate through audit and bundle tests | Authentic provider receipts |
-| Bounded audited retries | IMPLEMENTED + VERIFIED offline | Retryable transport/status failures are bounded and audited; protocol/model/schema failures are not retried | Authentic response trace if a retry occurs |
-| Report safety | IMPLEMENTED + VERIFIED offline | Fail-closed link-free safe subset; six focused rendered CommonMark tests; adversarial bypass inert | Authentic report artifact and viewer-safe rendering |
+| Bounded audited retries | IMPLEMENTED + VERIFIED offline | Retry-aware request windows accept only bounded scheduled transient attempts followed by one accepted response and reject orphan/out-of-order retry events | Authentic response trace if a retry occurs |
+| Report safety | IMPLEMENTED + VERIFIED offline | Strict draft references plus byte-exact deterministic report reconstruction; adversarial prose cannot change verdicts/citations | Authentic report artifact |
 | Windows memory route | VERIFIED LOCALLY, NOT JUDGE-DEMONSTRATED | Real DC01 `windows.info` resolves; profile and symbols ready; sealed registry exposes 14 Windows tools; native rows and custody pass; code bound by `6e696a0` | Publish unchanged history, then authentic run only after C4 freeze |
 | Windows fixed-console discovery and direct memory catalog | IMPLEMENTED + VERIFIED locally, COMMITTED | Active-interpreter-adjacent launcher and sanitized child `PATH`; Windows direct tools no longer depend on Linux/macOS dynamic mapping; 128 tests plus real smoke pass; commit `6e696a0` | Publish unchanged history and retain server timestamp |
 | Linux/macOS routes | PARTIAL/EXPERIMENTAL | No end-to-end proof | Out of flagship scope |
@@ -441,13 +446,13 @@ Verified on July 14, 2026 unless otherwise stated.
 | Bounded explicit model tool view | IMPLEMENTED + VERIFIED locally, COMMITTED | Full accepted output remains retained; provider input is capped at 65,536 UTF-8 bytes with accepted-output hash/size, prefix-character count, selection rule, and `model_view_complete=false`; commit `6e696a0` | Authenticate behavior only after the public freeze |
 | Private evidence-path sanitization | IMPLEMENTED + VERIFIED locally, COMMITTED | Worker recursively strips runner-local evidence/mount paths from success values and exception strings, matches Windows path variants case-insensitively, and substitutes the sealed evidence ID; native receipts and the subprocess error-path regression contain no private path; commit `6e696a0` | Recheck the authentic bundle after the public freeze |
 | Self-verifying proof bundle | IMPLEMENTED + VERIFIED for invalid path | Run `20260715T012818Z-0c60c234` verifies 4 artifacts and 8 audit entries, terminal `INVALID`, exit 2 | Authentic `COMPLETE` bundle from real evidence |
-| Exact quote integrity | IMPLEMENTED + VERIFIED offline | Every reviewer quote must resolve exactly inside its cited bounded receipt excerpt | Keep separate from semantic correctness under the frozen rubric |
+| Exact quote integrity | IMPLEMENTED + VERIFIED offline | Every finding/judge quote binds to a full-artifact SHA-256 and exact UTF-8 byte range; mutation and late-span regressions fail closed | Keep separate from semantic correctness under the frozen rubric |
 | Public authentic run bundle | NOT STARTED | The retained empty-case bundle is invalid, unauthenticated, and incomplete | First valid post-freeze GPT-5.6 run |
 | Corrected strategic master plan | VERIFIED + SAVED | `docs/HACKATHON_MASTER_PLAN.md`; rules/code/strategy/dataset audits | Keep synchronized when strategy or requirements change |
 | Winner priority and sequencing overlay | VERIFIED + SAVED | `docs/WINNER_ROADMAP.md`; benchmark-leakage, adjudication, provenance, viewer, and C0-C7 red-team audit | Follow order; no GPT-5.6 DC01 call before public freeze |
-| Static judge viewer | NOT STARTED | Strategy document exists; no viewer implementation or hosted path | Generate from real run |
-| Offline `verify-run` | IMPLEMENTED + VERIFIED on invalid bundle | Standard-library verifier passes integrity checks while reporting terminal `INVALID`; it rechecks recorded custody, not absent original evidence bytes | Verify a complete authentic bundle and publish the command |
-| No-key replay/viewer | PARTIAL | Verifier exists; no static viewer or hosted path | Build only over the authentic completed bundle |
+| Static judge viewer | IMPLEMENTED + VERIFIED offline, NOT DEMONSTRATED | Required manifest-bound inert `viewer.html`; verifier reconstructs its exact bytes and applies a no-script/no-external-resource positive policy | Generate from and visually QA an authentic run; publish hosted path |
+| Offline verifier | IMPLEMENTED + VERIFIED offline | Requires the complete phase lifecycle/root artifacts, canonical profile/custody binding, rebuilt summary, exact report/viewer bytes, evidence-bound receipts, exact spans, downgrade-only judge, locally recomputed usage cost, and terminal consistency | Verify a complete authentic bundle; add external authenticity layer |
+| No-key viewer path | IMPLEMENTED + VERIFIED offline, NOT DEMONSTRATED | `sentinel view` reruns strict lifecycle verification whenever a bundle claims `COMPLETE` before opening sealed HTML | Publish an authentic retained bundle and hosted copy |
 | Git provenance | VERIFIED PUBLICLY | Public `origin/main` matches local HEAD `3506d29`; GitHub metadata reports `visibility=public`; server-side commit record retained | Preserve unchanged history and bind the freeze digest |
 | Build provenance document | IMPLEMENTED | `BUILD_PROVENANCE.md` records prior/new/Codex boundaries and local-timestamp limitation | Record baseline hash and public/freeze URLs when they exist |
 | Public experiment preregistration | NOT STARTED | Protocol/rubric/scorer digest is not frozen or remotely timestamped | Complete after deterministic native smoke and before any GPT-5.6 DC01 call |
@@ -458,11 +463,15 @@ Verified on July 14, 2026 unless otherwise stated.
 
 ### Verified size and quality baseline
 
-- 14 source modules.
-- 8,779 total source text lines, of which 7,889 are nonblank physical lines.
-- 128 tests collected and passing in CPython 3.11.9.
-- Ruff check and format check pass across 25 Python files.
-- Wheel and sdist builds pass from the current source.
+The July 14 values elsewhere in this document remain historical checkpoints.
+The superseding 2026-07-18 vNext working-tree baseline is:
+
+- 17 source modules.
+- 13,383 physical source lines, of which 12,259 are nonblank.
+- 267 tests collected and passing in CPython 3.11.9.
+- Ruff check and format check pass across 32 Python files.
+- Wheel/sdist build and `pip check` are mandatory final gates; see the current
+  checkpoint appended below for their exact outcome.
 - Exact Windows AMD64 CPython 3.11 constraints and `pylock.toml` records are
   committed.
 - Historical coverage percentages below predate C2 and are not a current
@@ -486,7 +495,7 @@ integration coverage rather than chasing an arbitrary percentage.
 | Real native plugin proof | VERIFIED LOCALLY: `windows.info` resolves symbols; authoritative `gate-a-final-20260715T015251Z` returns pstree 40 and psscan 72 records; repaired `gate-a-netscan-20260715T014947Z` returns 19,685 records and 3,961,843 accepted-output bytes |
 | Public evidence archive outside repo | 561,424,278 bytes; official MD5 match `64A4E2CB47138084A5C2878066B2D7B1`; archive SHA-256 `86658D85D8254E8D30DCCC4F50D9C2A8B550A101D2E78A6D932316849E37AD80` |
 | Extracted DC01 memory outside repo | 2,147,483,648 bytes; SHA-256 `8079A7459B1739CAF7D4FBF6DDE5EB0AE7A9D24DBDE657DEBF4D5202C8DC6B62`; never commit or redistribute |
-| Git repository | Public `main`; `origin/main` matches `3506d29003262f22fee2144f12352749fc6cd06f`; server-side record retained; no rewrite or force-push |
+| Git repository | Public `main` base `2b256a7bfd170388d2a8497dd3289af248abae18`; this vNext release is published for review on `agent/openai-native-vnext`; no rewrite or force-push |
 | Proof-bundle smoke | Integrity PASS for invalid empty-case bundle `20260715T012818Z-0c60c234`; 4 artifacts, 8 audit entries, terminal `INVALID`, exit 2 |
 
 Tests alone did not prove the native route. The separate real-evidence smoke
@@ -599,8 +608,9 @@ preserving readable headings, lists, emphasis, tables, and visible citations.
 Verification: focused tests render adversarial input through CommonMark and
 reject active tags, URL-bearing attributes, raw HTML, dangerous schemes,
 protocol-relative targets, encoded delimiters, nested/malformed forms, and the
-exact bypass. The current full 128-test suite passes. Authentic report output
-and the future viewer remain separate demonstration gates.
+exact bypass. At the historical Gate A checkpoint, the full 128-test suite
+passed. Authentic report output and an authentic-run viewer remain separate
+demonstration gates.
 
 ### P0-2 - RESOLVED offline: exact filesystem offset is sealed end to end
 
@@ -613,8 +623,8 @@ backend cannot accept the offset.
 
 Verification includes a two-partition fixture whose filesystem exists only on
 the second partition, exact later-TSK-match propagation, mount-option proof,
-sealed worker argv proof, raw offset zero, and unknown-offset withholding. The
-current full suite passes 128 tests.
+sealed worker argv proof, raw offset zero, and unknown-offset withholding. At
+the historical Gate A checkpoint, the full suite passed 128 tests.
 
 ### P0-3 - RESOLVED offline: text log cannot become memory from a banner
 
@@ -682,7 +692,8 @@ The flagship is accepted only when every applicable item below is evidenced.
   without overstated claims.
 - [x] CPython 3.11.9 primary and independent lockcheck environments exist.
 - [x] `python -m pip check` passes in both clean environments.
-- [x] All 128 tests and Ruff check/format pass.
+- [x] All 267 tests and Ruff check/format pass in the superseding vNext primary
+      environment.
 - [x] The package builds and installs from the exact submission source.
 - [x] The real typed forensic catalog imports: 25 direct and 5 allowlisted
       dynamic functions with the primary venv on `PATH`.
@@ -717,15 +728,15 @@ The flagship is accepted only when every applicable item below is evidenced.
 ```text
 examples/public-run/
   report.md
+  viewer.html
   profile.json
   audit.jsonl
+  environment.json
   summary.json
   manifest.json
   manifest.sha256
   tool-outputs/
     <sha256>.*
-  viewer/
-    index.html
 ```
 
 The manifest must identify requested and provider-returned model identities,
@@ -749,11 +760,12 @@ completed investigation. It must never be presented as the flagship bundle.
 - [ ] Repeated-run variance if budget permits.
 - [ ] Runtime, tokens, provider/local cost estimate, and tool success/failure.
 
-Exact quote resolution proves only that a reviewer-quoted string occurs inside
-the bounded receipt excerpt for the cited call. It does not prove that the quote
-supports the claim, that the claim is factually correct, or that the project
-authored reviewer is independent. Semantic correctness and receipt sufficiency
-must be reported as separate axes under the publicly frozen rubric and scorer.
+Exact span resolution proves only that investigator and reviewer quotes occur at
+recorded byte ranges inside the cited content-addressed tool output. It does not
+prove that the quote supports the claim, that the claim is factually correct, or
+that the project-authored reviewer is independent. Semantic correctness and
+receipt sufficiency must be reported as separate axes under the publicly frozen
+rubric and scorer.
 
 A `PARTIAL` run is useful as a secondary safety demonstration but cannot be the
 flagship proof.
@@ -856,9 +868,10 @@ before spending more time or attempting any alternative project.
 
 Target: July 18, 20:00 ET.
 
-Current state: **PARTIAL IMPLEMENTATION**. The offline verifier is implemented
-and passes an invalid bundle integrity smoke. There is no complete authentic
-bundle, static viewer, hosted path, or judge quickstart.
+Current state: **IMPLEMENTED + VERIFIED OFFLINE, NOT DEMONSTRATED**. The strict
+offline verifier, static manifest-bound viewer, and judge quickstart are
+implemented and tested. There is no complete authentic bundle, human visual QA,
+or hosted path.
 
 Pass when an anonymous judge can understand the project in 20 seconds and verify
 the genuine run in under five minutes without rebuilding through a hosted
@@ -869,8 +882,9 @@ supplemental evidence only.
 
 Target: July 20.
 
-Current state: **NOT READY**. No public repository, authentic evaluated run,
-viewer, video, Devpost submission, or confirmation artifact exists.
+Current state: **NOT READY**. A public repository and offline viewer code exist;
+no committed/pushed vNext, authentic evaluated run and viewer artifact, hosted
+path, video, Devpost submission, or confirmation artifact exists.
 
 Pass when the public video, repository, viewer/test path, Devpost fields, metrics,
 links, licensing, feedback ID, and confirmation checklist are complete.
@@ -1037,7 +1051,7 @@ status changes, and measured outcomes.
 | Risk | Severity | Current mitigation | Exit evidence |
 |---|---|---|---|
 | No authentic GPT-5.6 run | Critical | Hard Gate C; public freeze then proof before polish | Retained `COMPLETE` bundle |
-| No public dated Git provenance | RESOLVED FOR CURRENT HISTORY | Public `origin/main` matches local HEAD `3506d29`; no rewrite or force-push | Preserve history and add the freeze digest/tag |
+| No immutable tagged vNext freeze | High | Reviewed base `origin/main` is `2b256a7`; vNext has a public review-branch commit without rewriting history | Review/merge the branch, then add the protocol freeze digest/tag |
 | Benchmark leakage before freeze | Critical | No GPT-5.6 DC01 call before public Gate B | Public freeze + server timestamp + run timestamps |
 | Sanitizer bypass | RESOLVED OFFLINE | Link-free safe subset and rendered adversarial tests | Authentic report/viewer demonstration |
 | Wrong partition mount | RESOLVED OFFLINE | Exact matched offset sealed end to end | Native paired-disk proof if retained |
@@ -1059,11 +1073,11 @@ status changes, and measured outcomes.
 
 ## Claims discipline
 
-Safe now, with the stated scope:
+Safe now, with the stated scope (superseding the July 14 count):
 
-- 14 source modules, 8,779 total source text lines, and 7,889 nonblank physical
+- 17 source modules, 13,383 physical source lines, and 12,259 nonblank
   source lines.
-- 128 offline tests pass under CPython 3.11.9.
+- 267 offline tests pass under CPython 3.11.9.
 - Ruff check and format check pass.
 - A wheel builds; primary and lockcheck environments pass `pip check`.
 - Exact Windows AMD64 CPython 3.11 constraints and a hash-bearing platform lock
@@ -1099,8 +1113,9 @@ Safe now, with the stated scope:
 - The feedback ID and screenshot are verified.
 - All three reproduced C1 correctness/security defects are resolved offline with
   adversarial regressions.
-- Local Git through commits `5309e5c` and `7b05d6a` and
-  `BUILD_PROVENANCE.md` exist; no public remote timestamp exists.
+- The public upstream history through reviewed `main` at `2b256a7` and
+  `BUILD_PROVENANCE.md` exists; the vNext release has a public review-branch
+  commit, but is not yet merged, freeze-tagged, or externally signed.
 
 Not safe yet:
 
@@ -1233,7 +1248,7 @@ Prompt 3 becomes documentation-ready only after all three rows are marked
 | Rules ambiguity resolved | READY |
 | Strategic handover saved and linked | READY |
 | Prompt 3 constraints preserved | READY |
-| P0 implementation prompt | **COMPLETE, current suite 128 tests** |
+| P0 implementation prompt | **COMPLETE at the historical Gate A 128-test checkpoint** |
 | C2 proof-artifact prompt | **COMPLETE OFFLINE in commits `5309e5c` and `7b05d6a`** |
 | CPython 3.11 lock/install/build/catalog path | **READY** |
 | Verified public evidence acquisition | **READY LOCALLY; raw evidence remains outside Git** |
@@ -1309,3 +1324,170 @@ that field during replay and adds the exact regression test. This rehearsal is
 disclosed and cannot become primary. No further live DC01 rehearsal is planned
 before freeze. The first valid post-freeze `COMPLETE` run will be the primary;
 the judge and report phases receive their first full live exercise there.
+
+## Superseding OpenAI-native vNext checkpoint (2026-07-18)
+
+This section supersedes current-state rows above while preserving their July 14
+historical truth. No source commit or push was created during this checkpoint.
+
+### Repositories reviewed
+
+- `sentinel-unchained` upstream `main`:
+  `2b256a7bfd170388d2a8497dd3289af248abae18`.
+- `Sentinel-Ensemble-Qwen` upstream `master`:
+  `9f309c6134e857f7b86f3e6b9c6709ce954944a5`.
+- Both local checkouts matched those live GitHub heads when the review began.
+- The untouched Unchained baseline passed 129 tests, Ruff check/format,
+  `pip check`, and wheel/sdist construction.
+
+The detailed comparison and rationale are in
+[`docs/OPENAI_VNEXT_REVIEW.md`](docs/OPENAI_VNEXT_REVIEW.md). The decision is to
+evolve the smaller Unchained controller, not port Qwen's dual conductor. Qwen's
+deterministic onboarding, typed capability filtering, bounded adaptive work, and
+fact-provenance ideas remain useful. Its 20-to-35-tool floor, monolithic
+orchestration, early/nonfatal custody, fail-open validation, per-call MCP process
+churn, promoting/nonfresh finalizer, and unsafe report surface do not carry
+forward.
+
+### Implemented and verified offline
+
+- Initial and final custody maps now share the public evidence-ID namespace.
+- Tool lifecycle receipts bind controller-owned evidence IDs and initial SHA-256
+  values. Multiple ready images fail closed instead of silently selecting item
+  zero.
+- `profile.json` is canonical JSON reconstructed from the verified evidence
+  profile, and that profile is rebound to the initial custody names, hashes,
+  byte counts, readiness, and investigation-start event. `summary.json` is also
+  rebuilt from the verified audit instead of being trusted as a sealed blob.
+- The opening decision is all-or-none. Unknown tools, malformed arguments,
+  duplicate call IDs or tool names, or more than six calls fail the opening
+  protocol; a `COMPLETE` lifecycle therefore contains 1–6 distinct valid
+  opening calls and no `capped` or `rejected` receipt anywhere in the lifecycle.
+- Strict verification validates retry-aware model transaction windows: one
+  request/options pair, zero to two correctly scheduled transient retry pairs,
+  and exactly one accepted response. Orphan, out-of-order, over-limit, or
+  non-transient retry receipts fail closed; transport classes, HTTP status,
+  backoff, and positive nonincreasing retry timeouts are bounded.
+- The authoritative audited response is the normalized request/response
+  contract: requested and returned model identity, IDs, completion state,
+  message, validated function calls, and usage. Duplicate raw `output_items`
+  are deliberately excluded from proof authority so a second representation
+  cannot contradict the normalized calls or message.
+- Verification revalidates each closed typed catalog and exact phase policy and
+  reconstructs every exact phase input. It binds model call
+  IDs/names/arguments to tool receipts, controller actions, forced serializers,
+  the deterministic report, and every full root-artifact descriptor. Accepted
+  response output usage cannot exceed its paired request ceiling, and emitted
+  lifecycle counts must match the verified findings, verdicts, and receipts.
+  Typed argument values use the runtime's same bool-safe JSON type contract.
+- Profile verification rederives OS, evidence shape, canonical filesystems, and
+  route-conflict warnings from the evidence inventory; those deterministic
+  routing fields cannot be rewritten independently.
+- The adaptive investigator uses a compact case ledger, receipt index, remaining
+  budget, and latest observation rather than replaying provider transcripts or
+  encrypted reasoning. Every nonterminal call must supply a visible UTF-8 ledger
+  update of at most 8,192 bytes, recorded before execution and rebound offline.
+  The live default no longer requests unused encrypted reasoning content.
+- Phase-specific GPT-5.6 reasoning, verbosity, output-token, and tool-call
+  ceilings reduce unnecessary latency while code-owned case caps remain hard.
+  Implicit prompt caching permits stable-prefix reuse, but cap preflight still
+  prices a cache miss. Audited call cost and the final budget snapshot are
+  recomputed from normalized token usage, the code-owned price table, and the
+  frozen caps. This is local cap accounting, not provider billing. No live
+  latency or measured faster-than-Qwen claim is made.
+- Findings bind to exact full-artifact UTF-8 byte ranges and stable span IDs. The
+  fresh judge sees those spans, can preserve or downgrade only, and cannot add
+  unknown findings.
+- GPT-5.6 returns a strict narrative-and-reference report draft. Code renders the
+  authoritative findings, verdict transitions, citations, IOCs, limitations,
+  and safe Markdown; model prose is explicitly nonauthoritative and the exact
+  report SHA-256/byte count is audited. Verification reconstructs the report and
+  requires byte-for-byte equality.
+- Every bundle contains a required, deterministic `viewer.html` with a restrictive
+  CSP, no scripts/external resources, and escaped dynamic text. Verification
+  reconstructs the viewer byte-for-byte and independently applies a positive
+  inert-HTML/CSP policy. `sentinel view` requires the strict lifecycle verifier
+  whenever the bundle claims `COMPLETE` before it opens the file.
+- The user-facing lifecycle is `sentinel doctor`, `profile`, `run`, `verify`, and
+  `view`; compatibility entry points remain.
+
+### Exact verification result
+
+Validated in external CPython 3.11.9 AMD64 environment
+`%LOCALAPPDATA%\venvs\sentinel-unchained-py311`:
+
+| Check | Result |
+|---|---|
+| `python -m pytest -q` | **PASS**, 267 collected tests |
+| `python -m ruff check .` | **PASS** |
+| `python -m ruff format --check .` | **PASS**, 32 Python files already formatted |
+| `python -m pip check` | **PASS**, no broken requirements |
+| `python -m build` | **PASS**, wheel and sdist built from the sdist path |
+| `git diff --check` | **PASS**; only a line-ending advisory for `run.ps1` |
+| `python -m unchained doctor --json` | Expected exit `2`: dependencies ready, model/key absent, no secret printed |
+
+Current source count: 17 modules, 13,383 physical lines, 12,259 nonblank lines.
+The suite includes a real-shaped synthetic lifecycle through strict verification,
+an exact supporting span after byte 3,000, and fully re-chained adversarial
+mutations of model/tool bindings, phase options, normalized responses, retry
+windows, exact phase request packets, response output ceilings, impossible
+complete receipts, lifecycle counts, visible ledgers,
+forced serializer/judge/report arguments, occurrence
+counts, profile/custody bindings, rebuilt summaries, local cost/final-budget
+accounting, exact report/viewer bytes, artifact descriptors, and active viewer
+content. It also covers judge lattice and ID failures, custody namespace
+regression, all-or-none opening rejection, and CLI no-call/fail-fast checks.
+
+The in-app browser could not perform human visual QA because its runtime failed
+before loading the local file with a sandbox-policy metadata error. This does
+not invalidate the automated HTML/security tests, but visual cross-browser QA
+remains **NOT DEMONSTRATED**.
+
+### Explicitly not demonstrated or production-ready
+
+1. No authentic completed GPT-5.6 vNext evidence run exists; this session had no
+   key and did not spend the frozen DC01 primary call.
+2. Offline verification validates recorded provider metadata but cannot
+   independently authenticate OpenAI.
+3. No live latency benchmark exists, so the phase caps and parallel opening are
+   performance design choices, not evidence that vNext is faster than the Qwen
+   ensemble or a measured end-to-end baseline.
+4. Recomputed local inference cost enforces the frozen price table and caps but
+   is not a provider bill; only provider billing records can establish billed
+   cost.
+5. Third-party parser children are process-contained and credential-scrubbed but
+   do not yet have OS-enforced network denial or scratch-only filesystem writes.
+6. Final hashing cannot defeat a privileged transient pathname swap; stable
+   handles or immutable snapshots remain required for that threat model.
+7. Multi-image routing fails closed but does not yet analyze all images.
+8. Heavy opening tools are bounded but not scheduled by CPU/RAM/I/O resource
+   class.
+9. Per-call parser subprocess startup remains measurable overhead; a persistent
+   pool must wait for an enforceable OS sandbox rather than weaken isolation.
+10. A same-user/administrator actor can still mutate a pathname between offline
+   verification and an external browser opening it.
+11. The local hash chain and manifest checksum are unsigned and have no trusted
+   external timestamp.
+12. The current workspace is inside OneDrive; sensitive live outputs should use
+    a restricted nonsynchronized case directory.
+13. Automated byte-exact viewer and inert-HTML checks pass, but human visual and
+    cross-browser QA is still pending because the in-app browser failed before
+    loading the local file.
+
+### Next highest-leverage action
+
+After review and an authorized key are available, run one harmless synthetic
+GPT-5.6 smoke through all five model phases, verify it, and visually inspect its
+sealed viewer. Only then run the frozen authorized evidence case:
+
+```powershell
+sentinel doctor
+sentinel profile C:\Evidence\case
+sentinel run C:\Evidence\case --caps strict
+sentinel verify C:\path\to\run --require-complete --require-live-gpt56
+sentinel view C:\path\to\run
+```
+
+Do not call the result provider-authenticated solely because the strict offline
+flags pass. Preserve the provider-side record and add a signature/timestamp or
+other independently controlled attestation before making that claim.

@@ -250,10 +250,9 @@ class RunBudget:
                     "conservative request estimate leaves no response-token budget",
                 )
 
-            # Live requests disable prompt caching (explicit mode, no
-            # breakpoints), so ordinary uncached input is the safe preflight
-            # price. Any unexpected provider-reported writes are reconciled
-            # from the observed response usage below.
+            # Implicit prompt caching may miss, so ordinary uncached input is
+            # still the safe preflight price. Provider-reported reads/writes
+            # are reconciled from observed response usage below.
             input_usage = ModelUsage(input_tokens=estimated_input_tokens)
             estimated_input_cost = estimate_usage_cost(self.config, input_usage, model_id)
             remaining_cost = self.config.max_cost_usd - self._cost_usd - estimated_input_cost
@@ -321,3 +320,5 @@ def _validate_usage(usage: ModelUsage) -> None:
         raise ValueError(
             "model usage provider_total_tokens must equal input_tokens + output_tokens"
         )
+    if usage.cached_input_tokens + usage.cache_write_tokens > usage.input_tokens:
+        raise ValueError("model usage cache read/write tokens must not exceed input_tokens")

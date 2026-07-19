@@ -16,6 +16,7 @@ from unchained.evidence import (
     EvidenceSession,
     MountContainmentError,
 )
+from unchained.models import LOG_PRIMARY_OS_CONFLICT_WARNING
 
 _REAL_VOLATILITY_BASE_COMMAND = evidence_module._volatility_base_command
 
@@ -38,7 +39,9 @@ def test_classification_uses_content_instead_of_extension(tmp_path: Path) -> Non
     assert profile.os == "windows"
     assert profile.shape == "memory-only"
     assert profile.items[0].kind == "memory"
-    assert post_hashes["definitely-not-memory.txt"] == profile.items[0].sha256
+    assert post_hashes == profile.hashes
+    assert post_hashes["E001"] == profile.items[0].sha256
+    assert "definitely-not-memory.txt" not in post_hashes
 
 
 def test_filesystem_structure_routes_disk_and_emits_fs_key(tmp_path: Path) -> None:
@@ -159,6 +162,58 @@ def test_linux_version_log_cannot_create_a_disk_memory_os_conflict(tmp_path: Pat
     assert profile.shape == "disk-only"
     assert {item.kind for item in profile.items} == {"disk", "log"}
     assert not any(warning.startswith("OS CONFLICT:") for warning in profile.warnings)
+
+
+def test_mount_discovery_reconciles_final_route_from_public_item_hints(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A filesystem learned during mounting must supersede a weaker log-only route."""
+
+    disk = tmp_path / "opaque-disk"
+    disk.write_bytes(b"opaque disk container")
+    log = tmp_path / "linux.log"
+    log.write_text("Linux version 6.8\n", encoding="utf-8")
+    mounted = tmp_path / "mounted"
+    mounted.mkdir()
+
+    def classify(
+        snapshot: evidence_module._FileSnapshot,
+        _budget: RunBudget | None,
+    ) -> evidence_module._Classification:
+        if snapshot.path == disk:
+            return evidence_module._Classification(
+                kind="disk",
+                filesystem=None,
+                os_hint="unknown",
+                health="disk-container-recognized",
+            )
+        return evidence_module._Classification(
+            kind="log",
+            filesystem=None,
+            os_hint="linux",
+            health="readable-log",
+        )
+
+    class FakeMount:
+        def mount(self, *_args: object) -> tuple[Path, tuple[str, ...]]:
+            return mounted, ()
+
+        def close(self) -> bool:
+            return True
+
+    monkeypatch.setattr(evidence_module, "_classify", classify)
+    session = EvidenceSession(tmp_path, mount=True, case_card_stream=None)
+    monkeypatch.setattr(session, "_mount", FakeMount())
+    try:
+        profile = session.profile()
+    finally:
+        session.close()
+
+    assert profile.os == "windows"
+    assert profile.shape == "disk-only"
+    assert profile.filesystems == ("ntfs",)
+    assert LOG_PRIMARY_OS_CONFLICT_WARNING in profile.warnings
 
 
 def test_linux_memory_without_symbols_is_unavailable_not_a_crash(

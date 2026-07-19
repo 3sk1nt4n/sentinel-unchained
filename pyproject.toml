@@ -28,6 +28,7 @@ dev = [
 ]
 
 [project.scripts]
+sentinel = "unchained.cli:main"
 sentinel-unchained = "unchained.cli:main"
 
 [tool.setuptools.packages.find]

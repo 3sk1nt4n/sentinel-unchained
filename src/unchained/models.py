@@ -3,15 +3,53 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from dataclasses import asdict, dataclass, field
 from enum import StrEnum
 from pathlib import Path
-from typing import Any, Literal, TypeAlias
+from typing import Any, Literal, Protocol, TypeAlias
 
 JsonValue: TypeAlias = None | bool | int | float | str | list["JsonValue"] | dict[str, "JsonValue"]
 OsFamily: TypeAlias = Literal["windows", "linux", "macos", "unknown"]
 EvidenceShape: TypeAlias = Literal["memory-only", "disk-only", "both", "logs-only", "unknown"]
 MODEL_TOOL_OUTPUT_MAX_BYTES = 64 * 1024
+CASE_LEDGER_UPDATE_MAX_BYTES = 8_192
+OS_EVIDENCE_CONFLICT_WARNING = (
+    "OS CONFLICT: disk and memory content disagree; OS-specific tool families are disabled."
+)
+LOG_PRIMARY_OS_CONFLICT_WARNING = "Standalone log OS hints conflict with the primary evidence OS."
+LOG_OS_CONFLICT_WARNING = "Standalone logs contain conflicting OS hints."
+EVIDENCE_ROUTE_WARNINGS = frozenset(
+    {
+        OS_EVIDENCE_CONFLICT_WARNING,
+        LOG_PRIMARY_OS_CONFLICT_WARNING,
+        LOG_OS_CONFLICT_WARNING,
+    }
+)
+
+
+def matches_json_schema_type(value: JsonValue, expected: JsonValue) -> bool:
+    """Apply the runtime's supported JSON Schema primitive-type contract."""
+
+    if expected is None:
+        return True
+    choices = expected if isinstance(expected, list) else [expected]
+    for choice in choices:
+        if choice == "null" and value is None:
+            return True
+        if choice == "integer" and isinstance(value, int) and not isinstance(value, bool):
+            return True
+        if choice == "number" and isinstance(value, (int, float)) and not isinstance(value, bool):
+            return True
+        if choice == "string" and isinstance(value, str):
+            return True
+        if choice == "boolean" and isinstance(value, bool):
+            return True
+        if choice == "array" and isinstance(value, list):
+            return True
+        if choice == "object" and isinstance(value, dict):
+            return True
+    return False
 
 
 class RunStatus(StrEnum):
@@ -60,6 +98,63 @@ class EvidenceItem:
         """Return the model-safe view plus the runner-local evidence path."""
 
         return {**self.public_dict(), "path": str(self.path)}
+
+
+class _EvidenceRouteItem(Protocol):
+    """Minimum deterministic facts needed to derive the public route."""
+
+    kind: Literal["memory", "disk", "log", "unknown"]
+    os_hint: OsFamily
+
+
+def derive_evidence_shape(items: Iterable[_EvidenceRouteItem]) -> EvidenceShape:
+    """Derive the case shape solely from classified evidence kinds."""
+
+    kinds = {item.kind for item in items}
+    if "memory" in kinds and "disk" in kinds:
+        return "both"
+    if "memory" in kinds:
+        return "memory-only"
+    if "disk" in kinds:
+        return "disk-only"
+    if "log" in kinds:
+        return "logs-only"
+    return "unknown"
+
+
+def reconcile_evidence_os(
+    items: Iterable[_EvidenceRouteItem],
+) -> tuple[OsFamily, tuple[str, ...]]:
+    """Reconcile strong memory/disk hints and weaker standalone-log hints."""
+
+    materialized = tuple(items)
+    disk_hints = {item.os_hint for item in materialized if item.kind == "disk"}
+    memory_hints = {item.os_hint for item in materialized if item.kind == "memory"}
+    log_hints = {item.os_hint for item in materialized if item.kind == "log"}
+    disk_hints.discard("unknown")
+    memory_hints.discard("unknown")
+    log_hints.discard("unknown")
+    strong_hints = disk_hints | memory_hints
+    warnings: list[str] = []
+    if len(strong_hints) > 1:
+        warnings.append(OS_EVIDENCE_CONFLICT_WARNING)
+        return "unknown", tuple(warnings)
+    if strong_hints:
+        resolved = next(iter(strong_hints))
+        if log_hints and any(value != resolved for value in log_hints):
+            warnings.append(LOG_PRIMARY_OS_CONFLICT_WARNING)
+        return resolved, tuple(warnings)
+    if len(log_hints) == 1:
+        return next(iter(log_hints)), tuple(warnings)
+    if len(log_hints) > 1:
+        warnings.append(LOG_OS_CONFLICT_WARNING)
+    return "unknown", tuple(warnings)
+
+
+def derive_filesystems(items: Iterable[EvidenceItem]) -> tuple[str, ...]:
+    """Return the canonical sorted filesystem set represented by the inventory."""
+
+    return tuple(sorted({item.filesystem for item in items if item.filesystem is not None}))
 
 
 @dataclass(frozen=True, slots=True)
@@ -215,6 +310,22 @@ class ToolResult:
 
 
 @dataclass(frozen=True, slots=True)
+class EvidenceSpan:
+    """Byte-located investigator evidence resolved against one retained output."""
+
+    span_id: str
+    tool_call_id: str
+    artifact_sha256: str
+    byte_start: int
+    byte_end: int
+    text: str
+    occurrence_count: int
+
+    def public_dict(self) -> dict[str, JsonValue]:
+        return asdict(self)
+
+
+@dataclass(frozen=True, slots=True)
 class Finding:
     """One investigator-produced finding before or after judge review."""
 
@@ -224,11 +335,18 @@ class Finding:
     proposed_status: FindingStatus
     severity: str
     tool_call_ids: tuple[str, ...]
+    supporting_spans: tuple[EvidenceSpan, ...] = ()
     iocs: tuple[str, ...] = ()
     limitations: tuple[str, ...] = ()
 
     @classmethod
-    def from_mapping(cls, data: dict[str, Any], index: int) -> Finding:
+    def from_mapping(
+        cls,
+        data: dict[str, Any],
+        index: int,
+        *,
+        supporting_spans: tuple[EvidenceSpan, ...] = (),
+    ) -> Finding:
         """Normalize a model-provided finding while preserving model semantics."""
 
         raw_status = str(data.get("proposed_status") or "NEEDS-REVIEW").upper().replace("_", "-")
@@ -243,6 +361,7 @@ class Finding:
             proposed_status=status,
             severity=str(data.get("severity") or "UNKNOWN").upper(),
             tool_call_ids=tuple(str(value) for value in data.get("tool_call_ids") or ()),
+            supporting_spans=supporting_spans,
             iocs=tuple(str(value) for value in data.get("iocs") or ()),
             limitations=tuple(str(value) for value in data.get("limitations") or ()),
         )
@@ -252,6 +371,7 @@ class Finding:
         data["proposed_status"] = self.proposed_status.value
         for key in ("tool_call_ids", "iocs", "limitations"):
             data[key] = list(data[key])
+        data["supporting_spans"] = [span.public_dict() for span in self.supporting_spans]
         return data
 
 
@@ -259,13 +379,18 @@ class Finding:
 class EvidenceQuote:
     """Exact bounded receipt text used by the fresh judge for one verdict."""
 
+    span_id: str
     tool_call_id: str
     text: str
 
     def public_dict(self) -> dict[str, JsonValue]:
         """Return the quote in the stable proof-bundle representation."""
 
-        return {"tool_call_id": self.tool_call_id, "text": self.text}
+        return {
+            "span_id": self.span_id,
+            "tool_call_id": self.tool_call_id,
+            "text": self.text,
+        }
 
 
 @dataclass(frozen=True, slots=True)

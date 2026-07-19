@@ -41,40 +41,59 @@ protects custody, constrains execution, records the run, and enforces budgets;
 it does not decide whether a finding is true. Findings and reports remain model
 judgments that require human review.
 
-> Prototype status: Windows is the implemented flagship **evidence-OS** path,
-> but no retained authentic end-to-end GPT-5.6 run exists yet. Linux is
-> experimental, macOS is best effort, and non-Windows disk analysis is limited
-> to fixed metadata probes. This does not mean every host OS can mount every
-> evidence format. A capability label describes what was actually available in
-> each run; it must never imply that unavailable analysis ran.
+> Prototype status: this working tree contains the OpenAI-native vNext control
+> plane, but no retained authentic end-to-end GPT-5.6 run exists yet. Windows is
+> the implemented flagship **evidence-OS** path. Linux is experimental, macOS is
+> best effort, and non-Windows disk analysis is limited to fixed metadata probes.
+> A capability label describes what was actually available in each run; it must
+> never imply that unavailable analysis ran.
 
 ### Current proof snapshot
 
 The engineering substrate is locally reproducible and the native Windows-memory
-leg now has a real smoke result, but the GPT-5.6 experiment is not yet
-demonstrated. Commits `5309e5c` and `7b05d6a` bind the C2 snapshot of 14 source
-modules, 7,767 nonblank source lines, and 123 tests. Gate A commit `6e696a0`
-binds the later native-integration, high-volume-output, and final
-privacy-hardening fixes at 14 modules, 8,779 total physical source lines, 7,889
-nonblank lines, and 128 tests.
+leg has a real smoke result, but the GPT-5.6 experiment is not yet demonstrated.
+The current working tree passes 267 offline tests and adds exact byte-located
+evidence spans, stateless investigation packets, deterministic report and viewer
+rerendering, lifecycle-complete verification, evidence-bound tool receipts, and
+a user-facing `sentinel` CLI. The reviewed source has 17 modules across 32 Python
+files, totaling 13,383 physical and 12,259 nonblank source lines. The two
+reviewed upstream baselines and the complete vNext findings are recorded in
+[`docs/OPENAI_VNEXT_REVIEW.md`](docs/OPENAI_VNEXT_REVIEW.md).
 
 | Claim | Current evidence-backed state |
 |---|---|
-| Project implementation | C2 commits: 14 modules and 7,767 nonblank lines; Gate A commit `6e696a0`: 14 modules, 8,779 total physical source lines, and 7,889 nonblank lines |
-| Offline quality gate | C2 commits: 123 tests; Gate A commit `6e696a0`: 128 tests; Ruff check, Ruff format check, and wheel build pass |
+| Project implementation | One import-safe controller with deterministic custody, typed authority, a bounded GPT-5.6 state machine, exact spans, deterministic reporting, and a static viewer |
+| Offline quality gate | 267 tests, Ruff check/format, `pip check`, wheel build, and sdist build pass in CPython 3.11.9; 17 source modules, 32 Python files, 13,383 physical source lines, and 12,259 nonblank source lines |
 | Reproducible runtime | CPython 3.11.9 AMD64 in two clean virtual environments outside OneDrive; `pip check` clean |
 | Dependency record | Exact Windows CPython 3.11 constraints and `pylock` committed |
 | Forensic substrate | `windows.info` resolved symbols; sealed registry exposes 14 Windows-memory tools; real `vol_pstree`, `vol_psscan`, and high-volume `vol_netscan` smokes succeeded |
-| Proof machinery | Exact accepted tool outputs, structured quote receipts, manifest, summary, environment record, detached checksum, and offline `verify-run` implemented |
+| Proof machinery | Exact accepted tool outputs, byte ranges, evidence-bound receipts, lifecycle automaton, manifest, summary, environment record, detached checksum, deterministic viewer, and offline verifier implemented |
 | Synthetic lifecycle proof | One empty-evidence bundle verifies internally as `INVALID`; it contains no evidence bytes, findings, native plugin rows, or model response |
 | Authentic experiment | **NOT YET PROVEN**: no authentic GPT-5.6 run, public freeze, or frozen-reference scored bundle |
 
-The non-strict verifier accepting a finalized `INVALID` bundle proves bundle
-construction and internal consistency only. The submission-strength command
-with `--require-complete --require-live-gpt56` correctly rejects that synthetic
-bundle. It must never be presented as an authentic or complete investigation.
-The separate native smoke is also pre-freeze local engineering proof, not a
-public, scored, or model-directed run.
+The offline verifier proves bundle integrity, recorded lifecycle consistency,
+exact citation resolution, and recorded provider metadata. It cannot independently
+authenticate OpenAI from locally written response IDs or usage fields. The
+strict flags reject incomplete or fake-marked fixtures, but provider authenticity
+still requires an authentic retained run plus external provider or operator
+attestation. The separate native smoke is pre-freeze local engineering proof,
+not a public, scored, or model-directed run.
+
+### Honest limits of the current result
+
+The control plane is designed to reduce avoidable latency through a six-tool
+maximum parallel opening, stateless bounded packets, implicit-cache-compatible
+stable prefixes, and one adaptive tool per turn. There is no retained authentic
+GPT-5.6 run or controlled latency/cost benchmark yet, so "faster" remains a
+design objective, not a measured result or guarantee. The verifier proves local
+bundle integrity, not provider authorship or forensic truth. Production
+hardening still needs OS-enforced child network/filesystem isolation, stable
+evidence handles or immutable snapshots, and an external signature, timestamp,
+or WORM anchor. The current adapters also fail closed on multiple ready images
+of one class; persistent sandboxed workers and resource-aware opening scheduling
+remain future performance work. Finally, a same-user or administrator can race a
+verified pathname before an external browser opens it. These boundaries are not
+changed by the passing offline suite.
 
 ## Build Week contribution boundary
 
@@ -96,10 +115,11 @@ integration; content-addressed exact tool-output retention; provider-returned
 identity and usage receipts; proof-bundle construction; a standard-library
 offline verifier; Unchained tests; prompts; and documentation.
 
-The public experiment freeze, frozen reference rubric and disclosed scoring, authentic
-real-evidence GPT-5.6 bundle, static viewer, video, and submission remain future
-gates. They are not claimed as completed Build Week artifacts merely because
-their contracts are documented.
+The deterministic static viewer is now implemented and sealed into every
+finalized bundle. The public experiment freeze, frozen reference rubric and
+disclosed scoring, authentic real-evidence GPT-5.6 bundle, hosted publication,
+video, and submission remain future gates. They are not claimed as completed
+merely because their contracts or offline implementations exist.
 
 The prior pipeline, semantic validator, prompts, reports, metrics, findings, and
 runs are not claimed as new Unchained work. See
@@ -124,7 +144,7 @@ The human owner chose the product thesis, Developer Tools track, DFIR testbed,
 benchmark, safety boundary, scope cuts, evaluation claims, and final submission
 decisions. Codex accelerated implementation and verification; it did not turn
 fake-model tests into runtime proof or make the unfinished authentic run,
-viewer, video, or submission complete.
+authentic viewer demonstration, hosted path, video, or submission complete.
 
 ## Deterministic floor
 
@@ -191,10 +211,13 @@ PLAN -> ACT (one typed tool) -> OBSERVE -> UPDATE CASE NOTES -> repeat/DONE
 LITERAL DONE -> forced structured serialization (no forensic tools)
        |
        v
-FRESH JUDGE: confirm, downgrade, or annotate only existing findings
+FRESH JUDGE: preserve or downgrade existing findings from exact spans
        |
        v
-GPT-5.6 REPORT -> post-run SHA-256 verification
+GPT-5.6 STRUCTURED DRAFT -> DETERMINISTIC REPORT + VIEWER + PROOF BUNDLE
+       |
+       v
+POST-RUN SHA-256 CUSTODY VERIFICATION
 ```
 
 All filenames, paths, artifact text, parser output, and tool output are treated
@@ -212,15 +235,18 @@ phase-specific protocol instructions and the hostile-evidence rule.
 In the opening book, GPT-5.6 receives the detected OS, evidence shape, and only
 the tool families actually available for that route. It must choose between one
 and six distinct, high-information **function names** for that OS and shape;
-calling the same function with another PID or argument is still a duplicate and
-the later call is rejected with a receipt. Windows, Linux, and macOS memory
-choices stay within their respective namespaces; disk choices favor execution,
-timeline, and persistence artifacts. If the profile marks memory `UNAVAILABLE`,
-the model must skip memory tools, continue with disk when possible, and record
-the limitation. Accepted opening calls reserve their cap slots atomically and
-run in parallel. If that reservation is capped, no executor starts, but every
-model-issued call still receives paired audit events and a deterministic
-`capped` result payload with an output hash.
+calling the same function with another PID or argument is still a duplicate.
+Opening validation is all-or-none: zero calls, more than six calls, a duplicate,
+an unavailable name, invalid arguments, or any other invalid selection rejects
+the entire batch before an opening executor starts. A `COMPLETE` run therefore
+has one to six distinct valid opening calls and exactly zero rejected opening
+calls. Windows, Linux, and macOS memory choices stay within their respective
+namespaces; disk choices favor execution, timeline, and persistence artifacts.
+If the profile marks memory `UNAVAILABLE`, the model must skip memory tools,
+continue with disk when possible, and record the limitation. A valid opening
+batch reserves all cap slots atomically and runs in parallel. If that reservation
+is capped, no executor starts, but every model-issued call still receives paired
+audit events and a deterministic `capped` result payload with an output hash.
 
 The investigator has typed, read-only forensic functions only: no shell, no
 internet or browsing tool, and no authority to modify evidence. After opening,
@@ -231,26 +257,27 @@ requires contradictions to be acknowledged with an explicit course correction,
 and retains dead ends rather than silently dropping them. It stops on
 diminishing returns, when further calls have stopped changing the conclusions.
 
-The only normal loop terminator is a response with no function call whose
-entire trimmed text is the literal `DONE`. Extra text, a different no-call
-response, or `DONE` alongside a tool call is a protocol error. After accepting
-`DONE`, the controller performs a separate, forced `submit_investigation`
+The only normal loop terminator is a response with no function call whose raw
+text is exactly the four ASCII characters `DONE`. Leading or trailing whitespace,
+a newline, extra text, a different no-call response, or `DONE` alongside a tool
+call is a protocol error. After accepting `DONE`, the controller performs a
+separate, forced `submit_investigation`
 serialization. That request exposes only the strict serialization schema, with
 no forensic functions, so it cannot resume the investigation, collect or add new
 evidence, or take another forensic action. It only converts the already-finished
 notes, supported or contradicted hypotheses, dead ends, limitations, and
 findings into the structure consumed by the fresh judge.
 
-The fresh judge may only confirm, downgrade, or annotate those existing
-findings; it cannot add one or upgrade the investigator's proposed status.
-Every verdict, including `NEEDS-REVIEW` and `UNSUPPORTED`, must provide a nonblank
-rationale and at least one unique citation drawn from that finding's own real
-tool receipts. For each cited receipt, the reviewer must also return a
-structured exact quote of at most 1,024 UTF-8 bytes. Controller code requires
-that quote to occur in the exact retained receipt excerpt; `verify-run` also
-checks it against the full content-addressed output. A `CONFIRMED` verdict must
-cite at least one successful receipt. Quote resolution proves traceability, not
-that the quoted text semantically entails the claim.
+The forced serializer must supply exact supporting quotes for each finding.
+Controller code resolves each quote against the complete retained tool output
+and records an artifact digest, byte start/end, occurrence count, and stable span
+ID. The fresh judge receives only the existing findings and their exact evidence
+spans. It may preserve or downgrade; it cannot add a finding or upgrade the
+investigator's proposed status. Every verdict must cite a known span and return
+a quote contained inside that span. `sentinel verify` reopens the content-addressed
+artifact and checks the digest, byte range, decoded text, span ID, finding
+relationship, and judge quote. This proves traceability, not that the quote
+semantically entails the claim.
 
 ## Requirements, host support, and installation
 
@@ -318,8 +345,9 @@ match it. A `pylock` file is not a legacy pip `-r` requirements file. See
 and validation contract.
 
 The distribution name is `sentinel-unchained`; its Python import package is
-`unchained` (stored under `src/unchained`). The supported CLI contract remains
-the module form shown below.
+`unchained` (stored under `src/unchained`). The canonical installed command is
+`sentinel`; `sentinel-unchained` and `python -m unchained` are compatibility
+entry points.
 
 `pyproject.toml` installs the prior project as a direct Git dependency pinned
 to the reviewed full commit:
@@ -397,27 +425,35 @@ no investigator, model, or API.
 
 ## Configure and run
 
-PowerShell:
+After installation, start with deterministic checks that make no OpenAI call:
+
+```powershell
+sentinel doctor
+sentinel profile C:\path\to\evidence
+```
+
+Then configure the funded model run and launch it:
 
 ```powershell
 $env:OPENAI_API_KEY = "sk-..."
 $env:UNCHAINED_MODEL = "gpt-5.6"
-python -m unchained C:\path\to\evidence --caps default
+sentinel run C:\path\to\evidence --caps default
 ```
 
-POSIX shells:
-
-```bash
-export OPENAI_API_KEY="sk-..."
-export UNCHAINED_MODEL="gpt-5.6"
-python -m unchained /path/to/evidence --caps default
-```
-
-The canonical interface is:
+The user-facing lifecycle is:
 
 ```text
-python -m unchained /path/to/evidence [--caps default|strict]
+sentinel doctor [--json]
+sentinel profile <evidence-file-or-folder> [--mount] [--json]
+sentinel run <evidence-file-or-folder> [--caps default|strict]
+sentinel verify <run-directory> [--require-complete] [--require-live-gpt56]
+sentinel view <run-directory> [--no-open]
 ```
+
+`python -m unchained ...` and `sentinel-unchained ...` remain compatibility
+entry points. A live run validates the model and key before reading evidence or
+creating a run directory. `doctor` never prints the key. `profile` inventories,
+routes, and verifies its custody pass without contacting OpenAI.
 
 The input contract accepts a folder containing a memory image and/or disk
 image, and discovery uses content rather than filename extensions. The scored
@@ -434,24 +470,29 @@ non-symlink files/directories that can be enumerated completely.
 ### Responses state, reasoning, and data boundary
 
 Every API request sets `store=false`; the implementation does not depend on a
-provider-stored response chain, and the API is instructed not to keep a stored
-Response object for later retrieval. Investigator turns preserve state locally
-by resending prior user input and every prior response output item. Requests add
-`include=["reasoning.encrypted_content"]`, so returned encrypted reasoning
-items are replayed with the other output items.
+provider-stored response chain. Each adaptive turn is a fresh, stateless packet
+containing the public profile, a compact controller-owned case ledger, receipt
+index, remaining budget, and only the latest observation. It does not replay the
+provider transcript or encrypted reasoning items. The finalizer receives the
+retained observations once, while the fresh judge receives only findings and
+their resolved evidence spans. Every phase uses
+`reasoning.context="current_turn"`, with phase-specific effort, verbosity,
+output-token, and tool-call limits. See the
+[official GPT-5.6 model guidance](https://developers.openai.com/api/docs/guides/latest-model).
 
-Opening-book, judge, and report requests use
-`reasoning.context="current_turn"`. The locally replayed, stable-goal
-investigation loop and its post-`DONE` structured serializer use
-`reasoning.context="all_turns"`. The judge still receives a new, deliberately
-independent evidence packet instead of the investigator's response chain. This
-follows the
-[official GPT-5.6 model guidance](https://developers.openai.com/api/docs/guides/latest-model)
-for manual history management with `store=false`.
+Raw SDK/provider `output_items` are adapter-local transport data. The adapter
+normalizes them into the controller-visible message and parsed function calls;
+the raw items are neither retained as an independent proof authority nor
+replayed on a later turn. This avoids two contradictory representations of one
+response in the bundle. Strict verification binds the canonical normalized
+message/function calls to the resulting controller actions and receipts.
 
-Requests also set `prompt_cache_options.mode="explicit"` and provide no cache
-breakpoints. For GPT-5.6, that disables prompt-cache reads and writes and avoids
-prompt-cache storage and cache-write charges; see the
+Requests set `prompt_cache_options.mode="implicit"`, matching GPT-5.6's
+automatic prompt-cache path. Stable matching prefixes such as the phase
+instructions, typed catalog, and public case profile may therefore be reused;
+cache hits are an optimization, not a correctness assumption or a measured
+benchmark claim. Provider-reported reads and writes remain audited and priced.
+See the
 [official prompt-caching guide](https://developers.openai.com/api/docs/guides/prompt-caching).
 
 For the tested `openai==2.31.0` compatibility target, `Responses.create` does
@@ -464,7 +505,8 @@ its contents into the outgoing JSON, whose top level contains
 The wire body does **not** contain an `extra_body` field.
 
 This is not an assertion that content never leaves the machine: evidence-derived
-profiles and raw forensic tool output are transmitted to OpenAI for inference.
+profiles, bounded observation text, and exact cited span text are transmitted to
+OpenAI for inference.
 Provider and organization retention, Zero Data Retention eligibility, data
 residency, and access policy remain external deployment boundaries that an
 operator must review.
@@ -491,13 +533,17 @@ Only the four cap values in the table are environment-overridable. The Sol
 price rates are code-owned; price-like environment variables are ignored so an
 operator cannot zero the rate table and silently bypass `MAX_COST_USD`.
 
-Live requests currently disable prompt caching as described above, so observed
-cache-read/write token counts should be zero. Preflight therefore prices
-estimated input at the ordinary uncached GPT-5.6 Sol rate. After each response,
-the audit still records provider-reported cached-input and cache-write fields,
-and the cost calculator defensively prices any unexpected nonzero values. This
-accounting is a local safety estimate. Provider-side usage and billing remain
-authoritative, and pricing, tokenizer behavior, or API usage fields can change.
+Implicit caching can miss and may also report cache writes. Preflight therefore
+prices every estimated input token at the ordinary uncached GPT-5.6 Sol rate;
+the hard cap never assumes a future hit. After each response, the audit records
+provider-reported cached-input and cache-write fields and the cost calculator
+reconciles both. For a `COMPLETE` lifecycle, strict verification independently
+recomputes every local call and cumulative estimate from the audited token counts
+and code-owned price table, then binds the totals to the final budget snapshot
+and configured token, cost, tool, and wall caps. This is local safety accounting,
+not a reconstruction or authentication of an OpenAI invoice. Provider-side usage
+and billing remain authoritative, and pricing, tokenizer behavior, cache
+retention policy, or API usage fields can change.
 
 Usage accounting is mandatory for every live provider response. `input_tokens`,
 `output_tokens`, and `total_tokens` must be present nonnegative integers;
@@ -524,6 +570,7 @@ bundle contains:
 
 ```text
 report.md         narrative or explicit PARTIAL/FATAL/INVALID fallback
+viewer.html       inert, deterministic, self-contained local proof view
 audit.jsonl       ordered, hash-chained lifecycle and proof receipts
 environment.json allowlisted runtime, dependency, Git, prompt, catalog, and cap facts
 summary.json     audit-derived status, timing, usage, tool, finding, and custody counters
@@ -536,11 +583,11 @@ tool-outputs/     exact content-addressed sanitized accepted outputs when tools 
 Tool output is not merely represented by a digest and excerpt. The exact full
 sanitized accepted UTF-8 bytes are stored before `tool.completed` is appended.
 Storage is atomic, duplicate-content safe, and fail-closed on a digest conflict,
-unsafe path, symlink, or nonregular target. The 2,048-byte audit receipt excerpt
-keeps the fresh-review packet bounded. The separately generated investigator
-view is complete only when the accepted output fits; otherwise it is an
-explicit receipt-bearing prefix no larger than 65,536 bytes. The full artifact
-remains available to the verifier and future viewer.
+unsafe path, symlink, or nonregular target. The 2,048-byte audit excerpt is only
+a compact audit field; the judge no longer depends on it. The investigator sees
+at most a receipt-bearing 65,536-byte model view. Findings cite controller-
+resolved byte spans from the full artifact, and both the verifier and static
+viewer use those exact retained spans.
 
 The report header visibly states the terminal status: `COMPLETE`, `PARTIAL`,
 `FATAL`, or `INVALID`. A completed model report's limitations section must
@@ -575,16 +622,20 @@ retried for malformed usage, wrong provider model, schema, or protocol. The
 controller receives only the final accepted response, so discarded dispatch
 attempts cannot cause a forensic tool to execute twice.
 
-Before writing a complete report, model-generated Markdown is defanged: raw
-HTML angle brackets are escaped; inline and reference-form images are removed;
-inline and reference-form link targets and reference definitions are removed;
-bare HTTP(S) text is rewritten to `hxxp(s)`; and `javascript:`, `data:`, and
-`file:` schemes are blocked. Every controller-generated `PARTIAL`, `FATAL`, or
-`INVALID` fallback separately renders hostile provider, parser, mount, cap, and
-configuration diagnostics as one inert line: newlines/control characters are
-made visible, active Markdown/HTML is removed, and punctuation is escaped so a
-diagnostic cannot inject a heading, fence, image, or link. Reports remain
-untrusted analyst-facing text and need review.
+GPT-5.6 does not author the authoritative Markdown table. It submits a strict
+report draft containing narrative fields and exact finding/span references.
+Controller code validates those references and deterministically renders status,
+findings, verdict transitions, citations, IOCs, limitations, and custody fields.
+Model prose is labeled **model-authored, nonauthoritative**, defanged before
+rendering, and cannot add a row, alter a verdict, or invent a citation through
+formatting. Its exact normalized UTF-8 report bytes are bound into
+`report.completed`. Verification reconstructs that report from the verified
+canonical profile, investigator packet, judge verdicts, evidence spans, and
+submitted draft, then requires an exact byte match. The static viewer escapes all
+dynamic text, contains no script or external resource, and carries a restrictive
+CSP. It too is deterministically rerendered from verified bundle state and
+byte-compared, in addition to its independent inert-HTML policy. Reports remain
+analyst-facing output and need human review.
 
 The audit hash chain makes accidental/local modification detectable, but a
 privileged actor who can rewrite the whole run directory is outside this
@@ -603,26 +654,65 @@ OpenAI SDK nor the forensic dependency, contacts no network service, and does
 not rerun a tool:
 
 ```powershell
-& $python -m unchained verify-run C:\path\to\run-bundle
+sentinel verify C:\path\to\run-bundle
+sentinel view C:\path\to\run-bundle
 ```
 
 That base command validates the declared terminal state, including an honestly
 finalized `INVALID`, `PARTIAL`, or `FATAL` run. It checks normalized paths,
 non-symlink regular files, every manifest hash and byte count, the detached
-manifest checksum, audit sequence and hash chain, exact sanitized accepted tool outputs,
-receipt excerpts, finding citations, exact reviewer quotes, downgrade-only
-review semantics, terminal consistency, and recorded custody receipts.
+manifest checksum, audit sequence and hash chain, exact sanitized accepted tool
+outputs, identity-and-digest-verified semantic rereads, recomputed span
+occurrence counts, receipt excerpts, finding citations, mandatory exact reviewer
+quotes, downgrade-only review semantics, terminal consistency, recorded custody
+receipts, and the proof viewer's inert HTML/CSP policy. For every viewer-bearing
+bundle it also rerenders the viewer from the verified status, profile, rebuilt
+summary, report, and audit prefix and requires the exact bytes.
 
-For submission-strength proof, require both a complete lifecycle and authentic
-GPT-5.6 response receipts:
+`sentinel view` never treats browser launch as a shortcut around proof checking.
+It verifies first, and when a bundle declares `COMPLETE` it automatically forces
+the complete strict lifecycle verifier before opening the manifest-declared
+viewer, even if the caller did not pass strict flags.
+
+For a complete lifecycle with recorded GPT-5.6 metadata, enable both strict
+offline gates:
 
 ```powershell
-& $python -m unchained verify-run C:\path\to\run-bundle `
+sentinel verify C:\path\to\run-bundle `
     --require-complete --require-live-gpt56
 ```
 
-The strict command requires `COMPLETE`, provider-returned GPT-5.6 identity,
-response and request IDs, positive validated usage, and no fake/replay markers.
+The strict command requires `COMPLETE` and binds the entire ordered opening,
+investigation, finalization, judge, and report transaction graph. A model
+transaction is retry-aware: one request/options pair may contain only the
+bounded audited transient-failure/scheduled-retry pairs permitted by controller
+policy before its one accepted response. It reconstructs every exact phase
+input—including adaptive ledger, receipt index, budget, latest observation,
+finalizer observations, judge packet, and report packet—and binds each accepted
+response's output usage to its requested maximum. Retry transport classes,
+status codes, backoff, and nonincreasing timeouts are code-bounded. The verifier
+validates the immutable strict tool catalog and phase options; all-or-none
+opening selection with one to six distinct valid calls and no `capped` or
+`rejected` receipt in `COMPLETE`; bool-safe JSON Schema value types for every
+typed argument; model call IDs, names, and arguments
+against tool receipts; every visible case-ledger update; raw text exactly equal
+to the four ASCII characters `DONE`; forced serializer arguments against
+`investigator.finished`; judgment arguments against downgrade-only
+`judge.completed`; and report-draft references and prose against a freshly
+rerendered exact report. It requires `profile.json` to be canonical JSON equal to
+the profiled event, round-trips the public profile, deterministically rederives
+OS, shape, filesystems, and route-conflict warnings from its evidence inventory,
+binds its evidence IDs,
+hashes, sizes, and count to initial custody, rebuilds canonical `summary.json`,
+and rerenders exact `viewer.html`. It also binds every root and nested artifact
+descriptor to the manifest; recomputes each local GPT-5.6 call/cumulative cost
+from audited usage and the code-owned prices; binds final usage, cost, and tool
+totals and lifecycle counts to the budget snapshot, serialized collections, and
+configured caps; checks provider-returned
+GPT-5.6 identity, unique response/request IDs, positive usage, and no fake/replay
+markers. Raw provider `output_items` are not a proof field. These are locally
+recorded fields and locally recomputed estimates; offline verification neither
+authenticates them with OpenAI nor validates provider billing.
 The current empty-evidence `INVALID` bundle passes the base integrity command
 and correctly fails the strict command. Neither command independently rehashes
 original evidence bytes that are deliberately absent from the bundle. The
@@ -714,8 +804,9 @@ complete sanitized accepted result is content-addressed. The investigator input
 is independently bounded by `ToolResult.model_output()` to 65,536 UTF-8 bytes;
 large results include a native-order prefix plus an explicit delivery receipt
 with the full accepted byte count, SHA-256, prefix character count, and
-`model_view_complete=false`. The fresh reviewer receives the separate audit
-receipt excerpt, which is capped at 2,048 bytes.
+`model_view_complete=false`. The fresh reviewer receives only controller-resolved
+evidence spans from the complete retained output; it is no longer limited to the
+2,048-byte audit excerpt.
 
 The worker writes one JSON response line and then deliberately remains alive.
 The parent therefore retains an unambiguous process-tree owner and destroys the
@@ -771,10 +862,12 @@ which a final custody comparison can be made.
 ```
 
 At the current reviewed working tree, the expected catalog output is `25 5`.
-The verified local quality snapshot is 128 passing tests, clean Ruff check and
-format check, a successful wheel build, and clean `pip check` in both CPython
-3.11.9 environments. The real `vol_pstree`, `vol_psscan`, and post-fix
-high-volume `vol_netscan` smokes described above also pass.
+The verified vNext quality snapshot is 267 collected and passing tests, clean
+Ruff check and format check, successful wheel/sdist builds, and clean `pip check`
+in the primary CPython 3.11.9 environment. The source snapshot contains 17
+modules across 32 Python files, with 13,383 physical and 12,259 nonblank source
+lines. The real `vol_pstree`, `vol_psscan`, and post-fix high-volume
+`vol_netscan` smokes described above also pass.
 These are operational checks. They do not replace the public experiment freeze
 or an authentic GPT-5.6 bundle. The repository history is now publicly anchored
 at the remote `origin/main`, while the earlier C2 commit snapshot
@@ -782,19 +875,22 @@ remains 123 tests and is preserved as such in provenance.
 
 Tests run without network access. Their behavioral coverage includes:
 
-- all four cap paths, opening overlap, distinct-by-name opening enforcement,
-  complete `capped` receipts for calls denied before launch, ordered/hash-valid
-  audit records, exact atomic tool-output artifacts, concurrent duplicate
-  retention, persistence-failure receipts, literal-`DONE` plus forced
-  serialization, judge downgrade, and mandatory rationale, finding-scoped
-  citations, and exact quoted spans;
+- all four cap paths, opening overlap, all-or-none distinct-by-name opening
+  enforcement with zero rejected calls in `COMPLETE`, complete `capped` receipts
+  for calls denied before launch, ordered/hash-valid audit records, exact atomic
+  tool-output artifacts, concurrent duplicate retention, persistence-failure
+  receipts, raw four-ASCII-character `DONE` plus forced serialization, judge
+  downgrade and mandatory rationale, finding-scoped citations, and exact quoted
+  spans;
 - mandatory, nonnegative, internally consistent live provider usage and
-  provider-returned model identity; bounded audited transient retries that do
-  not duplicate tool execution; and code-owned price rates that price-like
-  environment variables cannot zero;
+  provider-returned model identity; retry-aware transaction windows that bind
+  bounded audited transient retries to their accepted response without duplicate
+  tool execution; and recomputed call/cumulative/final-budget estimates from
+  code-owned price rates that price-like environment variables cannot zero;
 - the real OpenAI Python SDK over `httpx.MockTransport`, proving
   `reasoning.context` and `prompt_cache_options` survive wire serialization
-  without making a network request;
+  without making a network request, including implicit-cache default and
+  explicit-mode override behavior;
 - bounded and fail-closed Step 0 inventory/symbol work (including symlink and
   walk-error rejection), Linux/macOS configured-but-unverified symbol rejection,
   and the degraded Windows auto-download-pending route;
@@ -810,9 +906,14 @@ Tests run without network access. Their behavioral coverage includes:
   receipt;
 - one-line hostile-diagnostic fallback defanging plus removal of inline and
   reference links/images and dangerous schemes from complete reports;
-- atomic manifest, summary, environment, and detached-checksum construction;
-  and a standard-library verifier that fails closed on artifact, path, hash,
-  citation, quote, terminal, custody-receipt, or live-model inconsistencies.
+- atomic manifest, canonical profile, rebuilt summary, environment, and
+  detached-checksum construction; exact deterministic report/viewer rerendering;
+  a positive inert-viewer policy covering active tags, attributes, CSS, CSP, and
+  malformed structure; and a standard-library verifier that rejects fully
+  re-chained semantic tampering across model/tool bindings, visible ledgers,
+  serializer/judge/report arguments, artifact descriptors, report/viewer
+  authority, profile/custody identity, span counts, citations, quotes, terminal
+  state, cost/budget accounting, custody receipts, or live-model metadata.
 
 See [DECISIONS.md](DECISIONS.md) for the architecture contract and dependency
 boundary. See [docs/HACKATHON_MASTER_PLAN.md](docs/HACKATHON_MASTER_PLAN.md) for

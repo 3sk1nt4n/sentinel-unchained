@@ -1,7 +1,7 @@
 # Sentinel Unchained: Build Week Winner Master Plan
 
-> **Status:** CONDITIONAL GO, Gate A provenance is green, authentic runtime remains red
-> **Last deep review:** 2026-07-14 22:32 ET
+> **Status:** CONDITIONAL GO, OpenAI-native vNext is green offline, authentic runtime remains red
+> **Last deep review:** 2026-07-18
 > **Track:** Developer Tools
 > **Internal submission deadline:** 2026-07-20
 > **Hard deadline:** 2026-07-21 17:00 PT / 20:00 ET
@@ -25,27 +25,28 @@ Official Rules control.
 Sentinel Unchained has a winning core idea and a substantial offline-tested
 controller. It is not submission-ready today.
 
-### Current proof snapshot: 2026-07-14 22:22 ET
+### Current proof snapshot: 2026-07-18
 
 This is the controlling current-state snapshot. Older counts remain below as
 an explicitly historical baseline and must not be quoted as the present build.
 
 | Area | Evidence-backed state | Public claim boundary |
 |---|---|---|
-| Local provenance | Commits `5309e5c`, `7b05d6a`, `6e696a0`, `207a039`, and `3506d29` retain the provider/reviewer, C2 proof/lock, real Windows-memory Gate A hardening, synchronized winner documentation, and clean handoff | Public `origin/main` matches local HEAD `3506d29`; GitHub metadata reports `visibility=public`; retain the server-side commit record |
-| Implementation | 14 Python source modules, 8,779 total text lines and 7,889 nonblank lines, 128 passing tests, Ruff and format clean, wheel plus sdist build passing, and diff check clean | Strong local implementation evidence, not an authentic GPT-5.6 investigation |
+| Local provenance | Reviewed upstream `main` at `2b256a7`; historical commits retain the public Gate A path; vNext is published on `agent/openai-native-vnext` without rewriting history | Review and merge the vNext branch, then establish a distinct protocol-freeze tag; do not imply the review branch is the immutable experiment freeze |
+| Implementation | 17 Python source modules, 13,383 physical source lines and 12,259 nonblank source lines, 267 passing tests across 32 Python files, Ruff/format, `pip check`, wheel/sdist build, and diff check passing | Strong local implementation evidence, not an authentic GPT-5.6 investigation |
 | Python environment | Official CPython 3.11.9; clean primary and lockcheck virtual environments; `pip check` clean in both; exact Windows CPython 3.11 constraints and `pylock` committed | Reproducible tested Windows Python environment, not universal host portability |
 | Native-tool readiness | **GREEN LOCALLY:** verified DC01 memory-only profile, resolved Windows symbols, 14 sealed Windows-memory tools, real `vol_pstree`, `vol_psscan`, and post-fix `vol_netscan` results, and matching custody | Deterministic pre-freeze engineering proof only; no GPT-5.6 or scored run occurred |
-| C2 proof contract | Durable content-addressed outputs, requested and provider-returned model identity, response/request IDs, validated usage, bounded audited retries, manifest, summary, environment record, and offline `verify-run` are implemented and tested | Proof machinery is verified offline; it does not prove a live GPT-5.6 or native forensic run |
-| Retained CLI bundle | One empty-input run produced a hash-valid terminal `INVALID` bundle that passes ordinary offline verification | This proves invalid-path finalization only. It is not `COMPLETE`, authentic, evidence-backed, native-tool-backed, or GPT-5.6-backed |
+| C2 proof contract | Durable outputs, evidence-bound receipts, exact byte spans, retry-aware model windows, canonical profile/custody, rebuilt summary, locally recomputed cost/budget, and exact report/viewer reconstruction are implemented and tested | Local integrity and recorded metadata are verified; local estimates are not provider billing and offline checks cannot authenticate OpenAI |
+| CLI and viewer | `sentinel doctor/profile/run/verify/view`, complete fake-provider lifecycle, strict verifier, and byte-exact inert static viewer are tested; `view` enforces strict lifecycle verification for `COMPLETE` | IMPLEMENTED + VERIFIED offline, not demonstrated by an authentic retained run |
 | Gate A | **GREEN FOR LOCAL NATIVE AND PUBLIC PROVENANCE LEGS** | Public remote is verified; authentic runtime, freeze, and primary evidence remain open |
 | Live runtime | `OPENAI_API_KEY` is absent and no funded runtime has been demonstrated | No authentic GPT-5.6 claim is allowed |
-| Downstream submission work | No public freeze/rubric, authentic primary run, viewer, video, or Devpost submission | All remain open and must follow the gate order in this document |
+| Downstream submission work | Static viewer code exists; no public freeze/rubric, authentic primary bundle/viewer, hosted path, video, or Devpost submission | All external/demonstration gates remain open and must follow the gate order in this document |
 
 The immediate priority is not another native adapter or more controller breadth.
-The full history is now pushed without rewriting it and `origin/main` matches
-local HEAD. Establish the freeze commit and its server-timestamped digest,
-then begin the authentic GPT-5.6 path only after that freeze.
+Review and merge the published vNext branch, establish the freeze commit and its
+server-timestamped digest, then run one harmless synthetic live
+smoke before the authentic evidence path. DC01 remains off-limits before the
+public freeze.
 
 Proceed with this project. Do not pivot to a registry project. Do not add
 Linux, macOS, Plaso, Docker portability, or broad new tool families before the
@@ -230,7 +231,7 @@ model.” The accurate statement is:
 | Deterministic tool domain | Reviewed typed schemas, tool eligibility, fixed binary/callable mapping, path sealing, concurrency, timeouts, containment |
 | Deterministic audit domain | Ordered hash-linked events, requests, responses, calls, arguments, output artifacts, usage, costs, timestamps, terminal state |
 | Deterministic caps domain | Tool, token, wall-clock, and dollar limits with graceful partial termination |
-| Supporting controller protocol | One-to-six opening calls, distinct IDs, one tool per later turn, literal DONE, forced serialization, monotonic judge validation, citation validation, sanitization, cleanup |
+| Supporting controller protocol | All-or-none one-to-six opening calls with distinct IDs/tools and zero rejected calls in `COMPLETE`, one tool per later turn, literal DONE, forced serialization, monotonic judge validation, citation validation, sanitization, cleanup |
 | GPT-5.6 investigator | Opening strategy, next-tool choice, concise decision summaries, hypotheses, interpretation, provisional atomic findings, stopping decision |
 | Fresh GPT-5.6 reviewer | Finding-scoped receipt review, preservation or downgrade only, rationale and cited spans |
 | GPT-5.6 reporter | Narrative and tables from already reviewed findings, without new evidence or new findings |
@@ -275,8 +276,12 @@ FROZEN REFERENCE EVALUATION, AUTHORSHIP DISCLOSED
 ```
 
 The opening batch is one model decision followed by concurrent code execution.
-The later loop permits exactly one tool call per turn. This gives adaptive
-agency while keeping each later decision attributable to one new observation.
+It is accepted all-or-none: an unknown tool, malformed arguments, a duplicate
+call ID or tool name, or more than six calls fails the opening protocol. A
+`COMPLETE` lifecycle therefore has 1–6 distinct valid opening calls and
+`rejected=0`. The later loop permits exactly one tool call per turn. This gives
+adaptive agency while keeping each later decision attributable to one new
+observation.
 
 ### Reviewer language
 
@@ -339,13 +344,13 @@ Host OS and evidence OS are different axes.
 
 | Host path | Current state |
 |---|---|
-| Windows x86-64 plus official CPython 3.11.9 | VERIFIED for clean primary and lockcheck virtual environments, exact locked dependencies, `pip check`, 128 tests, Ruff and format, wheel plus sdist build, installed-package smoke, Volatility help, and catalog load |
+| Windows x86-64 plus official CPython 3.11.9 | VERIFIED at Gate A for clean primary and lockcheck virtual environments, exact locked dependencies, `pip check`, 128 tests, Ruff and format, wheel plus sdist build, installed-package smoke, Volatility help, and catalog load; the superseding OpenAI-native vNext primary-environment gate passes 267 tests |
 | Existing fixed Volatility console adapter | VERIFIED LOCALLY on real DC01 memory: symbols ready, 14 sealed Windows-memory tools, real `vol_pstree`, `vol_psscan`, and post-fix `vol_netscan` output, and matching custody |
 | Earlier Windows Python 3.14 environment | Historical development environment only; it is not the target proof environment |
 | Windows 11 plus WSL2 | Optional disk-support route; TSK was observed while `ewfmount` and `ntfs-3g` were missing at the earlier checkpoint |
 | Native Ubuntu/Linux | Plausible target, not yet clean-machine demonstrated |
 | Native macOS runner | Unverified |
-| Browser static viewer | Required cross-platform judge path, not yet built |
+| Browser static viewer | Implemented with a positive inert-HTML policy and automated tests; human visual and cross-browser QA remain pending because the in-app browser runtime failed before loading the local file |
 | Docker | No current demonstrated Unchained image or portable E01 mount contract |
 
 Do not say Docker makes the runner work identically on every laptop. A
@@ -355,6 +360,56 @@ static browser viewer. The live runner support matrix must list only hosts that
 were actually tested.
 
 ## 6. Current implementation truth
+
+### Superseding OpenAI-native vNext proof contract
+
+The current 2026-07-18 working tree supersedes the historical checkpoints below:
+
+- Opening calls are validated and reserved as an all-or-none batch. A
+  `COMPLETE` run contains 1–6 distinct eligible opening tools and no rejected
+  opening calls.
+- Each audited model transaction has one request/options pair, zero to two
+  bounded correctly scheduled transient retry pairs, and one accepted response.
+  Orphan, out-of-order, over-limit, and non-transient retry receipts are rejected;
+  transport/status classification and positive nonincreasing retry timeouts are
+  bound to the paired request and wall cap.
+- The normalized response fields are the sole response proof authority. Raw
+  provider `output_items` are deliberately not duplicated into the audit, so
+  they cannot contradict normalized text or validated function calls.
+- `profile.json` is canonical and rebound to the initial evidence custody map;
+  `summary.json` is rebuilt from the verified lifecycle and must match exactly.
+- Token usage is used to recompute every call cost and the final budget snapshot
+  against the code-owned price table and configured caps. These are local cap
+  controls and estimates, not provider billing records.
+- Exact opening, adaptive, finalizer, judge, and report inputs are reconstructed
+  from verified state. Accepted output usage is bounded by its paired request;
+  `COMPLETE` contains no `capped` or `rejected` receipt; lifecycle counts match
+  the verified finding, verdict, and receipt collections.
+- Typed argument values share one bool-safe runtime/verifier JSON type rule;
+  profile OS, shape, filesystems, and route warnings are rederived from retained
+  evidence items.
+- `report.md` and `viewer.html` are reconstructed from verified authority and
+  must match byte-for-byte. The viewer also passes a positive inert-HTML/CSP
+  policy, and `sentinel view` requires strict lifecycle verification for a
+  bundle claiming `COMPLETE`.
+
+The implementation has no authentic completed GPT-5.6 vNext run and no live
+latency comparison. Parallel opening and phase-specific limits are performance
+design choices, not measured evidence that vNext is faster than the Qwen
+ensemble.
+
+The remaining limitations are explicit: offline metadata cannot independently
+authenticate OpenAI; local price-table accounting is not provider billing;
+third-party parsers lack OS-enforced network and scratch-only filesystem
+isolation; final pathname hashing cannot defeat a privileged swap without stable
+handles or immutable snapshots; multiple ready images fail closed rather than
+all being analyzed; heavy opening calls are capped but not CPU/RAM/I/O scheduled;
+per-call parser process startup remains overhead; a same-user actor can race the
+path between verification and external browser open; the hash chain and manifest
+are unsigned and lack a trusted external timestamp; the current OneDrive
+workspace is unsuitable for sensitive live outputs; and human visual and
+cross-browser QA remains pending after the in-app browser failed before loading
+the local viewer.
 
 ### Historical C1 baseline, retained for traceability
 
@@ -379,7 +434,7 @@ from the later Gate A hardening in commit `6e696a0`:
 | Tests | 123 passing |
 | Quality gates | Ruff and build passing; both CPython 3.11.9 environments clean |
 
-### Current implementation proof at 22:22 ET
+### Historical Gate A implementation proof at 22:22 ET
 
 - 14 Python source modules, 8,779 total text lines, and 7,889 nonblank lines;
 - 128 tests pass;
@@ -788,6 +843,7 @@ examples/public-run/
   audit.jsonl
   summary.json
   report.md
+  viewer.html
   evaluation.json
   environment.json
   prompts/
@@ -836,7 +892,7 @@ Git tag, published bundle, and verifier provide the independent anchors.
 
 | Public claim type | Authoritative artifact |
 |---|---|
-| Runtime, calls, and statuses | `summary.json` derived from verified `audit.jsonl` |
+| Runtime, calls, and statuses | `summary.json` deterministically rebuilt from verified `audit.jsonl` |
 | Model, response IDs, request IDs, usage | retained provider response metadata |
 | Estimated cost | versioned price table plus provider usage |
 | Provider-billed cost | provider billing record, only if available |
@@ -919,7 +975,15 @@ The standard-library, no-network verifier now fails closed on:
 - byte-size or SHA-256 mismatch;
 - unresolved finding citation;
 - quoted span not present in the cited output;
-- modified manifest-listed summary bytes;
+- noncanonical profile bytes or a profile that does not match initial custody;
+- a summary that differs from the verifier's deterministic reconstruction;
+- a report or viewer that differs by even one byte from deterministic rerendering;
+- a viewer that violates the positive inert-HTML/CSP policy;
+- an opening that is malformed, duplicated, over six calls, partially accepted,
+  or records a rejection in a `COMPLETE` lifecycle;
+- orphan, out-of-order, over-limit, or invalid retry events;
+- audited call cost, cumulative usage, or terminal budget inconsistent with the
+  normalized response usage, configured caps, and code-owned price table;
 - failed final custody;
 - missing provider proof required by the public claim.
 
@@ -928,7 +992,10 @@ unreferenced tool-output blobs, invalid terminal ordering, judge upgrades, and
 fake/replay markers under strict live verification. A successful check proves
 internal bundle integrity, receipt resolution, and recorded custody fields. It
 does not prove semantic entailment and, without the source evidence, does not
-rehash original evidence bytes.
+rehash original evidence bytes. The normalized message/function-call fields are
+the response authority; raw `output_items` are intentionally absent rather than
+serving as a contradictory second representation. `sentinel view` invokes this
+strict lifecycle verification before opening any bundle that claims `COMPLETE`.
 
 ## 11. Video plan
 
@@ -1104,10 +1171,10 @@ the inaccurate “exactly four pieces of deterministic code” story.
 ### Completed Codex build prompt: P0 correctness
 
 This prompt completed on July 14 at the historical 80-test C1 checkpoint. C2
-later reached 123 tests at `7b05d6a`; the current Gate A-hardened working tree
-has 128. Retain all three checkpoints accurately, do not quote 80 or 123 as the
-current suite, and do not paste the prompt again unless a regression reopens one
-of the three defects.
+later reached 123 tests at `7b05d6a`; the historical Gate A-hardened checkpoint
+had 128. Retain all three checkpoints accurately, do not present any of them as
+the superseding 267-test OpenAI-native vNext suite, and do not paste the prompt
+again unless a regression reopens one of the three defects.
 
 ```text
 Continue the existing sentinel-unchained repository. Do not rebuild or replace
@@ -1356,13 +1423,13 @@ memory-only scope. A fake replay is never acceptable as proof.
 
 The single highest-leverage next action is now:
 
-> Commit the reviewed Gate A routing, launcher, sanitization, large-output, and
-> bounded-model-view hardening. Publish the full history without rewriting it
-> and establish a server timestamp. Then freeze the protocol, rubric, code,
+> Review and intentionally commit the OpenAI-native vNext. Publish without
+> rewriting history and establish a server timestamp. Then freeze the protocol, rubric, code,
 > prompts, catalog, caps, retries, scorer, the exact 16,000,000-byte worker
 > ceiling, success/failure public-path sanitization contract, exact 65,536-byte
 > UTF-8 model-view prefix/completeness rules, and first-valid-run selection rule.
-> Do not run GPT-5.6 on DC01 before that public freeze.
+> With an authorized key, run one harmless complete GPT-5.6 smoke and inspect its
+> sealed viewer. Do not run GPT-5.6 on DC01 before that public freeze and smoke.
 
 ## 18. Change control
 

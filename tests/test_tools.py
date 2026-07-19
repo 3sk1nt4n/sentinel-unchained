@@ -8,6 +8,7 @@ import sys
 import threading
 import time
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -21,6 +22,7 @@ from unchained.models import (
     EvidenceProfile,
     FunctionCall,
     ToolResult,
+    matches_json_schema_type,
 )
 from unchained.tools import (
     _EVENT_LOG_MAX_RETURN_BYTES,
@@ -38,6 +40,30 @@ EMPTY_PARAMETERS = {
     "required": [],
     "additionalProperties": False,
 }
+
+
+@pytest.mark.parametrize(
+    ("value", "expected", "accepted"),
+    [
+        (None, ["integer", "null"], True),
+        (4, ["integer", "null"], True),
+        (True, "integer", False),
+        (1.5, "number", True),
+        (False, "number", False),
+        ("text", "string", True),
+        (True, "boolean", True),
+        ([], "array", True),
+        ({}, "object", True),
+    ],
+)
+def test_shared_json_schema_type_contract(
+    value: Any,
+    expected: Any,
+    accepted: bool,
+) -> None:
+    """Runtime and strict verification share one bool-safe primitive type rule."""
+
+    assert matches_json_schema_type(value, expected) is accepted
 
 
 def test_opening_batch_really_executes_tools_in_parallel(tmp_path: Path) -> None:
@@ -62,6 +88,7 @@ def test_opening_batch_really_executes_tools_in_parallel(tmp_path: Path) -> None
             families=("memory",),
             os_families=("windows",),
             executor=executor,
+            evidence_refs=(("E001", "a" * 64),),
         )
         for name in ("windows.pslist", "windows.netscan")
     )
@@ -93,6 +120,8 @@ def test_opening_batch_really_executes_tools_in_parallel(tmp_path: Path) -> None
     entries = AuditLog.verify(audit_path)
     assert sum(entry["event_type"] == "tool.started" for entry in entries) == 2
     assert sum(entry["event_type"] == "tool.completed" for entry in entries) == 2
+    for entry in entries:
+        assert entry["payload"]["evidence_refs"] == [{"evidence_id": "E001", "sha256": "a" * 64}]
 
 
 def test_private_worker_returns_json_normalized_result(
@@ -445,6 +474,52 @@ def test_windows_direct_memory_tools_do_not_depend_on_dynamic_plugin_catalog(
 
     assert [definition.name for definition in definitions] == ["vol_pstree"]
     assert definitions[0].parameters["required"] == ["pid"]
+    assert definitions[0].public_evidence_refs() == [{"evidence_id": "E001", "sha256": "0" * 64}]
+
+
+def test_multiple_ready_memory_images_fail_closed_before_tool_loading(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    items = tuple(
+        EvidenceItem(
+            evidence_id=f"E{index:03d}",
+            path=tmp_path / f"memory-{index}.bin",
+            kind="memory",
+            size=1,
+            sha256=str(index) * 64,
+            os_hint="windows",
+            health="ready",
+            symbols="ready",
+        )
+        for index in (1, 2)
+    )
+    profile = EvidenceProfile(
+        root=tmp_path,
+        os="windows",
+        shape="memory-only",
+        filesystems=(),
+        sizes={item.evidence_id: item.size for item in items},
+        health={item.evidence_id: item.health for item in items},
+        symbols={item.evidence_id: item.symbols for item in items},
+        hashes={item.evidence_id: item.sha256 for item in items},
+        available_tool_families=("volatility3.windows",),
+        capability_label="synthetic",
+        items=items,
+    )
+    catalog_loaded = False
+
+    def unexpected_catalog(_budget: object) -> dict[str, object]:
+        nonlocal catalog_loaded
+        catalog_loaded = True
+        return {}
+
+    monkeypatch.setattr(tools_module, "_load_qwen_catalog", unexpected_catalog)
+
+    with pytest.raises(RuntimeError, match="multiple ready memory images"):
+        tools_module.load_reference_tools(profile)
+
+    assert catalog_loaded is False
 
 
 def test_private_worker_does_not_inherit_host_credentials(

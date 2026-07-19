@@ -21,7 +21,13 @@ from typing import Any, Literal
 from ._tool_worker import DIRECT_TOOL_TARGETS
 from .audit import AuditLog, canonical_json, sha256_text
 from .caps import CapExceeded, RunBudget
-from .models import EvidenceProfile, FunctionCall, JsonValue, ToolResult
+from .models import (
+    EvidenceProfile,
+    FunctionCall,
+    JsonValue,
+    ToolResult,
+    matches_json_schema_type,
+)
 
 ToolExecutor = Callable[[dict[str, JsonValue]], Any]
 _WORKER_MAX_RESPONSE_BYTES = 16_000_000
@@ -42,6 +48,7 @@ class ToolDefinition:
     families: tuple[str, ...]
     os_families: tuple[str, ...]
     executor: ToolExecutor
+    evidence_refs: tuple[tuple[str, str], ...] = ()
 
     def openai_schema(self) -> dict[str, JsonValue]:
         """Return a strict Responses API function-tool declaration."""
@@ -53,6 +60,14 @@ class ToolDefinition:
             "parameters": self.parameters,
             "strict": True,
         }
+
+    def public_evidence_refs(self) -> list[dict[str, str]]:
+        """Return controller-selected inputs that never become model arguments."""
+
+        return [
+            {"evidence_id": evidence_id, "sha256": digest}
+            for evidence_id, digest in self.evidence_refs
+        ]
 
 
 class ToolProtocolError(ValueError):
@@ -113,7 +128,7 @@ class ToolRegistry:
             raise ToolProtocolError(f"missing arguments for {call.name}: {missing}")
         for key, value in call.arguments.items():
             schema = properties[key]
-            if isinstance(schema, dict) and not _matches_type(value, schema.get("type")):
+            if isinstance(schema, dict) and not matches_json_schema_type(value, schema.get("type")):
                 raise ToolProtocolError(f"argument {key!r} has the wrong type for {call.name}")
         return definition
 
@@ -172,7 +187,14 @@ class ToolRegistry:
         """Audit a complete deterministic receipt for a call that never ran."""
 
         started = _utc_now()
-        self.audit.tool_started(call.call_id, call.name, call.arguments)
+        definition = self._definitions.get(call.name)
+        evidence_refs = definition.public_evidence_refs() if definition is not None else []
+        self.audit.tool_started(
+            call.call_id,
+            call.name,
+            call.arguments,
+            evidence_refs=evidence_refs,
+        )
         output = canonical_json({"error": reason, "status": status})
         result = ToolResult(
             call_id=call.call_id,
@@ -186,7 +208,7 @@ class ToolRegistry:
             duration_ms=0,
             error=reason,
         )
-        self.audit.tool_completed(result)
+        self.audit.tool_completed(result, evidence_refs=evidence_refs)
         return result
 
     def _claim_calls(self, calls: tuple[FunctionCall, ...]) -> None:
@@ -207,11 +229,17 @@ class ToolRegistry:
     def _execute_reserved(self, call: FunctionCall) -> ToolResult:
         started_at = _utc_now()
         started_clock = time.monotonic()
-        self.audit.tool_started(call.call_id, call.name, call.arguments)
+        definition = self.validate(call)
+        evidence_refs = definition.public_evidence_refs()
+        self.audit.tool_started(
+            call.call_id,
+            call.name,
+            call.arguments,
+            evidence_refs=evidence_refs,
+        )
         cap_error: CapExceeded | None = None
         output: str | None = None
         try:
-            definition = self.validate(call)
             raw = definition.executor(dict(call.arguments))
             output = raw if isinstance(raw, str) else canonical_json(raw)
             status, error = _result_status(raw)
@@ -240,7 +268,7 @@ class ToolRegistry:
             duration_ms=max(0, int((ended_clock - started_clock) * 1000)),
             error=error,
         )
-        self.audit.tool_completed(result)
+        self.audit.tool_completed(result, evidence_refs=evidence_refs)
         if cap_error is not None:
             raise cap_error
         return result
@@ -256,28 +284,6 @@ class ToolRegistry:
 
         definitions = load_reference_tools(profile, budget)
         return cls(definitions, audit, budget)
-
-
-def _matches_type(value: JsonValue, expected: JsonValue) -> bool:
-    if expected is None:
-        return True
-    choices = expected if isinstance(expected, list) else [expected]
-    for choice in choices:
-        if choice == "null" and value is None:
-            return True
-        if choice == "integer" and isinstance(value, int) and not isinstance(value, bool):
-            return True
-        if choice == "number" and isinstance(value, (int, float)) and not isinstance(value, bool):
-            return True
-        if choice == "string" and isinstance(value, str):
-            return True
-        if choice == "boolean" and isinstance(value, bool):
-            return True
-        if choice == "array" and isinstance(value, list):
-            return True
-        if choice == "object" and isinstance(value, dict):
-            return True
-    return False
 
 
 def _result_status(raw: Any) -> tuple[str, str | None]:
@@ -341,6 +347,17 @@ def load_reference_tools(
 ) -> tuple[ToolDefinition, ...]:
     """Load reviewed Qwen tool modules without importing its coordinator."""
 
+    if len(profile.memory_items) > 1:
+        raise RuntimeError(
+            "multiple ready memory images are in scope; split them into separate cases "
+            "until evidence-id-selectable memory routing is enabled"
+        )
+    if len(profile.disk_items) > 1:
+        raise RuntimeError(
+            "multiple ready disk images are in scope; split them into separate cases "
+            "until evidence-id-selectable disk routing is enabled"
+        )
+
     catalog = _load_qwen_catalog(budget)
     direct_catalog = catalog["direct"]
     volatility_plugins = catalog["volatility_plugins"]
@@ -391,6 +408,16 @@ def load_reference_tools(
                     evidence_id=memory_id if arg_type == "memory" else disk_id,
                     budget=budget,
                 ),
+                evidence_refs=(
+                    (
+                        memory_id if arg_type == "memory" else disk_id,
+                        memory_item.sha256
+                        if arg_type == "memory" and memory_item is not None
+                        else disk_item.sha256
+                        if disk_item is not None
+                        else "",
+                    ),
+                ),
             )
         )
 
@@ -428,6 +455,7 @@ def load_reference_tools(
                         evidence_id=disk_id,
                         filesystem_offset=filesystem_offset,
                     ),
+                    evidence_refs=((disk_id, disk_item.sha256),),
                 )
             )
 
@@ -523,6 +551,7 @@ def _dynamic_memory_definitions(
                 families=("memory",),
                 os_families=(profile.os,),
                 executor=_volatility_executor(name, memory_path, memory_id, budget),
+                evidence_refs=((memory_id, profile.hashes[memory_id]),),
             )
         )
     return definitions

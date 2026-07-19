@@ -1,8 +1,8 @@
 # Sentinel Unchained: Winner Roadmap
 
 > **Role:** priority, sequencing, positioning, and go/no-go overlay
-> **Status:** Gate A green for local native proof and public provenance; authentic runtime red
-> **Last deep review:** 2026-07-14 22:32 ET
+> **Status:** OpenAI-native vNext green offline; authentic runtime, sandbox, and attestation red
+> **Last deep review:** 2026-07-18
 > **Track:** Developer Tools
 > **Internal submission deadline:** 2026-07-20
 > **Hard deadline:** 2026-07-21 17:00 PT / 20:00 ET
@@ -28,26 +28,68 @@ If these files conflict, apply this precedence:
 
 Proceed with Sentinel Unchained. Do not pivot and do not re-scaffold.
 
-### Current execution snapshot: 2026-07-14 22:22 ET
+### Current execution snapshot: 2026-07-18
 
 | Stage | State | Evidence and remaining boundary |
 |---|---|---|
-| C0 provenance | **GREEN** | `origin/main` is public and matches local HEAD `3506d29`; the unchanged history is pushed and the remote commit record is retained |
-| C1 correctness | **GREEN** | The three reproduced defects and Windows prompt consistency are fixed and regression-tested |
-| C2 proof and reliability | **GREEN OFFLINE** | Content-addressed outputs, provider-returned identity fields, response/request IDs, validated usage, bounded audited retries, manifest, summary, environment record, offline verifier, exact constraints, and `pylock` are implemented |
-| Build evidence | **GREEN LOCALLY** | 14 source modules, 8,779 total text lines, 7,889 nonblank lines, 128 tests, Ruff and format, wheel plus sdist build, pip check, and diff check pass |
+| C0 provenance | **GREEN FOR REVIEWED BASE AND VNEXT REVIEW BRANCH** | Reviewed upstream `main` is `2b256a7`; vNext is published on `agent/openai-native-vnext` without rewriting `main` |
+| C1 correctness | **GREEN OFFLINE** | Custody namespaces, canonical profile binding, lifecycle verification, evidence bindings, exact spans, stateless model packets, deterministic report/viewer reconstruction, and viewer safety are regression-tested |
+| C2 proof and reliability | **GREEN OFFLINE** | Content-addressed outputs, evidence-bound receipts, retry-aware transaction windows, normalized response authority, rebuilt summary, locally recomputed cost/final budget, complete phase automaton, and required root artifacts are implemented |
+| Build evidence | **GREEN LOCALLY** | 17 source modules, 13,383 total source lines, 12,259 nonblank source lines, 267 tests across 32 Python files, Ruff and format, wheel plus sdist build, `pip check`, and diff check pass |
 | Python environment | **GREEN** | Official CPython 3.11.9; clean primary and lockcheck virtual environments; `pip check` clean in both |
 | Native readiness | **GREEN LOCALLY** | Official DC01 memory verified outside Git; Windows memory-only profile and symbols ready; 14 sealed tools; authoritative sanitized process batch and post-fix large netscan output retained; custody matched |
-| C2 CLI exercise | **LIMITED** | An empty-input terminal `INVALID` bundle verifies. It is not `COMPLETE`, authentic, evidence-backed, tool-backed, or GPT-5.6-backed |
+| C2 CLI exercise | **GREEN OFFLINE, NOT DEMONSTRATED** | `sentinel doctor/profile/run/verify/view`, a complete fake-provider lifecycle, strict verification, and static-viewer security are tested; no authentic model run exists |
 | Gate A | **GREEN FOR LOCAL NATIVE AND PUBLIC PROVENANCE LEGS** | Gate A hardening is committed and pushed publicly; authentic runtime and experiment freeze remain red |
 | C4 freeze | **NOT STARTED** | No public protocol/rubric/scorer/run-selection freeze exists |
-| C5 live proof | **NOT STARTED** | No `OPENAI_API_KEY`, funded runtime proof, authentic GPT-5.6 response, or primary run exists |
-| C6 and C7 | **NOT STARTED** | No evaluation, viewer, video, submission tag, or Devpost submission exists |
+| C5 live proof | **NOT STARTED** | No available `OPENAI_API_KEY`, harmless live smoke, authentic complete GPT-5.6 bundle, or primary run exists |
+| C6 and C7 | **PARTIAL OFFLINE** | Static viewer is implemented and sealed; no authentic viewer artifact, evaluation, hosted path, video, submission tag, or Devpost submission exists |
 
 These states are cumulative. The local native smoke makes the real-tool leg
 green but does not make the project public or authentic-model proven. A
 verifier PASS on an `INVALID` empty case remains separate and does not establish
 live model, forensic, or custody claims.
+
+For the current vNext contract, “green offline” specifically means:
+
+- the opening batch is all-or-none; `COMPLETE` requires 1–6 distinct eligible
+  opening tools and `rejected=0`;
+- each model transaction admits only its request/options pair, zero to two
+  correctly scheduled transient retry pairs, and exactly one accepted response;
+  orphan, invalid, out-of-order, and over-limit retries fail closed, while
+  transport/status classification and positive nonincreasing retry timeouts are
+  rebound to the paired request and wall cap;
+- normalized text, validated function calls, model/response/request IDs, status,
+  and usage are the response authority. Raw provider `output_items` are not
+  duplicated into the audit as a second, potentially contradictory authority;
+- canonical `profile.json` is rebound to initial custody and `summary.json` is
+  deterministically rebuilt from the verified lifecycle;
+- every call cost and terminal budget is recomputed from normalized token usage,
+  the code-owned price table, and configured caps. This is local cap accounting,
+  not provider billing;
+- every exact phase input is reconstructed from verified controller state,
+  response output usage cannot exceed its paired request ceiling, `COMPLETE`
+  contains no `capped` or `rejected` receipt, and lifecycle counts match the
+  verified collections;
+- typed argument values share one bool-safe runtime/verifier JSON type rule,
+  while profile OS, shape, filesystems, and route warnings are rederived from
+  retained evidence items;
+- `report.md` and `viewer.html` are rerendered and required to match byte-for-byte,
+  the viewer must satisfy the positive inert-HTML/CSP policy, and `sentinel view`
+  runs strict lifecycle verification for any bundle claiming `COMPLETE`.
+
+These controls are performance-conscious, but no live latency benchmark or
+measured faster-than-Qwen result exists yet.
+
+Remaining boundaries are not hidden: there is no authentic completed GPT-5.6
+vNext run; offline metadata cannot independently authenticate OpenAI; local
+cost accounting is not provider billing; parser children lack OS-enforced
+network and scratch-only filesystem isolation; privileged pathname and
+verification-to-browser-open races remain; multiple ready images fail closed
+instead of all being analyzed; heavy opening tools are not resource-class
+scheduled; per-call parser startup remains overhead; the bundle is unsigned and
+lacks a trusted external timestamp; sensitive live outputs should not remain in
+the synchronized OneDrive workspace; and human visual/cross-browser QA is still
+pending after the in-app browser failed before loading the viewer.
 
 Historical checkpoint discipline: commit `7b05d6a` remains the C2 baseline at
 14 modules, 7,767 repository-counted nonblank source lines, and 123 passing
@@ -234,9 +276,10 @@ server-side timestamp exist.
 
 ## 6. C1: focused correctness gate
 
-**Current state: GREEN.** This gate was completed at the historical 80-test
-checkpoint. C2 reached 123 tests at `7b05d6a`; the current Gate A-hardened
-working tree reaches 128 without reopening the three defects.
+**Historical Gate A state: GREEN.** This gate was completed at the historical
+80-test checkpoint. C2 reached 123 tests at `7b05d6a`; the later Gate
+A-hardened checkpoint reached 128 without reopening the three defects. The
+superseding OpenAI-native vNext snapshot is recorded in the status table above.
 
 Fix exactly the reproduced defects before adding proof features:
 
@@ -259,14 +302,15 @@ defects, plus regression testing and documentation/handover duties.
 - [x] the exact detected partition offset is retained and used;
 - [x] ordinary text logs remain logs;
 - [x] focused tests pass;
-- [x] current full suite passes with 128 tests;
+- [x] the historical Gate A full suite passed with 128 tests;
 - [x] Ruff passes;
 - [x] Windows investigator prompt and flagship scope agree.
 
 ## 7. C2: proof and reliability contract
 
-**Current state: GREEN OFFLINE.** Commits `5309e5c` and `7b05d6a` complete the
-C2 implementation contract:
+**Historical C2 base: GREEN OFFLINE; superseded by the vNext contract above.**
+Commits `5309e5c` and `7b05d6a` completed this earlier C2 implementation
+checkpoint:
 
 - full accepted tool outputs are stored content-addressably before a completion
   receipt is accepted;
@@ -297,11 +341,15 @@ failure surfaces, and exact 65,536 UTF-8-byte investigator-model-view ceiling
 with native-order prefix selection and an explicit completeness receipt. Those
 experiment artifacts do not exist yet.
 
-`MAX_COST_USD` is not a provider invoice guarantee. The safe claim is:
+`MAX_COST_USD` is not a provider invoice guarantee. In vNext the verifier also
+recomputes accepted-call cost, cumulative usage/cost, and the final budget
+snapshot from normalized token counts, the code-owned price table, and the
+configured caps. The safe claim is:
 
 > The controller applies a conservative code-owned estimated inference budget
-> before each request, bounds maximum output, audits every attempt, and stops
-> when reported usage reaches the configured limit.
+> before each request, bounds maximum output, audits every attempt, verifies
+> accepted-call cost from normalized usage, and stops when the verified local
+> budget reaches the configured limit.
 
 Use a dedicated funded OpenAI project, a low project-level budget or alert, and
 the local cap. Provider billing remains authoritative when available.
@@ -595,11 +643,13 @@ Only after C4 passes:
 1. Use a funded OpenAI project key without logging it.
 2. Request `gpt-5.6` through the Responses API.
 3. Record the provider-returned model, response IDs, request IDs when available,
-   statuses, usage, and every attempt.
+   statuses, normalized text/function calls, usage, and every attempt. Do not
+   make raw `output_items` a second proof authority.
 4. Give the model only a neutral case ID, generic filenames where safe,
    evidence profile, and frozen eligible typed functions.
-5. Let it select 1 to 6 opening functions, execute them concurrently, and
-   continue with one function per later turn.
+5. Let it select 1 to 6 opening functions. Validate and reserve the entire batch
+   all-or-none, execute a valid batch concurrently, require `rejected=0` for a
+   `COMPLETE` lifecycle, and continue with one function per later turn.
 6. Retain concise decision summaries, not hidden chain-of-thought.
 7. Preserve every exact accepted output and all failures.
 8. Retain each investigator model view separately, mark whether it is complete,
@@ -653,14 +703,14 @@ No model or forensic tool is executed by this viewer.
 
 ### Viewer security and portability
 
-- inline or local CSS and JavaScript only;
+- inline or local CSS only; no JavaScript;
 - no external dependencies or telemetry;
 - no module imports for the offline file;
 - no `fetch` of sibling JSON under `file://`;
 - bundle data embedded at generation time or selected with an explicit file
   picker;
-- evidence-derived and model-derived text inserted inertly with `textContent`,
-  never trusted as `innerHTML`;
+- evidence-derived and model-derived text escaped by the deterministic renderer,
+  never treated as executable HTML;
 - restrictive Content Security Policy where compatible;
 - no active images, external links, embedded SVG, or executable Markdown from
   receipts;
@@ -668,6 +718,11 @@ No model or forensic tool is executed by this viewer.
   available;
 - large full outputs kept as inert downloadable text or JSON with escaped
   previews.
+
+The offline verifier reconstructs `viewer.html` from verified inputs and
+requires byte-for-byte equality before applying the independent positive
+inert-HTML/CSP policy. `sentinel view` must rerun strict lifecycle verification
+before opening any bundle that claims `COMPLETE`.
 
 The user experience target is:
 
@@ -693,9 +748,10 @@ cannot independently rehash evidence bytes they do not possess.
 
 Say:
 
-> The verifier validates the retained custody record, audit chain, bundle
-> integrity, output hashes, citation identity, quoted spans, and summary
-> consistency.
+> The verifier validates the canonical profile against retained custody,
+> retry-aware model transactions, normalized responses and local cost/budget
+> accounting, the audit chain, output hashes, citation identity, quoted spans,
+> a rebuilt summary, and byte-exact deterministic report/viewer renderings.
 
 Do not say the lightweight viewer independently re-verifies the original
 evidence.
@@ -947,10 +1003,13 @@ this task.
    frozen profile, and the frozen eligible typed functions. Never provide the
    case name, source, answer key, or rubric.
 3. Capture requested and provider-returned model identities, response/request
-   IDs when available, status, usage, timestamps, and every request attempt.
-4. Execute the 1-to-6 model-selected opening concurrently, then one typed
-   function per later turn. Preserve concise decision summaries, not hidden
-   chain-of-thought.
+   IDs when available, status, normalized text/function calls, usage,
+   timestamps, and every request attempt. Do not retain raw `output_items` as a
+   second proof authority.
+4. Validate the 1-to-6 model-selected opening all-or-none, execute the valid
+   batch concurrently, require zero rejected calls for `COMPLETE`, then allow
+   one typed function per later turn. Preserve concise decision summaries, not
+   hidden chain-of-thought.
 5. Retain all exact accepted outputs, failures, audit events, manifests,
    summaries, environment records, prompt/catalog/rubric digests, and pre/post
    evidence hashes. Retain each investigator model view separately with its
@@ -983,13 +1042,14 @@ model or forensic tool.
 3. Make every finding one click from its exact receipt context and artifact
    hash. Explain that a resolving citation is inspectable, not automatically
    sufficient.
-4. Insert all evidence/model text inertly. No trusted innerHTML, active images,
-   executable Markdown, external dependencies, or telemetry. Add a restrictive
-   CSP where compatible.
+4. Insert all evidence/model text inertly. No JavaScript, trusted innerHTML,
+   active images, executable Markdown, external dependencies, or telemetry. Add
+   a restrictive CSP and require byte-exact verifier rerendering.
 5. Keep the replay banner permanently visible. Test anonymous hosted access and
    the offline download on clean current browsers.
-6. Ship verify-run and a retained PASS transcript. A screencast may supplement
-   the path but may not replace it.
+6. Ship verify-run and a retained PASS transcript. Require `sentinel view` to
+   rerun strict lifecycle verification before opening `COMPLETE`. A screencast
+   may supplement the path but may not replace it.
 
 Acceptance: 20 seconds to understand, one click to the receipt, under five
 minutes to verify the core value, anonymous hosted access, clean offline access,
@@ -1035,7 +1095,7 @@ an invoice guarantee, or present replay as authentic execution.
 6. A same-model fresh reviewer is a downgrade-only check, not ground truth.
 7. Resolving citations make claims inspectable, not automatically correct.
 8. The local cost cap is conservative estimated control, not an invoice
-   guarantee.
+    guarantee.
 9. The existing reviewed Volatility path is preferred over a rushed new
    adapter.
 10. A hosted viewer plus offline bundle is the no-rebuild path. A recording is
@@ -1048,20 +1108,24 @@ an invoice guarantee, or present replay as authentic execution.
     enters the repository, viewer, model context, or public bundle.
 15. Every public metric includes its numerator, denominator, source artifact,
     and zero-denominator behavior.
+16. Parallel opening, stateless packets, and phase-specific limits are design
+    reasons to expect less avoidable work; they are not a faster-than-Qwen claim
+    until a frozen live benchmark measures latency and defines the denominator.
+17. Offline verification cannot authenticate OpenAI, substitute for provider
+    billing, provide OS-enforced parser isolation, eliminate privileged pathname
+    races, analyze multiple images, resource-schedule heavy opening tools, sign
+    or externally timestamp the bundle, or replace human cross-browser QA.
 
 ## 18. Single next action
 
-Commit the reviewed Windows direct-tool routing, absolute-venv launcher,
-public-path sanitization, 16,000,000-byte worker transport, and 65,536-byte
-bounded model-view hardening. Preserve the failed pre-fix netscan diagnostic.
-Push the full history without rewriting it and establish an independent server
-timestamp. This closes the remaining Gate A provenance leg.
-
-Then publicly freeze the protocol, rubric, exact code, prompts, eligible
+Review and merge the OpenAI-native vNext branch. Then publicly freeze the
+protocol, rubric, exact code, prompts, eligible
 catalog, caps, retries, scorer, exact 16,000,000-byte worker ceiling,
 case-insensitive slash-variant public-path sanitization across success/failure
 surfaces, exact 65,536-byte UTF-8 model-view ceiling with native-order prefix
 selection and explicit completeness receipt, and first-valid-run selection
-rule. Do not expose DC01 to GPT-5.6 before that freeze. The first post-freeze run
-that completes without a predeclared infrastructure fault is the primary, even
-when its semantic result is disappointing.
+rule. After an authorized key is available, run one harmless synthetic live
+smoke through opening, investigation, finalization, judge, report, custody,
+verification, and viewer inspection. Do not expose DC01 to GPT-5.6 before the
+freeze and successful harmless smoke. The first valid post-freeze evidence run
+remains primary even when its semantic result is disappointing.

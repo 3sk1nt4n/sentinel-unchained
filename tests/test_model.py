@@ -177,6 +177,9 @@ def test_responses_adapter_sends_exact_options_and_parses_usage() -> None:
         store=False,
         include=("reasoning.encrypted_content",),
         reasoning_context="all_turns",
+        reasoning_effort="high",
+        text_verbosity="low",
+        max_tool_calls=1,
         prompt_cache_mode="explicit",
     )
 
@@ -190,13 +193,15 @@ def test_responses_adapter_sends_exact_options_and_parses_usage() -> None:
             "max_output_tokens": 321,
             "store": False,
             "include": ["reasoning.encrypted_content"],
-            "reasoning": {"context": "all_turns"},
+            "reasoning": {"context": "all_turns", "effort": "high"},
+            "text": {"verbosity": "low"},
             "extra_body": {"prompt_cache_options": {"mode": "explicit"}},
             "tools": [tool],
             "parallel_tool_calls": False,
             "tool_choice": choice,
             "previous_response_id": "resp_previous",
             "timeout": 12.5,
+            "max_tool_calls": 1,
         }
     ]
     assert response.status == "completed"
@@ -248,7 +253,6 @@ def test_responses_adapter_builds_request_with_real_sdk_without_network() -> Non
                 store=False,
                 include=("reasoning.encrypted_content",),
                 reasoning_context="all_turns",
-                prompt_cache_mode="explicit",
             )
         )
     finally:
@@ -257,8 +261,9 @@ def test_responses_adapter_builds_request_with_real_sdk_without_network() -> Non
     assert response.response_id == "resp_real_sdk"
     assert response.provider_model == "gpt-5.6"
     assert response.request_id == "req_real_sdk"
-    assert captured_body["reasoning"] == {"context": "all_turns"}
-    assert captured_body["prompt_cache_options"] == {"mode": "explicit"}
+    assert captured_body["reasoning"] == {"context": "all_turns", "effort": "medium"}
+    assert captured_body["text"] == {"verbosity": "medium"}
+    assert captured_body["prompt_cache_options"] == {"mode": "implicit"}
     assert captured_body["store"] is False
     assert captured_body["include"] == ["reasoning.encrypted_content"]
 
@@ -593,6 +598,66 @@ def test_invalid_provider_usage_is_audited_then_rejected(
     ]
     assert entries[-2]["payload"]["usage_error"]
     assert entries[-1]["payload"]["error_type"] == "usage_protocol"
+
+
+def test_response_above_requested_output_ceiling_is_audited_then_rejected(
+    tmp_path: Path,
+) -> None:
+    """Provider usage above the code-owned request ceiling cannot reach the controller."""
+
+    audit_path = tmp_path / "audit.jsonl"
+    with AuditLog(audit_path, "run-output-ceiling", fsync=False) as audit:
+        model = AuditedModel(
+            adapter_for(FakeResponsesEndpoint(sdk_response(output_text="too many tokens"))),
+            audit,
+            permissive_budget(),
+        )
+        with pytest.raises(ModelProviderError, match="above the request maximum 1"):
+            model.create(
+                ModelRequest(
+                    phase="investigate",
+                    instructions="Use typed tools only.",
+                    input_items="bounded packet",
+                    max_output_tokens=1,
+                )
+            )
+
+    entries = AuditLog.verify(audit_path)
+    assert [entry["event_type"] for entry in entries] == [
+        "model.request",
+        "model.request.options",
+        "model.response",
+        "model.error",
+    ]
+    assert entries[1]["payload"]["max_output_tokens"] == 1
+    assert entries[2]["payload"]["token_counts"]["output_tokens"] == 40
+    assert entries[3]["payload"]["error_type"] == "response_protocol"
+
+
+def test_response_at_requested_output_ceiling_is_accepted(tmp_path: Path) -> None:
+    """The output-token ceiling is inclusive, matching the provider contract."""
+
+    audit_path = tmp_path / "audit.jsonl"
+    with AuditLog(audit_path, "run-output-boundary", fsync=False) as audit:
+        response = AuditedModel(
+            adapter_for(FakeResponsesEndpoint(sdk_response(output_text="bounded"))),
+            audit,
+            permissive_budget(),
+        ).create(
+            ModelRequest(
+                phase="investigate",
+                instructions="Use typed tools only.",
+                input_items="bounded packet",
+                max_output_tokens=40,
+            )
+        )
+
+    assert response.usage.output_tokens == 40
+    assert [entry["event_type"] for entry in AuditLog.verify(audit_path)] == [
+        "model.request",
+        "model.request.options",
+        "model.response",
+    ]
 
 
 def test_incomplete_response_is_parsed_audited_then_rejected(tmp_path: Path) -> None:

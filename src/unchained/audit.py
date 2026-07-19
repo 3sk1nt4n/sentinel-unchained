@@ -235,7 +235,13 @@ class AuditLog:
         call_cost_usd: float,
         running_cost_usd: float,
     ) -> None:
-        """Record every normalized model message, function call, and usage counter."""
+        """Record canonical controller-visible response fields and observed usage.
+
+        Raw provider ``output_items`` are intentionally excluded. They are an SDK
+        transport representation from which the adapter derives canonical
+        ``message`` and parsed ``function_calls`` fields. Retaining both as proof
+        authorities would create an avoidable contradiction surface.
+        """
 
         self.append(
             "model.response",
@@ -250,7 +256,6 @@ class AuditLog:
                 "error": response.error,
                 "message": response.text,
                 "function_calls": [asdict(call) for call in response.function_calls],
-                "output_items": list(response.output_items),
                 "token_counts": asdict(response.usage),
                 "usage_error": response.usage_error,
                 "call_cost_usd_estimate": call_cost_usd,
@@ -259,18 +264,30 @@ class AuditLog:
             actor="model-client",
         )
 
-    def tool_started(self, call_id: str, name: str, arguments: Any) -> None:
+    def tool_started(
+        self,
+        call_id: str,
+        name: str,
+        arguments: Any,
+        *,
+        evidence_refs: Any = (),
+    ) -> None:
         self.append(
             "tool.started",
-            {"tool_call_id": call_id, "tool_name": name, "arguments": arguments},
+            {
+                "tool_call_id": call_id,
+                "tool_name": name,
+                "arguments": arguments,
+                "evidence_refs": evidence_refs,
+            },
             actor="tool-runner",
         )
 
-    def tool_completed(self, result: ToolResult) -> None:
+    def tool_completed(self, result: ToolResult, *, evidence_refs: Any = ()) -> None:
         try:
             artifact = self._persist_tool_output(result)
         except Exception as exc:
-            self._record_output_persistence_failure(result, exc)
+            self._record_output_persistence_failure(result, exc, evidence_refs=evidence_refs)
             raise
         excerpt = first_2kb(result.output)
         artifact_receipt: dict[str, JsonValue] = {
@@ -287,6 +304,7 @@ class AuditLog:
                 "tool_call_id": result.call_id,
                 "tool_name": result.tool_name,
                 "arguments": result.arguments,
+                "evidence_refs": evidence_refs,
                 "status": result.status,
                 "started_at": result.started_at,
                 "ended_at": result.ended_at,
@@ -308,7 +326,13 @@ class AuditLog:
             actor="tool-runner",
         )
 
-    def _record_output_persistence_failure(self, result: ToolResult, error: Exception) -> None:
+    def _record_output_persistence_failure(
+        self,
+        result: ToolResult,
+        error: Exception,
+        *,
+        evidence_refs: Any = (),
+    ) -> None:
         """Record a bounded failure receipt without masking the persistence error."""
 
         actual_digest: str | None = None
@@ -326,6 +350,7 @@ class AuditLog:
                     "tool_call_id": result.call_id,
                     "tool_name": result.tool_name,
                     "arguments": result.arguments,
+                    "evidence_refs": evidence_refs,
                     "status": result.status,
                     "claimed_output_sha256": result.output_sha256,
                     "actual_output_sha256": actual_digest,

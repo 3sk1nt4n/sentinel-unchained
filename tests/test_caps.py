@@ -157,3 +157,16 @@ def test_gpt56_cache_write_and_long_context_cost_math() -> None:
 def test_negative_usage_is_rejected_instead_of_reducing_cost(usage: ModelUsage) -> None:
     with pytest.raises(ValueError, match="nonnegative integer"):
         estimate_usage_cost(CapConfig(), usage)
+
+
+def test_cache_accounting_larger_than_input_is_rejected() -> None:
+    usage = ModelUsage(
+        input_tokens=10,
+        output_tokens=1,
+        cached_input_tokens=8,
+        cache_write_tokens=3,
+        provider_total_tokens=11,
+    )
+
+    with pytest.raises(ValueError, match="cache read/write tokens"):
+        estimate_usage_cost(CapConfig(), usage)

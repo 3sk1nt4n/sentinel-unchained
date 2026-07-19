@@ -29,7 +29,14 @@ from types import TracebackType
 from typing import BinaryIO, Literal, TextIO
 
 from .caps import CapExceeded, RunBudget
-from .models import EvidenceItem, EvidenceProfile, EvidenceShape, OsFamily
+from .models import (
+    EvidenceItem,
+    EvidenceProfile,
+    OsFamily,
+    derive_evidence_shape,
+    derive_filesystems,
+    reconcile_evidence_os,
+)
 
 _HASH_CHUNK_BYTES = 16 * 1024 * 1024
 _SAMPLE_CHUNK_BYTES = 2 * 1024 * 1024
@@ -843,47 +850,32 @@ def _probe_symbol_readiness(
     return "missing", False, "unavailable-symbol-table-missing"
 
 
-def _reconcile_os(classifications: tuple[_Classification, ...]) -> tuple[OsFamily, tuple[str, ...]]:
-    """Cross-check disk, memory, and log OS hints and fail closed on conflict."""
+def _memory_readiness(
+    path: Path,
+    readiness_os: OsFamily,
+    base_warnings: tuple[str, ...],
+    budget: RunBudget | None,
+) -> tuple[str, bool, str, tuple[str, ...]]:
+    """Probe one memory item and derive its deterministic readiness warning."""
 
-    disk_hints = {item.os_hint for item in classifications if item.kind == "disk"}
-    memory_hints = {item.os_hint for item in classifications if item.kind == "memory"}
-    log_hints = {item.os_hint for item in classifications if item.kind == "log"}
-    disk_hints.discard("unknown")
-    memory_hints.discard("unknown")
-    log_hints.discard("unknown")
-    strong_hints = disk_hints | memory_hints
-    warnings: list[str] = []
-    if len(strong_hints) > 1:
+    symbols, available, health = _probe_symbol_readiness(path, readiness_os, budget)
+    warnings = list(base_warnings)
+    if not available and readiness_os in {"linux", "macos"}:
+        if "runtime-missing" in health:
+            reason = "the Volatility runtime is absent"
+        elif "resolution-unverified" in health:
+            reason = "the configured symbols did not resolve this evidence's process-list plugin"
+        else:
+            reason = "its symbol table is absent"
         warnings.append(
-            "OS CONFLICT: disk and memory content disagree; OS-specific tool families are disabled."
+            f"{readiness_os} memory is UNAVAILABLE because {reason}; disk analysis may continue."
         )
-        return "unknown", tuple(warnings)
-    if strong_hints:
-        resolved = next(iter(strong_hints))
-        if log_hints and any(value != resolved for value in log_hints):
-            warnings.append("Standalone log OS hints conflict with the primary evidence OS.")
-        return resolved, tuple(warnings)
-    if len(log_hints) == 1:
-        return next(iter(log_hints)), tuple(warnings)
-    if len(log_hints) > 1:
-        warnings.append("Standalone logs contain conflicting OS hints.")
-    return "unknown", tuple(warnings)
-
-
-def _shape(classifications: tuple[_Classification, ...]) -> EvidenceShape:
-    has_memory = any(item.kind == "memory" for item in classifications)
-    has_disk = any(item.kind == "disk" for item in classifications)
-    has_log = any(item.kind == "log" for item in classifications)
-    if has_memory and has_disk:
-        return "both"
-    if has_memory:
-        return "memory-only"
-    if has_disk:
-        return "disk-only"
-    if has_log:
-        return "logs-only"
-    return "unknown"
+    elif health == "degraded-windows-symbol-probe":
+        warnings.append(
+            "Windows memory remains routable for Volatility auto-download, but "
+            "the evidence-specific info probe did not resolve during readiness."
+        )
+    return symbols, available, health, tuple(warnings)
 
 
 def _privileged_prefix() -> list[str] | None:
@@ -1651,6 +1643,7 @@ class EvidenceSession:
         self._budget = budget
         self._profile: EvidenceProfile | None = None
         self._snapshots: dict[str, _FileSnapshot] = {}
+        self._evidence_ids_by_relative_path: dict[str, str] = {}
         self._mount = _ReadOnlyMount()
         self._closed = False
         self._verified = False
@@ -1693,11 +1686,11 @@ class EvidenceSession:
             )
             self._snapshots = {snapshot.relative_path: snapshot for snapshot in snapshots}
             classifications = tuple(_classify(snapshot, self._budget) for snapshot in snapshots)
-            os_family, route_warnings = _reconcile_os(classifications)
-            shape = _shape(classifications)
+            os_family, route_warnings = reconcile_evidence_os(classifications)
+            shape = derive_evidence_shape(classifications)
 
             items: list[EvidenceItem] = []
-            warnings: list[str] = list(route_warnings)
+            mount_messages: list[str] = []
             for index, (snapshot, classification) in enumerate(
                 zip(snapshots, classifications, strict=True),
                 start=1,
@@ -1709,31 +1702,13 @@ class EvidenceSession:
                 item_warnings = list(classification.warnings)
                 if classification.kind == "memory":
                     readiness_os = item_os if item_os != "unknown" else os_family
-                    symbols, available, health = _probe_symbol_readiness(
+                    symbols, available, health, derived_warnings = _memory_readiness(
                         snapshot.path,
                         readiness_os,
+                        classification.warnings,
                         self._budget,
                     )
-                    if not available and readiness_os in {"linux", "macos"}:
-                        if "runtime-missing" in health:
-                            reason = "the Volatility runtime is absent"
-                        elif "resolution-unverified" in health:
-                            reason = (
-                                "the configured symbols did not resolve this evidence's "
-                                "process-list plugin"
-                            )
-                        else:
-                            reason = "its symbol table is absent"
-                        item_warnings.append(
-                            f"{readiness_os} memory is UNAVAILABLE because {reason}; "
-                            "disk analysis may continue."
-                        )
-                    elif health == "degraded-windows-symbol-probe":
-                        item_warnings.append(
-                            "Windows memory remains routable for Volatility auto-download, but "
-                            "the evidence-specific info probe did not resolve during readiness."
-                        )
-                warnings.extend(f"E{index:03d}: {warning}" for warning in item_warnings)
+                    item_warnings = list(derived_warnings)
                 items.append(
                     EvidenceItem(
                         evidence_id=f"E{index:03d}",
@@ -1770,43 +1745,53 @@ class EvidenceSession:
                         classification.filesystem_offset,
                         self._budget,
                     )
-                    warnings.extend(mount_warnings)
+                    mount_messages.extend(mount_warnings)
                     if mount_path is not None and items[disk_index].filesystem is None:
                         items[disk_index] = replace(
                             items[disk_index],
                             filesystem="ntfs",
                             os_hint="windows",
                         )
-                        has_primary_conflict = any(
-                            warning.startswith("OS CONFLICT:") for warning in route_warnings
-                        )
-                        if os_family == "unknown" and not has_primary_conflict:
-                            os_family = "windows"
-                            for memory_index, memory_item in enumerate(items):
-                                if memory_item.kind != "memory" or memory_item.os_hint != "unknown":
-                                    continue
-                                symbols, available, memory_health = _probe_symbol_readiness(
-                                    memory_item.path,
-                                    "windows",
-                                    self._budget,
-                                )
-                                items[memory_index] = replace(
-                                    memory_item,
-                                    os_hint="windows",
-                                    symbols=symbols,
-                                    available=available,
-                                    health=memory_health,
-                                )
                     mounted_health = (
                         "mounted-read-only" if mount_path else "raw-only-mount-unavailable"
                     )
                     items[disk_index] = replace(items[disk_index], health=mounted_health)
 
+            final_os_family, final_route_warnings = reconcile_evidence_os(items)
+            if final_os_family != os_family and final_os_family != "unknown":
+                for memory_index, (snapshot, classification, memory_item) in enumerate(
+                    zip(snapshots, classifications, items, strict=True)
+                ):
+                    if memory_item.kind != "memory" or memory_item.os_hint != "unknown":
+                        continue
+                    symbols, available, memory_health, memory_warnings = _memory_readiness(
+                        snapshot.path,
+                        final_os_family,
+                        classification.warnings,
+                        self._budget,
+                    )
+                    items[memory_index] = replace(
+                        memory_item,
+                        os_hint=final_os_family,
+                        symbols=symbols,
+                        available=available,
+                        health=memory_health,
+                        warnings=memory_warnings,
+                    )
+                final_os_family, final_route_warnings = reconcile_evidence_os(items)
+            os_family = final_os_family
+            route_warnings = final_route_warnings
             immutable_items = tuple(items)
+            warnings = list(route_warnings)
+            for item in immutable_items:
+                warnings.extend(f"{item.evidence_id}: {warning}" for warning in item.warnings)
+            warnings.extend(mount_messages)
+            self._evidence_ids_by_relative_path = {
+                snapshot.relative_path: item.evidence_id
+                for snapshot, item in zip(snapshots, immutable_items, strict=True)
+            }
             conflict = any(warning.startswith("OS CONFLICT:") for warning in route_warnings)
-            filesystems = tuple(
-                sorted({item.filesystem for item in immutable_items if item.filesystem is not None})
-            )
+            filesystems = derive_filesystems(immutable_items)
             available_tool_families = _tool_families(
                 os_family,
                 immutable_items,
@@ -1889,8 +1874,13 @@ class EvidenceSession:
             if mismatches:
                 raise CustodyError("Evidence custody verification failed: " + "; ".join(mismatches))
             self._verified = True
+            if set(self._evidence_ids_by_relative_path) != original_names:
+                raise CustodyError(
+                    "Evidence custody verification failed: sealed evidence-id map is incomplete"
+                )
             return {
-                relative: current_snapshots[relative].sha256 for relative in sorted(original_names)
+                self._evidence_ids_by_relative_path[relative]: current_snapshots[relative].sha256
+                for relative in sorted(original_names)
             }
 
     def close(self) -> bool:

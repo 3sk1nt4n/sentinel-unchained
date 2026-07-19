@@ -22,8 +22,13 @@ Rules:
   anything confirmed.
 - When output contradicts your hypothesis, say so and change course. Dead
   ends are findings too.
-- Stop when more tool calls stop changing your conclusions. Output the
-  single word DONE on its own line to end.
+- On every nonterminal adaptive turn that calls a tool, include a visible,
+  nonempty case-ledger update no larger than 8,192 UTF-8 bytes. State what
+  changed, what remains uncertain, and why the next tool can still change the
+  conclusions.
+- Stop when more tool calls stop changing your conclusions. Return no function
+  call and output exactly the four ASCII characters DONE, with no leading or
+  trailing whitespace and no newline.
 """.strip()
 
 

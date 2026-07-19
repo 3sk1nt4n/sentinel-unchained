@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import threading
 from dataclasses import dataclass, field
@@ -12,6 +13,7 @@ import pytest
 
 from conftest import ManualClock
 from unchained.agent import (
+    MAX_CASE_LEDGER_UPDATE_BYTES,
     AgentProtocolError,
     UnchainedAgent,
     _parse_investigation,
@@ -118,6 +120,14 @@ def tool_names(request: ModelRequest) -> set[str]:
     }
 
 
+def evidence_source(output: str, *, status: str = "success") -> dict[str, str]:
+    return {
+        "status": status,
+        "output": output,
+        "output_sha256": hashlib.sha256(output.encode("utf-8")).hexdigest(),
+    }
+
+
 @dataclass
 class FakeInvestigatorModel:
     """Script decisions from request capabilities without calling a provider."""
@@ -125,8 +135,13 @@ class FakeInvestigatorModel:
     usage: ModelUsage = ModelUsage(input_tokens=10, output_tokens=5)
     always_request_tool: bool = False
     opening_tool_names: tuple[str, ...] = ("windows.pslist",)
-    terminal_text: str = "DONE\n"
+    terminal_text: str = "DONE"
     done_with_tool: bool = False
+    done_with_tool_text: str = "DONE"
+    loop_update: str = (
+        "The prior receipt leaves execution timing unresolved [opening-tool]; "
+        "another process view can still change the conclusion."
+    )
     requests: list[ModelRequest] = field(default_factory=list)
 
     @property
@@ -138,17 +153,43 @@ class FakeInvestigatorModel:
         index = len(self.requests)
         names = tool_names(request)
 
+        if "submit_report_draft" in names:
+            report_packet = json.loads(str(request.input_items[0]["content"][0]["text"]))
+            finding_ids = [finding["finding_id"] for finding in report_packet["findings"]]
+            span_ids = [
+                quote["span_id"]
+                for verdict in report_packet["judge_verdicts"]
+                for quote in verdict["quoted_spans"]
+            ]
+            return ModelResponse(
+                response_id=f"response-{index}",
+                function_calls=(
+                    FunctionCall(
+                        call_id=f"report-{index}",
+                        name="submit_report_draft",
+                        arguments={
+                            "executive_summary": "The execution claim remains unsupported.",
+                            "investigative_narrative": (
+                                "The process listing was reviewed without corroborating execution."
+                            ),
+                            "ioc_commentary": "No independently supported IOCs were identified.",
+                            "limitations_commentary": (
+                                "Only the supplied process-list evidence span was adjudicated."
+                            ),
+                            "referenced_finding_ids": finding_ids,
+                            "referenced_span_ids": span_ids,
+                        },
+                    ),
+                ),
+                usage=self.usage,
+            )
+
         if "submit_judgment" in names:
             judge_packet = json.loads(str(request.input_items[0]["content"][0]["text"]))
-            opening_receipt = next(
-                receipt
-                for receipt in judge_packet["audit_tool_receipts"]
-                if receipt["tool_call_id"] == "opening-tool"
-            )
-            opening_excerpt = str(
-                opening_receipt.get("output_excerpt")
-                or opening_receipt.get("output_first_2kb")
-                or ""
+            opening_span = next(
+                span
+                for span in judge_packet["findings"][0]["supporting_spans"]
+                if span["tool_call_id"] == "opening-tool"
             )
             return ModelResponse(
                 response_id=f"response-{index}",
@@ -165,8 +206,9 @@ class FakeInvestigatorModel:
                                     "cited_tool_call_ids": ["opening-tool"],
                                     "quoted_spans": [
                                         {
+                                            "span_id": opening_span["span_id"],
                                             "tool_call_id": "opening-tool",
-                                            "text": opening_excerpt,
+                                            "text": opening_span["text"],
                                         }
                                     ],
                                     "annotations": ["Acquire corroborating execution artifacts."],
@@ -194,6 +236,12 @@ class FakeInvestigatorModel:
             )
 
         if request.phase == "investigation-finalize":
+            opening_output = next(
+                str(item["output"])
+                for item in request.input_items
+                if item.get("type") == "function_call_output"
+                and item.get("call_id") == "opening-tool"
+            )
             return ModelResponse(
                 response_id=f"response-{index}",
                 function_calls=(
@@ -215,6 +263,12 @@ class FakeInvestigatorModel:
                                     "proposed_status": "CONFIRMED",
                                     "severity": "HIGH",
                                     "tool_call_ids": ["opening-tool"],
+                                    "supporting_quotes": [
+                                        {
+                                            "tool_call_id": "opening-tool",
+                                            "text": opening_output,
+                                        }
+                                    ],
                                     "iocs": [],
                                     "limitations": [],
                                 }
@@ -231,7 +285,7 @@ class FakeInvestigatorModel:
             if self.done_with_tool:
                 return ModelResponse(
                     response_id=f"response-{index}",
-                    text="DONE",
+                    text=self.done_with_tool_text,
                     function_calls=(
                         FunctionCall(
                             call_id="ambiguous-loop-tool",
@@ -257,6 +311,7 @@ class FakeInvestigatorModel:
         )
         return ModelResponse(
             response_id=f"response-{index}",
+            text="" if index == 1 else self.loop_update,
             function_calls=(
                 opening_calls
                 if index == 1
@@ -307,9 +362,9 @@ def test_fresh_judge_downgrades_deliberately_unsupported_finding(tmp_path: Path)
     assert len(judge_requests) == 1
     assert judge_requests[0].previous_response_id is None
     judge_instructions = " ".join(judge_requests[0].instructions.split())
-    assert "bounded retained output excerpt" in judge_instructions
-    assert "not necessarily the complete native-tool stdout or stderr" in judge_instructions
-    assert "exact, nonempty substring" in judge_instructions
+    assert "exact byte range" in judge_instructions
+    assert "supplied span_id" in judge_instructions
+    assert "exact, nonempty substring of that span" in judge_instructions
     assert "at most 1024 UTF-8 bytes" in judge_instructions
 
     phases = [request.phase for request in model.requests]
@@ -320,19 +375,42 @@ def test_fresh_judge_downgrades_deliberately_unsupported_finding(tmp_path: Path)
         "judge",
         "report",
     ]
+    assert all(request.include == () for request in model.requests)
     loop_request = model.requests[1]
     assert loop_request.parallel_tool_calls is False
     assert loop_request.tool_choice == "auto"
     assert "submit_investigation" not in tool_names(loop_request)
+    loop_instructions = " ".join(loop_request.instructions.split())
+    assert "nonempty visible case-ledger update" in loop_instructions
+    assert "8,192 UTF-8 bytes" in loop_instructions
     finalizer_request = model.requests[2]
     assert finalizer_request.tool_choice == {
         "type": "function",
         "name": "submit_investigation",
     }
-    assert finalizer_request.reasoning_context == "all_turns"
+    assert finalizer_request.reasoning_context == "current_turn"
     assert tool_names(finalizer_request) == {"submit_investigation"}
+    opening_packet = json.loads(str(model.requests[0].input_items[0]["content"][0]["text"]))
     judge_packet = json.loads(str(model.requests[3].input_items[0]["content"][0]["text"]))
-    assert "available_catalog" in judge_packet
+    assert "available_catalog" not in opening_packet
+    assert "available_catalog" not in judge_packet
+    assert "audit_tool_receipts" not in judge_packet
+    assert run.findings[0].supporting_spans[0].byte_start == 0
+    assert run.verdicts[0].quoted_spans[0].span_id == run.findings[0].supporting_spans[0].span_id
+    assert [request.reasoning_effort for request in model.requests] == [
+        "low",
+        "medium",
+        "medium",
+        "high",
+        "low",
+    ]
+    assert [request.max_output_tokens for request in model.requests] == [
+        2_048,
+        4_096,
+        12_288,
+        12_288,
+        8_192,
+    ]
 
     entries = AuditLog.verify(audit.path)
     assert [
@@ -346,6 +424,71 @@ def test_fresh_judge_downgrades_deliberately_unsupported_finding(tmp_path: Path)
     assert sum(entry["event_type"] == "investigator.done" for entry in entries) == 1
     finished = next(entry for entry in entries if entry["event_type"] == "investigator.finished")
     assert finished["payload"]["case_notes"] != "DONE"
+    report_completed = next(entry for entry in entries if entry["event_type"] == "report.completed")
+    returned_report = run.report_markdown.encode("utf-8")
+    assert run.report_markdown.endswith("\n")
+    assert (
+        report_completed["payload"]["report_sha256"] == hashlib.sha256(returned_report).hexdigest()
+    )
+    assert report_completed["payload"]["report_bytes"] == len(returned_report)
+
+
+@pytest.mark.parametrize(
+    ("loop_update", "message"),
+    [
+        (" \t\r\n ", "nonempty visible case-ledger update"),
+        ("\x00\u200b", "nonempty visible case-ledger update"),
+        (
+            "€" * ((MAX_CASE_LEDGER_UPDATE_BYTES // 3) + 1),
+            f"exceeds {MAX_CASE_LEDGER_UPDATE_BYTES} UTF-8 bytes",
+        ),
+    ],
+)
+def test_investigate_tool_call_rejects_missing_or_oversized_ledger_update(
+    tmp_path: Path,
+    loop_update: str,
+    message: str,
+) -> None:
+    model = FakeInvestigatorModel(always_request_tool=True, loop_update=loop_update)
+    agent, audit = build_agent(tmp_path, model=model, budget=RunBudget(CapConfig()))
+
+    try:
+        run = agent.run(profile(tmp_path))
+    finally:
+        audit.close()
+
+    assert run.status is RunStatus.PARTIAL
+    assert run.partial_reason is not None and message in run.partial_reason
+    entries = AuditLog.verify(audit.path)
+    assert sum(entry["event_type"] == "tool.started" for entry in entries) == 1
+    assert not any(entry["event_type"] == "investigator.notes.updated" for entry in entries)
+    protocol_error = next(
+        entry for entry in entries if entry["event_type"] == "model.protocol_error"
+    )
+    assert message in protocol_error["payload"]["reason"]
+
+
+def test_investigate_tool_call_accepts_update_at_exact_utf8_limit(tmp_path: Path) -> None:
+    update = "€" * (MAX_CASE_LEDGER_UPDATE_BYTES // 3) + "aa"
+    assert len(update.encode("utf-8")) == MAX_CASE_LEDGER_UPDATE_BYTES
+    model = FakeInvestigatorModel(always_request_tool=True, loop_update=update)
+    budget = RunBudget(CapConfig(max_tool_calls=1))
+    agent, audit = build_agent(tmp_path, model=model, budget=budget)
+
+    try:
+        run = agent.run(profile(tmp_path))
+    finally:
+        audit.close()
+
+    assert run.status is RunStatus.PARTIAL
+    assert run.cap is not None and run.cap.kind is CapKind.TOOL_CALLS
+    notes = next(
+        entry
+        for entry in AuditLog.verify(audit.path)
+        if entry["event_type"] == "investigator.notes.updated"
+    )
+    assert notes["payload"]["case_ledger_update"] == update
+    assert notes["payload"]["case_ledger_update_bytes"] == MAX_CASE_LEDGER_UPDATE_BYTES
 
 
 def test_investigator_must_end_with_literal_done(tmp_path: Path) -> None:
@@ -364,8 +507,30 @@ def test_investigator_must_end_with_literal_done(tmp_path: Path) -> None:
     assert all(request.phase != "investigation-finalize" for request in model.requests)
 
 
-def test_done_cannot_accompany_a_tool_call(tmp_path: Path) -> None:
-    model = FakeInvestigatorModel(done_with_tool=True)
+@pytest.mark.parametrize("terminal_text", [" DONE", "DONE ", "DONE\n", "\nDONE\n"])
+def test_investigator_rejects_whitespace_surrounded_done(
+    tmp_path: Path,
+    terminal_text: str,
+) -> None:
+    model = FakeInvestigatorModel(terminal_text=terminal_text)
+    agent, audit = build_agent(tmp_path, model=model, budget=RunBudget(CapConfig()))
+
+    try:
+        run = agent.run(profile(tmp_path))
+    finally:
+        audit.close()
+
+    assert run.status is RunStatus.PARTIAL
+    assert run.partial_reason == "investigator without a tool call must output exactly DONE"
+    assert all(request.phase != "investigation-finalize" for request in model.requests)
+
+
+@pytest.mark.parametrize("done_text", ["DONE", " DONE", "DONE ", "\nDONE\n"])
+def test_done_like_text_cannot_accompany_a_tool_call(
+    tmp_path: Path,
+    done_text: str,
+) -> None:
+    model = FakeInvestigatorModel(done_with_tool=True, done_with_tool_text=done_text)
     budget = RunBudget(CapConfig())
     agent, audit = build_agent(tmp_path, model=model, budget=budget)
 
@@ -395,6 +560,9 @@ def test_structured_findings_reject_uncited_and_invented_citations() -> None:
                 "proposed_status": "UNSUPPORTED",
                 "severity": "LOW",
                 "tool_call_ids": ["t17"],
+                "supporting_quotes": [
+                    {"tool_call_id": "t17", "text": "does not establish execution"}
+                ],
                 "iocs": [],
                 "limitations": [],
             }
@@ -402,12 +570,22 @@ def test_structured_findings_reject_uncited_and_invented_citations() -> None:
         "limitations": [],
         "unresolved_questions": [],
     }
-    parsed = _parse_investigation(baseline, 2, {"t17": "success"})
+    sources = {"t17": evidence_source("The listing does not establish execution.")}
+    parsed = _parse_investigation(baseline, 2, sources)
     assert parsed.findings[0].proposed_status is FindingStatus.UNSUPPORTED
 
-    uncited = {**baseline, "findings": [{**baseline["findings"][0], "tool_call_ids": []}]}
+    uncited = {
+        **baseline,
+        "findings": [
+            {
+                **baseline["findings"][0],
+                "tool_call_ids": [],
+                "supporting_quotes": [],
+            }
+        ],
+    }
     with pytest.raises(AgentProtocolError, match="has no tool-call citation"):
-        _parse_investigation(uncited, 2, {"t17": "success"})
+        _parse_investigation(uncited, 2, sources)
 
     invented = {
         **baseline,
@@ -419,7 +597,7 @@ def test_structured_findings_reject_uncited_and_invented_citations() -> None:
         ],
     }
     with pytest.raises(AgentProtocolError, match="inline citations do not match"):
-        _parse_investigation(invented, 2, {"t17": "success"})
+        _parse_investigation(invented, 2, sources)
 
 
 @pytest.mark.parametrize(
@@ -448,6 +626,7 @@ def test_judge_requires_proof_for_every_verdict(
                     "proposed_status": "UNSUPPORTED",
                     "severity": "LOW",
                     "tool_call_ids": ["t17"],
+                    "supporting_quotes": [{"tool_call_id": "t17", "text": "not established"}],
                     "iocs": [],
                     "limitations": [],
                 }
@@ -456,14 +635,23 @@ def test_judge_requires_proof_for_every_verdict(
             "unresolved_questions": [],
         },
         2,
-        {"t17": "success", "t18": "success"},
+        {
+            "t17": evidence_source("The hypothesis is not established."),
+            "t18": evidence_source("unrelated receipt"),
+        },
     ).findings[0]
     raw_verdict = {
         "finding_id": "F001",
         "status": "UNSUPPORTED",
         "rationale": "The receipt does not prove the hypothesis.",
         "cited_tool_call_ids": ["t17"],
-        "quoted_spans": [{"tool_call_id": "t17", "text": "not established"}],
+        "quoted_spans": [
+            {
+                "span_id": finding.supporting_spans[0].span_id,
+                "tool_call_id": "t17",
+                "text": "not established",
+            }
+        ],
         "annotations": [],
         **override,
     }
@@ -499,10 +687,11 @@ def test_judge_schema_requires_strict_bounded_evidence_quotes() -> None:
     assert quote_schema == {
         "type": "object",
         "properties": {
+            "span_id": {"type": "string"},
             "tool_call_id": {"type": "string"},
             "text": {"type": "string"},
         },
-        "required": ["tool_call_id", "text"],
+        "required": ["span_id", "tool_call_id", "text"],
         "additionalProperties": False,
     }
 
@@ -549,6 +738,9 @@ def test_judge_rejects_invalid_evidence_quotes(
                     "proposed_status": "NEEDS-REVIEW",
                     "severity": "LOW",
                     "tool_call_ids": ["t17"],
+                    "supporting_quotes": [
+                        {"tool_call_id": "t17", "text": "prefix exact proof suffix"}
+                    ],
                     "iocs": [],
                     "limitations": [],
                 }
@@ -557,8 +749,15 @@ def test_judge_rejects_invalid_evidence_quotes(
             "unresolved_questions": [],
         },
         1,
-        {"t17": "success"},
+        {"t17": evidence_source("prefix exact proof suffix")},
     ).findings[0]
+    if isinstance(quoted_spans, list):
+        quoted_spans = [
+            {**value, "span_id": finding.supporting_spans[0].span_id}
+            if isinstance(value, dict)
+            else value
+            for value in quoted_spans
+        ]
     raw_verdict = {
         "finding_id": "F001",
         "status": "NEEDS-REVIEW",
@@ -599,6 +798,10 @@ def test_judge_requires_a_resolving_quote_for_every_citation(tmp_path: Path) -> 
                     "proposed_status": "CONFIRMED",
                     "severity": "LOW",
                     "tool_call_ids": ["t17", "t18"],
+                    "supporting_quotes": [
+                        {"tool_call_id": "t17", "text": "first exact span"},
+                        {"tool_call_id": "t18", "text": "legacy exact span"},
+                    ],
                     "iocs": [],
                     "limitations": [],
                 }
@@ -607,8 +810,12 @@ def test_judge_requires_a_resolving_quote_for_every_citation(tmp_path: Path) -> 
             "unresolved_questions": [],
         },
         1,
-        {"t17": "success", "t18": "success"},
+        {
+            "t17": evidence_source("first exact span"),
+            "t18": evidence_source("legacy exact span"),
+        },
     ).findings[0]
+    spans = {span.tool_call_id: span for span in finding.supporting_spans}
     receipts = {
         "t17": {
             "tool_call_id": "t17",
@@ -637,7 +844,13 @@ def test_judge_requires_a_resolving_quote_for_every_citation(tmp_path: Path) -> 
                 "verdicts": [
                     {
                         **base,
-                        "quoted_spans": [{"tool_call_id": "t17", "text": "exact span"}],
+                        "quoted_spans": [
+                            {
+                                "span_id": spans["t17"].span_id,
+                                "tool_call_id": "t17",
+                                "text": "exact span",
+                            }
+                        ],
                     }
                 ]
             },
@@ -653,8 +866,16 @@ def test_judge_requires_a_resolving_quote_for_every_citation(tmp_path: Path) -> 
                     {
                         **base,
                         "quoted_spans": [
-                            {"tool_call_id": "t17", "text": "first exact span"},
-                            {"tool_call_id": "t18", "text": "legacy exact span"},
+                            {
+                                "span_id": spans["t17"].span_id,
+                                "tool_call_id": "t17",
+                                "text": "first exact span",
+                            },
+                            {
+                                "span_id": spans["t18"].span_id,
+                                "tool_call_id": "t18",
+                                "text": "legacy exact span",
+                            },
                         ],
                     }
                 ]
@@ -664,8 +885,16 @@ def test_judge_requires_a_resolving_quote_for_every_citation(tmp_path: Path) -> 
             audit,
         )
     assert verdicts[0].public_dict()["quoted_spans"] == [
-        {"tool_call_id": "t17", "text": "first exact span"},
-        {"tool_call_id": "t18", "text": "legacy exact span"},
+        {
+            "span_id": spans["t17"].span_id,
+            "tool_call_id": "t17",
+            "text": "first exact span",
+        },
+        {
+            "span_id": spans["t18"].span_id,
+            "tool_call_id": "t18",
+            "text": "legacy exact span",
+        },
     ]
 
 
@@ -677,7 +906,9 @@ def test_prompt_two_canonical_rules_are_regression_protected() -> None:
     assert "memory is UNAVAILABLE" in normalized
     assert "[t17]" in normalized
     assert "Dead ends are findings too" in normalized
-    assert "single word DONE" in normalized
+    assert "four ASCII characters DONE" in normalized
+    assert "no leading or trailing whitespace" in normalized
+    assert "no newline" in normalized
 
 
 def test_agent_opening_book_traverses_parallel_batch_path(tmp_path: Path) -> None:
@@ -772,13 +1003,14 @@ def test_opening_book_runs_each_distinct_function_at_most_once(tmp_path: Path) -
     )
 
     try:
-        _history, results = agent._opening(profile(tmp_path))  # noqa: SLF001
+        with pytest.raises(AgentProtocolError, match="duplicated tool"):
+            agent._opening(profile(tmp_path))  # noqa: SLF001
     finally:
         audit.close()
 
-    assert executed == [{"pid": 1}]
-    assert [result.status for result in results] == ["success", "rejected"]
-    assert "duplicate opening call" in results[1].output
+    assert executed == []
+    entries = AuditLog.verify(tmp_path / "audit.jsonl")
+    assert entries[-1]["event_type"] == "model.protocol_error"
 
 
 @pytest.mark.parametrize(

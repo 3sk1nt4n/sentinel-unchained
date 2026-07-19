@@ -1,70 +1,209 @@
-# Sentinel Unchained Architecture
+# Sentinel Unchained architecture
 
-Sentinel Unchained is a trust-measurement harness for model-directed digital-forensics investigations. The forensic case is the testbed. The product is the auditable boundary around an autonomous investigator.
+Sentinel Unchained is a trust-measurement harness for model-directed digital
+forensics. The forensic case is the testbed; the product is the auditable,
+deterministic boundary around an autonomous GPT-5.6 investigator.
 
-## Pipeline and trust boundary
+## OpenAI-native vNext pipeline
 
 ```text
-evidence folder
+evidence file or folder
       |
       v
 PROFILE + ROUTE [deterministic]
-  classify content, detect evidence OS/shape, hash custody, capability label
+  content classification, evidence OS/shape, EID-keyed SHA-256, capability truth
       |
       v
-OPENING BOOK [GPT-5.6] -- chooses up to six available typed tools
+OPENING BOOK [GPT-5.6]
+  choose one to six distinct route-valid typed tools; the batch is all-or-none
       |
       v
-parallel typed execution [deterministic authority]
+PARALLEL TYPED EXECUTION [deterministic authority]
+  reserve caps atomically, own paths, bind each receipt to evidence ID + digest
       |
       v
-PLAN -> ACT -> OBSERVE -> UPDATE loop [GPT-5.6]
-      |             one typed tool per turn, hard caps enforced by code
-      v
-literal DONE -> forced serialization [deterministic protocol]
+CASE LEDGER + LATEST OBSERVATION [deterministic packet]
       |
       v
-FRESH JUDGE [GPT-5.6] -- preserve or downgrade only
+PLAN -> ACT -> OBSERVE -> UPDATE [GPT-5.6]
+  visible <=8,192-byte ledger update + at most one typed forensic tool per turn;
+  raw response text exactly equal to DONE is the only terminator
       |
       v
-REPORT [GPT-5.6] -> content-addressed proof bundle
+FORCED INVESTIGATION SERIALIZATION [strict schema, no forensic tools]
       |
       v
-post-run SHA-256 custody verification [deterministic]
+EXACT SPAN RESOLUTION [deterministic]
+  quote -> artifact SHA-256 + UTF-8 byte start/end + stable span ID
+      |
+      v
+FRESH JUDGE [GPT-5.6]
+  existing findings + their spans only; preserve or downgrade, never promote
+      |
+      v
+STRUCTURED REPORT DRAFT [GPT-5.6]
+  narrative fields plus exact existing finding/span references
+      |
+      v
+DETERMINISTIC RENDERER [code authority]
+  authoritative rows/verdicts/citations; model prose labeled nonauthoritative
+      |
+      v
+CLOSE TOOLS/MOUNTS -> FINAL FULL SHA-256 CUSTODY CHECK [deterministic]
+      |
+      v
+SEAL REPORT + STATIC VIEWER + CONTENT-ADDRESSED PROOF BUNDLE
+      |
+      v
+OFFLINE LIFECYCLE, HASH, RECEIPT, AND SPAN VERIFICATION
 ```
 
-The model may choose tools, arguments, hypotheses, stopping point, labels, and report prose. It cannot access a shell, open an arbitrary path, change evidence, bypass the typed tool registry, change audit records, or raise a cap. Code owns custody, tool authority, append-only audit recording, protocol validation, and resource limits.
+The report model never owns the authoritative findings table. The final custody
+pass occurs only after forensic work and mount access have stopped; bundle
+artifacts are sealed afterward so the manifest records that result.
 
-## Deterministic safety floor
+## Authority boundary
 
-| Domain | Guarantee | Limit, stated plainly |
-|---|---|---|
-| Evidence | Inputs are profiled and SHA-256 hashed before and after execution. | The application detects a mismatch; it is not an externally immutable evidence vault. |
-| Tools | Only registered typed forensic functions execute. Arguments are validated and no model-generated shell command runs. | A registered tool can still return incomplete or tool-specific output. |
-| Audit | Model messages, calls, output excerpts, hashes, usage, timestamps, and cost estimates are recorded in JSONL. | App-level append-only behavior is not a tamper-proof external ledger. |
-| Caps | Tool calls, tokens, wall time, and estimated spend have hard limits; a fired cap produces a PARTIAL result. | Provider billing and network failures remain outside local enforcement. |
+| Domain | Deterministic authority | GPT-5.6 authority | Explicit limit |
+|---|---|---|---|
+| Evidence | Complete inventory, public evidence IDs, pre/post hashes, capability route | Interpret the public profile | Hashes detect end-state changes; they do not defeat privileged pathname swaps |
+| Tools | Registry, evidence paths, schemas, process ownership, caps, evidence/hash bindings | Choose route-valid tool and typed arguments | Registered third-party adapters are not yet network/filesystem sandboxed by the OS |
+| State | Case ledger facts, completed calls, receipts, budgets, latest observation | Notes, hypotheses, course corrections, `DONE` | No prior provider transcript or encrypted reasoning replay |
+| Findings | IDs, citations, exact quote resolution, status lattice | Propose findings and supporting quotes | Structural provenance is not a semantic truth validator |
+| Judge | Fresh packet, known IDs/spans, downgrade-only enforcement | Preserve or downgrade with rationale and span quote | Same model family can share investigator failure modes |
+| Report | Authoritative rows, transitions, citations, limitations, escaping | Narrative draft and commentary | Prose remains analyst-facing and requires human review |
+| Proof | Audit chain, artifacts, manifest, viewer, custody, offline verification | No authority | Local bundle is unsigned and has no external timestamp |
 
-## Observed behavior and current status
+The model cannot access a shell, choose an arbitrary path or binary, change the
+evidence, write the audit, modify a cap, add a judge finding, promote a verdict,
+or control authoritative report rows. An opening response containing an unknown,
+duplicate, malformed, or seventh tool call rejects the whole opening batch; no
+valid subset is executed. Adaptive termination is equally literal: whitespace,
+punctuation, or commentary around `DONE` is a protocol error, not completion.
 
-The pre-freeze DC01 rehearsal is retained as non-primary evidence. The opening book selected `vol_pstree`, `vol_psscan`, `vol_netscan`, `vol_malfind`, `vol_cmdline`, and `vol_svcscan`. These executed through typed functions, retained content-addressed outputs, and passed final custody matching. The large `vol_netscan` result exercised the bounded 65,536-byte model-view receipt path. The run stopped before judge and report because the Responses replay contained a provider-only `status` field. Commit `57e6124` removes that field during replay and adds a regression test. The judge and report legs are implemented and their first complete live exercise is intentionally reserved for the post-freeze primary run.
+## Context and speed policy
+
+Every Responses API call uses `store=false` and
+`reasoning.context="current_turn"`. Adaptive turns are stateless provider calls:
+the controller sends the public profile, a compact case ledger, receipt index,
+remaining budget, and only the latest observation. The forced finalizer receives
+the retained observations once. The judge receives exact spans rather than a
+full transcript or the old 2,048-byte audit prefixes.
+
+| Phase | Reasoning effort | Text verbosity | Max output tokens | Max calls exposed |
+|---|---|---|---:|---:|
+| Opening | low | low | 2,048 | 6 typed forensic calls |
+| Adaptive turn | medium | low | 4,096 | 1 typed forensic call |
+| Finalization | medium | low | 12,288 | 1 strict schema call |
+| Judge | high | low | 12,288 | 1 strict schema call |
+| Report | low | medium | 8,192 | 1 strict schema call |
+
+Case-wide tool, token, wall-time, and estimated-cost caps remain code-enforced.
+Opening calls reserve their entire batch before concurrent execution. The
+current scheduler is bounded but not yet resource-aware; running several heavy
+full-image scans on one slow disk remains a production optimization target.
+Requests use implicit GPT-5.6 prompt caching so matching stable prefixes may be
+reused. Cache hits are optional: cap preflight prices an uncached request and
+provider-reported cache reads/writes are audited and reconciled. This design
+removes transcript replay and unnecessary tool volume, but no live latency
+improvement is claimed until it is measured against the same evidence and caps.
 
 ## Data boundary
 
-The provider receives the neutral evidence profile, model messages, typed tool arguments, and retained tool output needed for the investigation. The evidence file itself is read locally by the native tools. Requests use `store=false`; prompt caching is disabled where the provider surface supports that option. Operators must still review sensitive output before sending a case to an external provider.
+Original evidence bytes stay local. The provider receives the public evidence
+profile, bounded model views of sanitized tool output, controller-owned ledger
+state, and exact evidence-span text needed for findings and judgment. Tool output
+and model-authored text are hostile data: neither may change instructions,
+authority, caps, or verdict rules. Operators must still review case sensitivity,
+provider retention, residency, and organization policy before a live run.
 
-## Budget and model policy
+## Proof and verification boundary
 
-The repository currently supports GPT-5.6 and GPT-5.6 Sol identifiers only. There is no alternate-provider smoke mode and no cheaper model that can produce a scored result.
+Each accepted model response records the requested model, provider-returned
+model identity, response ID, request correlation when available, phase policy,
+validated usage, and a controller-estimated cost. The normalized assistant
+message and normalized function calls are the audited response authority; raw
+provider `output_items` are deliberately not retained as a second, potentially
+contradictory proof representation. Tool receipts bind call IDs to controller-
+owned evidence IDs and initial SHA-256 values. Findings bind to exact spans in
+content-addressed output artifacts.
 
-| Mode | Tool calls | Tokens | Wall time | Estimated cap |
-|---|---:|---:|---:|---:|
-| `strict` rehearsal | 20 | 100,000 | 600 s | $2.50 |
-| `default` / scored | 60 | 400,000 | 1,800 s | $10.00 |
+Strict offline verification requires retry-aware model transaction windows: a
+request and phase options, zero to two bounded error/scheduled retry pairs, a
+recovery receipt when retried, and exactly one accepted response. It revalidates
+the strict catalog and asymmetric phase options, retry status/backoff policy,
+response identity, and usage accounting. It independently recomputes each local
+GPT-5.6 cost estimate from audited tokens and the code-owned configured price
+table, reconciles the running totals, and binds the final budget snapshot to the
+configured caps. These are reproducible local cap estimates, not an OpenAI
+invoice or proof of provider billing.
 
-`run.ps1 -Caps strict` now applies the strict values to the child process. Runtime cost is billed to the operator's API project, not Codex credits. The estimator is deliberately conservative and must not be presented as a provider invoice.
+Every phase input is reconstructed exactly from verified controller state.
+Adaptive packets include their profile, visible ledger, receipt index, budget,
+latest call IDs, and corresponding bounded observations; the finalizer, fresh
+judge, and report inputs are similarly rebound. Accepted output usage cannot
+exceed its paired request ceiling. Retry transport/status/timeout metadata must
+be runtime-reachable, `COMPLETE` admits no `capped` or `rejected` receipt, and
+lifecycle counts must match the verified findings, verdicts, and receipts.
+Typed argument values use one shared bool-safe JSON Schema primitive-type rule.
+The public OS route, evidence shape, canonical filesystem set, and route warnings
+are independently rederived from the evidence-item inventory.
 
-## Provenance receipts and verification
+The verifier also binds model call IDs/names/arguments to tool receipts and
+controller actions; visible ledger updates to adaptive responses; and forced
+serializer, judge, and report arguments to their controller outputs. It
+reconstructs the canonical public profile; binds its evidence IDs, sizes, hashes,
+and count to initial custody and the matching final receipt; checks canonical
+`profile.json`; and rebuilds `summary.json`. It deterministically rerenders the
+report and static viewer and requires their exact bytes, rather than merely
+trusting their manifest hashes. Finally, it validates every full artifact-write
+descriptor, rereads cited artifacts against device/inode/digest, recomputes span
+occurrence counts, requires exact judge quotes, enforces downgrade-only
+decisions, and checks terminal consistency and matching custody maps.
 
-Each accepted provider response records the provider-returned model identity, response ID, request correlation where available, validated usage, and the exact retained tool-output artifacts cited by findings. `verify-run` checks the manifest, artifact hashes, citation resolution, response metadata, and custody result. `--require-live-gpt56` additionally rejects fake or replay-only evidence for a scored run.
+`--require-live-gpt56` validates recorded GPT-5.6 metadata and rejects explicit
+fake/replay markers. An offline verifier cannot independently prove that OpenAI
+issued locally recorded fields. Provider authenticity requires an external
+provider retrieval, signature, trusted timestamp, or independently controlled
+attestation layer.
 
-Relevant implementation modules are `unchained.evidence`, `unchained.tools`, `unchained.audit`, `unchained.caps`, `unchained.artifacts`, `unchained.model`, and `unchained.verify`.
+## Static proof viewer
+
+`viewer.html` is generated deterministically before sealing and is a required
+manifest artifact with role `proof-viewer`. It contains no JavaScript, external
+resource, image, frame, or live link; dynamic values are escaped and a restrictive
+CSP is embedded. `sentinel view <run>` verifies the bundle and viewer descriptor
+before opening the already-generated file, and a run that claims `COMPLETE`
+always receives full strict lifecycle verification even if the operator omits a
+strict flag. Verification independently rerenders the viewer from verified
+inputs and requires byte equality, then applies a positive passive HTML policy,
+exact CSP requirements, and active-tag/attribute/CSS rejection. A
+manifest-consistent replacement containing active content still fails. Viewing
+never regenerates findings or contacts OpenAI. A same-user concurrent mutation
+between verification and an external browser open remains outside the
+prototype's guarantee.
+
+## Current verified state
+
+- Both reviewed local repositories matched their upstream heads at the start of
+  the 2026-07-18 review.
+- The original Unchained baseline passed 129 tests; the vNext working tree passes
+  267 offline tests plus Ruff check and format check.
+- The current tree contains 17 source modules and 32 Python files, with 13,383
+  physical source lines and 12,259 nonblank source lines.
+- The prior DC01 rehearsal remains `PARTIAL`; it stopped before judge/report and
+  its old custody receipt namespace fails the corrected verifier.
+- No authentic completed GPT-5.6 vNext evidence bundle exists yet.
+- No live same-evidence latency benchmark has been run, and automated in-app
+  browser visual QA could not start because the browser runtime lacked required
+  sandbox-policy metadata. Parser-based inertness tests passed, but human
+  visual/cross-browser QA remains pending.
+- OS-enforced parser sandboxing, stable evidence handles/immutable snapshots,
+  multi-image scheduling, resource-aware heavy-tool scheduling, and signed or
+  externally timestamped proof remain production work.
+
+The implementation is concentrated in `unchained.evidence`, `unchained.tools`,
+`unchained.agent`, `unchained.model`, `unchained.reporting`, `unchained.viewer`,
+`unchained.viewer_policy`, `unchained.audit`, `unchained.caps`, `unchained.artifacts`, and
+`unchained.verify`. The full repository comparison and release gates are in
+[`OPENAI_VNEXT_REVIEW.md`](OPENAI_VNEXT_REVIEW.md).

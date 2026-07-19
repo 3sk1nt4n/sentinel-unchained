@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import os
 import sys
@@ -29,6 +30,7 @@ from .evidence import CustodyError, EvidenceDiscoveryError, EvidenceError, Evide
 from .model import OpenAIResponsesModel
 from .models import EvidenceProfile, RunStatus
 from .tools import ToolRegistry
+from .viewer import render_viewer_html
 
 EXIT_COMPLETE = 0
 EXIT_FATAL = 1
@@ -37,13 +39,13 @@ EXIT_PARTIAL = 3
 
 
 def build_parser() -> argparse.ArgumentParser:
-    """Create the exact no-subcommand CLI requested by the project contract."""
+    """Create the user-facing run command and legacy no-subcommand parser."""
 
     parser = argparse.ArgumentParser(
-        prog="python -m unchained",
+        prog="sentinel run",
         description="Run a bounded GPT-5.6-driven DFIR investigation.",
     )
-    parser.add_argument("evidence", type=Path, help="folder containing captured evidence")
+    parser.add_argument("evidence", type=Path, help="file or folder containing captured evidence")
     parser.add_argument(
         "--caps",
         choices=("default", "strict"),
@@ -53,11 +55,27 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def build_root_parser() -> argparse.ArgumentParser:
+    """Create the compact command overview shown before any evidence I/O."""
+
+    parser = argparse.ArgumentParser(
+        prog="sentinel",
+        description="Profile, investigate, verify, and view a bounded GPT-5.6 DFIR case.",
+    )
+    parser.add_argument(
+        "command",
+        nargs="?",
+        choices=("doctor", "profile", "run", "verify", "view"),
+        help="lifecycle command; run 'sentinel <command> --help' for details",
+    )
+    return parser
+
+
 def build_verify_parser() -> argparse.ArgumentParser:
     """Create the dependency-free completed-bundle verification command."""
 
     parser = argparse.ArgumentParser(
-        prog="python -m unchained verify-run",
+        prog="sentinel verify",
         description="Verify a retained Sentinel Unchained proof bundle without rebuilding it.",
     )
     parser.add_argument("run_directory", type=Path, help="completed proof-bundle directory")
@@ -65,6 +83,140 @@ def build_verify_parser() -> argparse.ArgumentParser:
     parser.add_argument("--require-complete", action="store_true")
     parser.add_argument("--require-live-gpt56", action="store_true")
     return parser
+
+
+def build_doctor_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="sentinel doctor",
+        description="Check local runtime and live-run configuration without reading evidence.",
+    )
+    parser.add_argument("--json", action="store_true", dest="json_output")
+    return parser
+
+
+def build_profile_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="sentinel profile",
+        description="Inventory, classify, route, and hash evidence without an OpenAI call.",
+    )
+    parser.add_argument("evidence", type=Path)
+    parser.add_argument(
+        "--mount",
+        action="store_true",
+        help="attempt a read-only disk mount while computing capabilities",
+    )
+    parser.add_argument("--json", action="store_true", dest="json_output")
+    return parser
+
+
+def build_view_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="sentinel view",
+        description="Verify and open the retained offline proof viewer.",
+    )
+    parser.add_argument("run_directory", type=Path)
+    parser.add_argument(
+        "--no-open",
+        action="store_true",
+        help="verify and print the viewer path without launching a browser",
+    )
+    return parser
+
+
+def _doctor(*, json_output: bool) -> int:
+    configured_model = os.getenv("UNCHAINED_MODEL")
+    checks = {
+        "python_3_11": sys.version_info[:2] == (3, 11),
+        "openai_sdk": importlib.util.find_spec("openai") is not None,
+        "volatility3": importlib.util.find_spec("volatility3") is not None,
+        "qwen_tool_package": importlib.util.find_spec("sift_sentinel") is not None,
+        "model_is_gpt56_sol": bool(
+            configured_model
+            and (configured_model == "gpt-5.6" or configured_model.startswith("gpt-5.6-sol"))
+        ),
+        "openai_api_key_present": bool(os.getenv("OPENAI_API_KEY")),
+    }
+    ready = all(checks.values())
+    payload = {
+        "ready_for_live_run": ready,
+        "checks": checks,
+        "configured_model": configured_model,
+        "python": sys.version.split()[0],
+        "secrets_printed": False,
+    }
+    if json_output:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+    else:
+        print("READY" if ready else "NOT READY")
+        for name, passed in checks.items():
+            print(f"{'PASS' if passed else 'FAIL':<4}  {name}")
+        if not ready:
+            print("Next: set UNCHAINED_MODEL=gpt-5.6 and OPENAI_API_KEY, then rerun doctor.")
+    return EXIT_COMPLETE if ready else EXIT_INVALID
+
+
+def _profile(evidence: Path, *, mount: bool, json_output: bool) -> int:
+    stream = None if json_output else sys.stdout
+    with EvidenceSession(evidence, mount=mount, case_card_stream=stream) as session:
+        profile = session.profile()
+        final_hashes = session.verify_custody()
+    if final_hashes != profile.hashes:
+        raise CustodyError("profile custody receipts changed namespace or content")
+    if json_output:
+        print(
+            json.dumps(
+                {
+                    "profile": profile.public_dict(),
+                    "custody": {"match": True, "hashes": final_hashes},
+                    "openai_called": False,
+                    "mount_requested": mount,
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+    else:
+        print("Custody recheck: PASS")
+        print("OpenAI calls: 0")
+        if not mount and profile.disk_items:
+            print("Tip: rerun with --mount to include read-only mounted-disk capabilities.")
+    return EXIT_COMPLETE
+
+
+def _progress(message: str) -> None:
+    print(f"[sentinel] {message}", file=sys.stderr, flush=True)
+
+
+def _view(run_directory: Path, *, no_open: bool) -> int:
+    from .verify import verify_run
+
+    result = verify_run(run_directory)
+    if not result.passed:
+        print("Viewer refused: proof-bundle verification failed.", file=sys.stderr)
+        for error in result.errors:
+            print(f"- {error}", file=sys.stderr)
+        return EXIT_FATAL
+    if result.terminal_status == RunStatus.COMPLETE.value:
+        result = verify_run(run_directory, require_complete=True)
+        if not result.passed:
+            print(
+                "Viewer refused: COMPLETE bundle failed strict lifecycle verification.",
+                file=sys.stderr,
+            )
+            for error in result.errors:
+                print(f"- {error}", file=sys.stderr)
+            return EXIT_FATAL
+    viewer = run_directory.expanduser().resolve(strict=True) / "viewer.html"
+    if not viewer.is_file() or viewer.is_symlink():
+        print("Viewer refused: verified bundle has no regular viewer.html.", file=sys.stderr)
+        return EXIT_INVALID
+    print(f"Verified viewer: {viewer}")
+    if not no_open:
+        import webbrowser
+
+        if not webbrowser.open(viewer.as_uri()):
+            print("The browser did not accept the viewer URL; open the printed path manually.")
+    return EXIT_COMPLETE
 
 
 def _run_directory(evidence: Path) -> tuple[str, Path]:
@@ -176,6 +328,8 @@ def _tool_output_artifacts(
 def run_cli(evidence_path: Path, caps_profile: str) -> int:
     """Execute, close, manifest, and immediately verify one isolated run."""
 
+    _progress("checking GPT-5.6 configuration before evidence I/O")
+    model = OpenAIResponsesModel()
     run_id, run_directory = _run_directory(evidence_path)
     audit_path = run_directory / "audit.jsonl"
     store = ArtifactStore(run_directory)
@@ -184,7 +338,6 @@ def run_cli(evidence_path: Path, caps_profile: str) -> int:
     investigation: AgentRun | None = None
     registry: ToolRegistry | None = None
     cap_config: CapConfig | None = None
-    model: OpenAIResponsesModel | None = None
     terminal_status = RunStatus.FATAL
     exit_code = EXIT_FATAL
     report = _fatal_report("run did not start")
@@ -208,6 +361,7 @@ def run_cli(evidence_path: Path, caps_profile: str) -> int:
         try:
             cap_config = CapConfig.from_env(caps_profile)
             budget = RunBudget(cap_config)
+            _progress("profiling and hashing the evidence set")
             audit.append("caps.configured", asdict(cap_config))
             session = EvidenceSession(evidence_path, budget=budget)
             audit.append("custody.initial.started", {})
@@ -222,6 +376,9 @@ def run_cli(evidence_path: Path, caps_profile: str) -> int:
                 },
             )
             audit.append("profile.completed", profile.public_dict())
+            _progress(
+                f"route ready: {profile.os}/{profile.shape}; {len(profile.items)} evidence item(s)"
+            )
 
             if profile.shape == "unknown":
                 raise EvidenceDiscoveryError(
@@ -231,13 +388,18 @@ def run_cli(evidence_path: Path, caps_profile: str) -> int:
                 raise EvidenceDiscoveryError("all recognized evidence routes are unavailable")
 
             budget.check()
-            model = OpenAIResponsesModel()
+            _progress("loading route-valid typed forensic tools")
             try:
                 registry = ToolRegistry.from_reference(profile, audit, budget)
             except RuntimeError as exc:
                 raise ValueError(f"forensic tool readiness failed: {exc}") from exc
             agent = UnchainedAgent(model=model, tools=registry, audit=audit, budget=budget)
+            _progress(
+                "starting GPT-5.6 opening book; bounded profile and observations may be sent "
+                "to OpenAI, original evidence bytes stay local"
+            )
             investigation = agent.run(profile)
+            _progress(f"model pipeline finished with status {investigation.status.value}")
             terminal_status = investigation.status
             exit_code = _terminal_exit(investigation)
             report = investigation.report_markdown
@@ -315,6 +477,7 @@ def run_cli(evidence_path: Path, caps_profile: str) -> int:
             )
 
         if custody_required and session is not None:
+            _progress("performing final full SHA-256 custody verification")
             audit.append("custody.final.started", {})
             try:
                 final_hashes = session.verify_custody()
@@ -342,9 +505,10 @@ def run_cli(evidence_path: Path, caps_profile: str) -> int:
             else None
         )
         try:
+            report = report.rstrip() + "\n"
             report_ref = store.write_text(
                 "report.md",
-                report.rstrip() + "\n",
+                report,
                 role="report",
                 media_type="text/markdown",
             )
@@ -383,6 +547,22 @@ def run_cli(evidence_path: Path, caps_profile: str) -> int:
                 mount_released=mount_released,
             )
             root_artifacts.append(store.write_json("summary.json", summary, role="summary"))
+            viewer = render_viewer_html(
+                run_id=run_id,
+                status=terminal_status.value,
+                profile=profile,
+                summary=summary,
+                report_markdown=report,
+                audit_entries=preterminal_entries,
+            )
+            root_artifacts.append(
+                store.write_text(
+                    "viewer.html",
+                    viewer,
+                    role="proof-viewer",
+                    media_type="text/html",
+                )
+            )
             for artifact in root_artifacts:
                 audit.append("artifact.written", artifact.public_dict())
             audit.append(
@@ -441,9 +621,12 @@ def run_cli(evidence_path: Path, caps_profile: str) -> int:
             print(f"- {error}", file=sys.stderr)
         return EXIT_FATAL
 
+    _progress("content-addressed proof bundle verified")
     print(f"Run status: {terminal_status.value}")
     print(f"Proof bundle: {run_directory}")
     print("Bundle verification: PASS")
+    print(f'Verify again: sentinel verify "{run_directory}" --require-complete')
+    print(f'Open viewer: sentinel view "{run_directory}"')
     return exit_code
 
 
@@ -451,7 +634,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     """Parse arguments and return a stable process exit code."""
 
     raw_arguments = list(sys.argv[1:] if argv is None else argv)
-    if raw_arguments[:1] == ["verify-run"]:
+    if not raw_arguments or raw_arguments[:1] in (["-h"], ["--help"]):
+        build_root_parser().print_help()
+        return EXIT_COMPLETE
+    if raw_arguments[:1] in (["verify-run"], ["verify"]):
         arguments = build_verify_parser().parse_args(raw_arguments[1:])
         from .verify import verify_run
 
@@ -474,12 +660,42 @@ def main(argv: Sequence[str] | None = None) -> int:
                 print(f"Error: {error}", file=sys.stderr)
         return EXIT_COMPLETE if result.passed else EXIT_FATAL
 
+    if raw_arguments[:1] == ["doctor"]:
+        arguments = build_doctor_parser().parse_args(raw_arguments[1:])
+        return _doctor(json_output=arguments.json_output)
+
+    if raw_arguments[:1] == ["profile"]:
+        arguments = build_profile_parser().parse_args(raw_arguments[1:])
+        try:
+            return _profile(
+                arguments.evidence,
+                mount=arguments.mount,
+                json_output=arguments.json_output,
+            )
+        except (EvidenceError, OSError, ValueError) as exc:
+            print(f"Sentinel profile failed: {type(exc).__name__}: {exc}", file=sys.stderr)
+            return EXIT_INVALID
+
+    if raw_arguments[:1] == ["view"]:
+        arguments = build_view_parser().parse_args(raw_arguments[1:])
+        try:
+            return _view(arguments.run_directory, no_open=arguments.no_open)
+        except (OSError, ValueError) as exc:
+            print(f"Sentinel viewer failed: {exc}", file=sys.stderr)
+            return EXIT_INVALID
+
+    if raw_arguments[:1] == ["run"]:
+        raw_arguments = raw_arguments[1:]
+
     arguments = build_parser().parse_args(raw_arguments)
     try:
         return run_cli(arguments.evidence, arguments.caps)
     except KeyboardInterrupt:
         print("Sentinel Unchained interrupted.", file=sys.stderr)
         return EXIT_FATAL
+    except ValueError as exc:
+        print(f"Sentinel Unchained configuration invalid: {exc}", file=sys.stderr)
+        return EXIT_INVALID
     except Exception as exc:  # noqa: BLE001 - stable CLI code even if finalization fails
         print(f"Sentinel Unchained fatal error: {type(exc).__name__}: {exc}", file=sys.stderr)
         return EXIT_FATAL

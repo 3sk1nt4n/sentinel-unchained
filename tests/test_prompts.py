@@ -10,6 +10,8 @@ def test_investigator_prompt_is_consistently_windows_scoped() -> None:
 
     assert "windows evidence" in normalized
     assert "1 to 6 distinct functions" in normalized
+    assert "nonempty case-ledger update" in normalized
+    assert "8,192 utf-8 bytes" in normalized
     assert "linux" not in normalized
     assert "macos" not in normalized
     assert "up to 6" not in normalized

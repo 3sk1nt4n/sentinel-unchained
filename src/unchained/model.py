@@ -8,7 +8,7 @@ import os
 import time
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, replace
-from typing import Any, Protocol
+from typing import Any, Literal, Protocol
 
 from .audit import AuditLog, canonical_json, first_2kb, sha256_text
 from .caps import CapExceeded, RunBudget, estimate_usage_cost
@@ -29,9 +29,12 @@ class ModelRequest:
     max_output_tokens: int = 16_384
     timeout_seconds: float | None = None
     store: bool = False
-    include: tuple[str, ...] = ("reasoning.encrypted_content",)
+    include: tuple[str, ...] = ()
     reasoning_context: str = "current_turn"
-    prompt_cache_mode: str = "explicit"
+    reasoning_effort: Literal["none", "low", "medium", "high", "xhigh", "max"] = "medium"
+    text_verbosity: Literal["low", "medium", "high"] = "medium"
+    max_tool_calls: int | None = None
+    prompt_cache_mode: str = "implicit"
 
 
 class ModelProviderError(RuntimeError):
@@ -99,16 +102,22 @@ class OpenAIResponsesModel:
             "input": request.input_items,
             "max_output_tokens": request.max_output_tokens,
             "store": request.store,
-            "include": list(request.include),
-            "reasoning": {"context": request.reasoning_context},
+            "reasoning": {
+                "context": request.reasoning_context,
+                "effort": request.reasoning_effort,
+            },
+            "text": {"verbosity": request.text_verbosity},
             # GPT-5.6 exposes this experimental request field before the pinned
             # SDK's typed ``Responses.create`` signature does.  ``extra_body``
             # is the SDK-supported escape hatch for forwarding such fields.
-            # Explicit mode without a content breakpoint disables caching.
+            # Implicit mode lets GPT-5.6 reuse matching stable prefixes.  The
+            # adapter still audits provider-reported cache reads and writes.
             "extra_body": {
                 "prompt_cache_options": {"mode": request.prompt_cache_mode},
             },
         }
+        if request.include:
+            kwargs["include"] = list(request.include)
         if request.tools:
             kwargs["tools"] = list(request.tools)
         if request.parallel_tool_calls is not None:
@@ -119,6 +128,8 @@ class OpenAIResponsesModel:
             kwargs["previous_response_id"] = request.previous_response_id
         if request.timeout_seconds is not None:
             kwargs["timeout"] = request.timeout_seconds
+        if request.max_tool_calls is not None:
+            kwargs["max_tool_calls"] = request.max_tool_calls
 
         response = self._client.responses.create(**kwargs)
         output_items: list[dict[str, JsonValue]] = []
@@ -247,6 +258,9 @@ class AuditedModel:
                 "store": bounded.store,
                 "include": list(bounded.include),
                 "reasoning_context": bounded.reasoning_context,
+                "reasoning_effort": bounded.reasoning_effort,
+                "text_verbosity": bounded.text_verbosity,
+                "max_tool_calls": bounded.max_tool_calls,
                 "prompt_cache_mode": bounded.prompt_cache_mode,
             },
             actor="model-client",
@@ -318,7 +332,7 @@ class AuditedModel:
             self._record_cap(wall_error)
             raise
         try:
-            self._validate_response(response, bounded.phase)
+            self._validate_response(response, bounded.phase, bounded.max_output_tokens)
         except ModelProviderError as exc:
             self.audit.append(
                 "model.error",
@@ -447,7 +461,12 @@ class AuditedModel:
             },
         )
 
-    def _validate_response(self, response: ModelResponse, phase: str) -> None:
+    def _validate_response(
+        self,
+        response: ModelResponse,
+        phase: str,
+        max_output_tokens: int,
+    ) -> None:
         if isinstance(self.client, OpenAIResponsesModel) and not response.provider_model:
             raise ModelProviderError(
                 f"model response during {phase} omitted provider-returned model identity"
@@ -461,6 +480,11 @@ class AuditedModel:
             raise ModelProviderError(
                 f"model response during {phase} was {response.status}: "
                 f"{response.incomplete_details or response.error or 'no detail'}"
+            )
+        if response.usage.output_tokens > max_output_tokens:
+            raise ModelProviderError(
+                f"model response during {phase} reported {response.usage.output_tokens} "
+                f"output tokens above the request maximum {max_output_tokens}"
             )
         call_ids: set[str] = set()
         for call in response.function_calls:
