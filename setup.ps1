@@ -53,10 +53,16 @@ if (-not (Test-Path $python)) {
     & py -3.11 -m venv $venv
     Assert-NativeSuccess "Python virtual-environment creation"
 }
-$pythonInfoRaw = @(
-    & $python -I -S -c 'import json, platform, struct; print(json.dumps({"implementation": platform.python_implementation(), "version": platform.python_version(), "machine": platform.machine(), "address_bits": struct.calcsize("P") * 8}, sort_keys=True))'
-)
+# The probe runs from a file, not -c, because Windows PowerShell 5.1 mangles
+# embedded double quotes when building native command lines.
+$probeFile = Join-Path ([System.IO.Path]::GetTempPath()) "unchained-python-probe.py"
+@'
+import json, platform, struct
+print(json.dumps({"implementation": platform.python_implementation(), "version": platform.python_version(), "machine": platform.machine(), "address_bits": struct.calcsize("P") * 8}, sort_keys=True))
+'@ | Set-Content -Path $probeFile -Encoding ascii
+$pythonInfoRaw = @(& $python -I -S $probeFile)
 Assert-NativeSuccess "Python version check"
+Remove-Item $probeFile -ErrorAction SilentlyContinue
 try {
     $pythonInfo = ($pythonInfoRaw -join [Environment]::NewLine) |
         ConvertFrom-Json -ErrorAction Stop
@@ -101,14 +107,36 @@ else {
     Write-Host "[4/5] Quality gate skipped because -SkipTests was explicit" -ForegroundColor Yellow
 }
 
-Write-Host "[5/5] READY" -ForegroundColor Green
+Write-Host "[5/5] Making 'sentinel' a one-word command in every terminal" -ForegroundColor Cyan
+$shimDirectory = Join-Path $env:LOCALAPPDATA "sentinel-unchained\bin"
+New-Item -ItemType Directory -Force $shimDirectory | Out-Null
+$shim = Join-Path $shimDirectory "sentinel.cmd"
+$sentinelExe = Join-Path $venv "Scripts\sentinel.exe"
+Set-Content -Path $shim -Value "@echo off`r`n`"$sentinelExe`" %*" -Encoding ascii
+$userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+if ($null -eq $userPath) { $userPath = "" }
+if (($userPath -split ";") -notcontains $shimDirectory) {
+    [Environment]::SetEnvironmentVariable("Path", ($userPath.TrimEnd(";") + ";" + $shimDirectory), "User")
+    Write-Host "      Added one shim folder to your user PATH: $shimDirectory" -ForegroundColor Gray
+    Write-Host "      (Only a 2-line sentinel.cmd lives there - nothing else is shadowed.)" -ForegroundColor Gray
+}
+if (($env:Path -split ";") -notcontains $shimDirectory) {
+    $env:Path = $env:Path.TrimEnd(";") + ";" + $shimDirectory
+}
+
+Write-Host ""
+Write-Host "READY" -ForegroundColor Green
 Write-Host ""
 Write-Host "+-- YOUR NEXT SAFE STEP -------------------------------------------------+" -ForegroundColor Cyan
 Write-Host "| Start the guided case wizard. Profiling is local and costs `$0.        |" -ForegroundColor White
 Write-Host "+------------------------------------------------------------------------+" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "  & `"$python`" -m unchained onboard" -ForegroundColor White
+Write-Host "  sentinel onboard" -ForegroundColor White
 Write-Host ""
+Write-Host "From now on, every command is one word from any terminal:" -ForegroundColor Gray
+Write-Host "  sentinel key - sentinel onboard <case> - sentinel doctor - sentinel view <bundle>" -ForegroundColor Gray
+Write-Host "PATH-restricted environment? The full form always works:" -ForegroundColor DarkGray
+Write-Host "  & `"$python`" -m unchained onboard" -ForegroundColor DarkGray
 Write-Host "The wizard explains what belongs in one case, profiles and hashes it first," -ForegroundColor Gray
 Write-Host "then stops for an explicit choice before any funded GPT-5.6 Sol run." -ForegroundColor Gray
 Write-Host "Validated Python: $python" -ForegroundColor DarkGray

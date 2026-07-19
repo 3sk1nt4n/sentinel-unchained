@@ -56,3 +56,6 @@ def test_posix_bootstrap_is_key_safe_and_uses_the_offline_lane() -> None:
     assert "profile /evidence" in script
     assert "dfirmadness.com/the-stolen-szechuan-sauce" in script
     assert not re.search(r"(curl|wget)[^\n]*dfirmadness", script)
+    # One-word command shim for the offline lane.
+    assert ".local/bin" in script
+    assert "chmod +x" in script

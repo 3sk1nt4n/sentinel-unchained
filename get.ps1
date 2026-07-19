@@ -34,7 +34,7 @@ foreach ($tool in @("git", "py")) {
 }
 
 # 1/4 - repository
-Write-Step "1/4" "Getting the repository"
+Write-Step "1/5" "Getting the repository"
 if (Test-Path (Join-Path (Get-Location) "setup.ps1")) {
     $repo = (Get-Location).Path
     Write-Host "      Using the current checkout: $repo" -ForegroundColor Gray
@@ -52,12 +52,12 @@ else {
 Set-Location $repo
 
 # 2/4 - pinned isolated environment
-Write-Step "2/4" "Installing the pinned CPython 3.11 toolchain (no key, no evidence)"
+Write-Step "2/5" "Installing the pinned CPython 3.11 toolchain (no key, no evidence)"
 powershell -NoProfile -ExecutionPolicy Bypass -File .\setup.ps1
 if ($LASTEXITCODE -ne 0) { throw "setup.ps1 failed with exit code $LASTEXITCODE." }
 
 # 3/4 - optional hidden key capture
-Write-Step "3/4" "Optional: store your OpenAI key for live runs (hidden input)"
+Write-Step "3/5" "Optional: store your OpenAI key for live runs (hidden input)"
 Write-Host "      The key is written to a private local file and referenced through" -ForegroundColor Gray
 Write-Host "      OPENAI_API_KEY_FILE. It is never echoed, never committed, never logged." -ForegroundColor Gray
 Write-Host "      Press Enter on an empty prompt to skip and stay fully offline." -ForegroundColor Gray

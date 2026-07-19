@@ -20,7 +20,10 @@ def test_setup_is_fail_closed_and_hands_off_to_guided_onboarding() -> None:
     assert "platform.python_implementation()" in script
     assert 'struct.calcsize("P") * 8' in script
     assert '@("AMD64", "x86_64")' in script
-    assert "-I -S -c" in script
+    # The probe must run from a file: Windows PowerShell 5.1 mangles embedded
+    # double quotes in native -c command lines.
+    assert "-I -S $probeFile" in script
+    assert "-I -S -c" not in script
     assert script.index("platform.python_implementation()") < script.index(
         "pip install -r requirements/bootstrap.txt"
     )

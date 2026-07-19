@@ -37,7 +37,7 @@ for tool in git docker; do
   fi
 done
 
-step "1/4" "Getting the repository"
+step "1/6" "Getting the repository"
 if [ -f "./compose.yaml" ] && [ -f "./setup.ps1" ]; then
   REPO="$(pwd)"
   note "Using the current checkout: $REPO"
@@ -51,10 +51,10 @@ else
 fi
 cd "$REPO"
 
-step "2/4" "Building the hardened offline image (no key, no network at runtime)"
+step "2/6" "Building the hardened offline image (no key, no network at runtime)"
 docker compose build
 
-step "3/4" "Optional: store your OpenAI key for the live Luna canary (hidden input)"
+step "3/6" "Optional: store your OpenAI key for the live Luna canary (hidden input)"
 note "The key is written to a private local file (chmod 600) and referenced through"
 note "OPENAI_API_KEY_FILE. It is never echoed, never committed, never logged."
 note "Press Enter on an empty prompt to skip and stay fully offline."
@@ -82,7 +82,7 @@ else
   printf '      %sSkipped. Everything below stays local and free.%s\n' "$GREEN" "$RESET"
 fi
 
-step "4/5" "Ready-made samples"
+step "4/6" "Ready-made samples"
 note "A safe synthetic sample ships in the repo and is already mounted at /evidence:"
 note "  docker compose run --rm offline profile /evidence --json"
 note ""
@@ -94,7 +94,22 @@ note "custody itself during onboarding):"
 note "  DC01-memory.zip  64A4E2CB47138084A5C2878066B2D7B1"
 note "  DC01-E01.zip     E57FC636E833C5F1AB58DFACE873BBDE"
 
-step "5/5" "Opening the guided onboarding (zero-key, zero-spend welcome)"
+step "5/6" "Making 'sentinel' a one-word command (hardened offline lane)"
+SHIM_DIR="$HOME/.local/bin"
+mkdir -p "$SHIM_DIR"
+cat > "$SHIM_DIR/sentinel" <<SHIM
+#!/usr/bin/env bash
+# One-word launcher for the hardened offline Unchained container.
+exec docker compose -f "$REPO/compose.yaml" run --rm offline "\$@"
+SHIM
+chmod +x "$SHIM_DIR/sentinel"
+note "Created $SHIM_DIR/sentinel - e.g.: sentinel profile /evidence --json"
+case ":$PATH:" in
+  *":$SHIM_DIR:"*) note "It is on your PATH already." ;;
+  *) note "Add it to PATH to use one-word commands: export PATH=\"\$PATH:$SHIM_DIR\"" ;;
+esac
+
+step "6/6" "Opening the guided onboarding (zero-key, zero-spend welcome)"
 docker compose run --rm offline
 
 printf '\n%sNext moves:%s\n' "$CYAN" "$RESET"

@@ -26,12 +26,13 @@
 </p>
 
 <p align="center">
-  <a href="docs/START-HERE.md"><strong>Start here</strong></a> ·
-  <a href="#quickstart">Quickstart</a> ·
-  <a href="#what-you-will-see">Run experience</a> ·
-  <a href="#how-it-works">Architecture</a> ·
-  <a href="#proof-status">Proof status</a> ·
-  <a href="JUDGE-QUICKSTART.md">Judge guide</a>
+  <a href="docs/START-HERE.md"><strong>🚀 Start here</strong></a> ·
+  <a href="#for-judges--the-submission-at-a-glance">🏆 For judges</a> ·
+  <a href="#quickstart">⏱️ Quickstart</a> ·
+  <a href="#what-you-will-see">🎬 Run experience</a> ·
+  <a href="#how-it-works">🧠 Architecture</a> ·
+  <a href="#proof-status">🧾 Proof status</a> ·
+  <a href="JUDGE-QUICKSTART.md">⚖️ Judge guide</a>
 </p>
 
 **The whole idea in one breath:**
@@ -160,11 +161,11 @@ cd Unchained
 powershell -NoProfile -ExecutionPolicy Bypass -File .\setup.ps1
 ```
 
-**Step 2 — meet the analyst-friendly front door:**
+**Step 2 — meet the analyst-friendly front door.** The installer makes
+`sentinel` a one-word command (open a new terminal if it is not found yet):
 
 ```powershell
-$sentinel = "$env:LOCALAPPDATA\venvs\sentinel-unchained-py311\Scripts\sentinel.exe"
-& $sentinel onboard
+sentinel onboard
 ```
 
 A full-color welcome walks you through preparing one case, what the safe
@@ -173,7 +174,7 @@ preview does, and exactly what a paid run would cost — before anything is read
 **Step 3 — profile one case and get the verified case card:**
 
 ```powershell
-& $sentinel onboard "C:\Evidence\CASE-A"
+sentinel onboard "C:\Evidence\CASE-A"
 ```
 
 This classifies by bounded content probes, assigns public evidence IDs, and
@@ -196,7 +197,7 @@ which the case card prints.
 only after you type the exact phrase `LAUNCH GPT-5.6 SOL`:
 
 ```powershell
-& $sentinel onboard "C:\Evidence\CASE-A" --launch --caps strict
+sentinel onboard "C:\Evidence\CASE-A" --launch --caps strict
 ```
 
 You then watch the investigation live: the opening book, each typed tool with

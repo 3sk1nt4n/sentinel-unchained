@@ -43,18 +43,25 @@ Never present a fake-model test or replay as an authentic GPT-5.6 run.
 
 ## Judge's first screen
 
-After installation, start here—not with a funded run:
+After installation, `sentinel` is a one-word command (setup adds a tiny shim
+folder to your user PATH; open a new terminal if it is not found). Start
+here—not with a funded run:
 
 ```powershell
-$sentinel = "$env:LOCALAPPDATA\venvs\sentinel-unchained-py311\Scripts\sentinel.exe"
-& $sentinel onboard
+sentinel onboard
 ```
 
 The welcome needs no evidence and no key, reads nothing, and makes zero OpenAI
 calls. To produce the first deterministic case card:
 
 ```powershell
-& $sentinel onboard "C:\Evidence\sentinel\dc01"
+sentinel onboard "C:\Evidence\sentinel\dc01"
+```
+
+If PATH changes are restricted, the full form always works:
+
+```powershell
+& "$env:LOCALAPPDATA\venvs\sentinel-unchained-py311\Scripts\sentinel.exe" onboard
 ```
 
 That default profiles content and rechecks SHA-256 custody locally. Archives
@@ -143,11 +150,10 @@ Expected final line:
 No broken requirements found.
 ```
 
-Open the guided, zero-key welcome:
+Open the guided, zero-key welcome (one word after setup):
 
 ```powershell
-$sentinel = "$env:LOCALAPPDATA\venvs\sentinel-unchained-py311\Scripts\sentinel.exe"
-& $sentinel onboard
+sentinel onboard
 ```
 
 ## 3. Run the no-key quality gate
