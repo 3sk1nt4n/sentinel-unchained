@@ -78,7 +78,7 @@ zero OpenAI calls:
 | Track | **Developer Tools** — OpenAI Build Week |
 | Built with | **Codex** (implementation + adversarial review) and **GPT-5.6** (Sol investigator/reviewer, Luna canary) |
 | Codex Session ID | `019f61e5-5755-7a02-adb4-618d32baab27` — see [Built with Codex](#built-with-codex) |
-| Fastest no-key test | Three commands, zero spend — top of the [judge quickstart](JUDGE-QUICKSTART.md) |
+| Fastest no-key test | A few commands, zero spend — top of the [judge quickstart](JUDGE-QUICKSTART.md) |
 | Live receipts | [Sol capped opening on real memory](docs/runs/sol-capped-dc01-opening.json) · [Luna canary](docs/runs/luna-canary-receipt.json) |
 | Honest gaps | `COMPLETE` bundle, benchmark, and video are pending; the [proof status](#proof-status) table never overstates |
 
@@ -96,7 +96,7 @@ zero OpenAI calls:
 | Item | Status |
 |---|---|
 | 🟢 Public MIT repo, Codex Session ID, provenance boundary | **Done** |
-| 🟢 383-test offline gate, ruff clean, hardened Docker | **Done** |
+| 🟢 390-test offline gate, ruff clean, hardened Docker | **Done** |
 | 🟢 Live GPT-5.6 Sol opening on real 2 GiB Windows memory | **Done** — retained, capped `PARTIAL` by design |
 | 🟢 Zero-key guided onboarding + colorful live run experience | **Done** — see the screen above |
 | 🟡 Authentic `COMPLETE` proof bundle | **In progress** — the final live run |
@@ -345,14 +345,19 @@ final-report phases under the intended submission caps.
 1. **Case card** — evidence is classified by bounded content probes, assigned
    public IDs, routed by OS/shape, and SHA-256 hashed before any model call.
 2. **Opening book** — GPT-5.6 chooses up to twelve eligible typed tools. Code
-   validates the complete decision and starts valid calls concurrently.
+   validates the complete decision and runs them concurrently; the terminal
+   narrates each tool with its retained bytes and execution time.
 3. **Visible investigation** — each adaptive turn is
-   `PLAN → one ACT → OBSERVE → UPDATE`; growing provider transcripts are not
-   replayed.
+   `PLAN → one ACT → OBSERVE → UPDATE`. The run shows GPT-5.6's per-turn
+   reasoning (its visible case-ledger update), the one typed action it chose,
+   and per-response token counts with a running cost estimate; growing provider
+   transcripts are never replayed.
 4. **Grounded review** — exact quotes become content-addressed UTF-8 byte spans;
-   a fresh-context reviewer may preserve or downgrade, never upgrade.
-5. **Proof handoff** — Unchained prints the bundle path, terminal status, and
-   exact verification/viewer commands.
+   a fresh-context reviewer may preserve or downgrade, never upgrade, and each
+   verdict prints as a green *preserved* or amber *downgraded* line with its
+   rationale.
+5. **Proof handoff** — a final status badge prints the bundle path, terminal
+   status, the strict verification gates, and the exact verify/view commands.
 
 The model never receives a shell, local evidence path, executable name,
 subprocess authority, or budget authority. Fixed private workers may invoke
@@ -475,8 +480,9 @@ Read the full [architecture](docs/ARCHITECTURE.md) or the detailed
 
 **Live milestone:** the first retained Sol run used a 2 GiB Windows memory image,
 recorded `gpt-5.6-sol` on both model responses, executed all six model-selected
-opening tools successfully, and stopped honestly when the next reservation
-would exceed the six-tool cap. It used 59,254 provider-reported tokens, took
+opening tools successfully (under the earlier six-tool opening cap; the opening
+now allows up to twelve), and stopped honestly when the next reservation would
+exceed that cap. It used 59,254 provider-reported tokens, took
 43.702 seconds end to end, and produced a local cost estimate of $0.38789875.
 This proves the live opening, typed execution, cap, custody, and bundle path—not
 a completed investigation. See the
@@ -499,7 +505,7 @@ schema. A live `COMPLETE` v2 bundle remains pending.
 | Claim | Current evidence |
 |---|---|
 | Deterministic profile, routing, public IDs, and pre/post custody | Unit/adversarial tests + containerized synthetic profile |
-| One-to-six all-or-none parallel opening | Controller and synchronization-barrier regression tests |
+| Up-to-twelve all-or-none parallel opening | Controller and synchronization-barrier regression tests |
 | Stateless one-action adaptive loop and typed `DONE` | Required-action, closed-schema, malformed-status, exact-input, and protocol-mutation tests; literal v1 remains verifier-readable only |
 | Exact evidence spans | Full-artifact late-span and byte-mutation tests |
 | Downgrade-only fresh review | Finding-ID, status-lattice, span, and receipt tests |
