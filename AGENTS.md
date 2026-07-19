@@ -4,7 +4,18 @@
 and go/no-go gates. `docs/HACKATHON_MASTER_PLAN.md` owns the detailed
 experiment, proof, judge-experience, prompt, and submission contracts.
 `HACKATHON_HANDOVER.md` is the living execution-status source of truth. Read all
-three before substantial work.
+three before substantial work. `STATUS.md` is the one-glance done-vs-remaining
+scoreboard.
+
+## Design philosophy
+
+Win on elegance and verifiable trust, not volume. This is an OpenAI-native
+build: GPT-5.6 does the reasoning through the Responses API, and deterministic
+code exists only where evidence integrity, custody, caps, or the proof contract
+demand it. After the typed tools run, the rest is bounded API calls. Prefer the
+smallest, clearest change that preserves the authority boundary; do not
+re-scaffold or add weight the proof contract does not need. Less code, more
+proof.
 
 For every material implementation, verification, artifact, scope, schedule, or
 submission-status change:
@@ -62,6 +73,12 @@ submission-status change:
     Linux/macOS breadth, Plaso, a new Volatility adapter, and generalized Docker
     portability are future work, not open prerequisites. Do not reopen them
     before the authentic primary, viewer, video, and submission are green.
+15. Single-brand hygiene. Keep the tree consistent as one OpenAI / Codex /
+    GPT-5.6 project: no references to other AI assistants or model vendors, and
+    no AI co-authorship trailers, in code, docs, commit messages, filenames, or
+    metadata. Run a repo-wide scan before finishing and remove any that appear.
+    Provider credential-scrub allowlists that redact API-key environment
+    prefixes are a security feature — leave them.
 
 The current retained `/feedback` Session ID is
 `019f61e5-5755-7a02-adb4-618d32baab27`. Preserve it as current provenance, but
