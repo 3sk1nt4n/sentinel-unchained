@@ -100,7 +100,7 @@ local SHA-256 case card before any model is involved.
 | Item | Status |
 |---|---|
 | 🟢 Public MIT repo, Codex Session ID, provenance boundary | **Done** |
-| 🟢 390-test offline gate, ruff clean, hardened Docker | **Done** |
+| 🟢 404-test offline gate, ruff clean, hardened Docker | **Done** |
 | 🟢 Live GPT-5.6 Sol opening on real 2 GiB Windows memory | **Done** — retained, capped `PARTIAL` by design |
 | 🟢 Zero-key guided onboarding + colorful live run experience | **Done** — see the screen above |
 | 🟡 Authentic `COMPLETE` proof bundle | **In progress** — the final live run |
@@ -137,7 +137,7 @@ amber `ACTION NEEDED` card, not a fake green light.
 | Your machine | Lane | First result in | Spend | Verified state |
 |---|---|---|---|---|
 | 🪟 **Windows 10/11** | Native CPython 3.11 — the flagship forensic lane | ~5 min | $0 until you type the launch phrase | ✅ Tested; the live Sol run happened here |
-| 🐧 **Linux (AMD64)** | Hardened Docker offline lane | ~3 min | $0 | ✅ Tested: 274-test in-container gate |
+| 🐧 **Linux (AMD64)** | Hardened Docker offline lane | ~3 min | $0 | ✅ Same 404-test suite in-container (a few Windows-only tests skip) |
 | 🍎 **macOS** | Same Docker lane via Docker Desktop | ~3 min | $0 | ⚠️ Expected via Docker's `linux/amd64` emulation; not yet verified on Mac hardware |
 
 Every lane converges on the same experience: a colorful guided onboarding, a
@@ -157,7 +157,7 @@ git clone https://github.com/3sk1nt4n/Unchained.git; cd Unchained
 ```
 
 ```bash
-# 🐧 Linux / 🍎 macOS (Git + Python 3.11)
+# 🐧 Linux (Git + Python 3.11) — macOS: use the Docker lane below (tested route)
 git clone https://github.com/3sk1nt4n/Unchained.git && cd Unchained
 ./setup.sh           # install + verify everything (one command)
 ./unchained.sh       # start a whole case — it walks you through the rest
@@ -399,7 +399,7 @@ Read the full [architecture](docs/ARCHITECTURE.md) or the detailed
 | Capability | State |
 |---|---|
 | OpenAI-native controller and independent offline verifier | ✅ Verified offline |
-| Linux/AMD64 Docker build, 274-test gate, CLI, profile, and custody | ✅ Verified locally |
+| Linux/AMD64 Docker build, 404-test suite, CLI, profile, and custody | ✅ Verified locally |
 | Cheap GPT-5.6 Luna typed-tool canary | ✅ Demonstrated live; second-reviewer-attested (project-affiliated) sanitized receipt |
 | Authentic GPT-5.6 Sol capped opening on real Windows memory | ✅ Retained bundle verifies `VALID`; terminal state is intentionally `PARTIAL` |
 | Authentic `COMPLETE` GPT-5.6 Sol evidence bundle | ⏳ Opening/tool path proven; findings → reviewer → final report still pending |
@@ -438,7 +438,7 @@ schema. A live `COMPLETE` v2 bundle remains pending.
 | Downgrade-only fresh review | Finding-ID, status-lattice, span, and receipt tests |
 | Deterministic report and inert viewer | Independent rerender + exact-byte and positive HTML/CSP policy tests |
 | Independent strict verifier | Re-chained adversarial mutations across lifecycle, usage, retry, cost, and custody |
-| Linux Docker packaging | CPython 3.11 test target: 274 tests, Ruff, format, and `pip check`; non-root runtime/profile gate |
+| Linux Docker packaging | CPython 3.11 test target: the same 404-test suite (a few Windows-only tests skip on Linux), Ruff, format, and `pip check`; non-root runtime/profile gate |
 | Live GPT-5.6 Luna canary | Independently demonstrated; [attested sanitized projection](docs/runs/luna-canary-receipt.json), with no raw receipt available for bundle proof |
 | Authentic GPT-5.6 Sol opening on real memory | [Bundle-derived sanitized receipt](docs/runs/sol-capped-dc01-opening.json): 2 model responses, 6 successful opening tools, recorded custody match, offline `VALID` |
 | Authentic complete GPT-5.6 Sol case | Pending; retained Sol run is explicitly `PARTIAL` at `MAX_TOOL_CALLS` |

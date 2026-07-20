@@ -318,7 +318,7 @@ def _key_command(*, status: bool, remove: bool) -> int:
     else:
         print(success)
     print(f"Location: {key_path} (owner-only access)")
-    print("Check any time: sentinel key --status · remove: sentinel key --remove")
+    print("Check any time: sentinel key --status - remove: sentinel key --remove")
     print("Tip: if UNCHAINED_MODEL is unset, set it to gpt-5.6 before a paid run.")
     return EXIT_COMPLETE
 
@@ -513,7 +513,7 @@ def _interactive_terminal() -> bool:
 def _choose_analysis_depth(selected: str) -> str:
     """Offer the interactive HEAVY/LIGHT pick; any non-answer keeps the selection.
 
-    Both depths run the same GPT-5.6 Sol investigator — this chooses hard stop
+    Both depths run the same GPT-5.6 Sol investigator - this chooses hard stop
     ceilings, never a different model. EOF or a closed stdin keeps the current
     selection so noninteractive callers are unaffected.
     """
@@ -524,8 +524,8 @@ def _choose_analysis_depth(selected: str) -> str:
     model_label = active_model_label()
     try:
         answer = input(
-            f"Choose spending depth [Enter = keep {current} · 1 = HEAVY · 2 = LIGHT] "
-            f"— both on {model_label}: "
+            f"Choose spending depth [Enter = keep {current} - 1 = HEAVY - 2 = LIGHT] "
+            f"- both on {model_label}: "
         ).strip()
     except (EOFError, OSError):
         return selected
@@ -552,9 +552,10 @@ def _confirm_paid_sol_launch(caps_profile: str, caps: CapConfig) -> bool:
     print(f"|  Model for this run: {model_label}")
     print("|  It may receive the bounded profile and typed-tool observations; the")
     print("|  original evidence bytes stay local. This is no longer the $0 preview.")
+    depth_name = "HEAVY (FLAGSHIP)" if caps_profile == "default" else "LIGHT (CAUTIOUS)"
     print(
-        f"|  {caps_profile.upper()} hard ceiling: ${caps.max_cost_usd:.2f} estimated cost "
-        f"· {caps.max_total_tokens:,} tokens · {caps.max_tool_calls} tools."
+        f"|  {depth_name} hard ceiling: ${caps.max_cost_usd:.2f} estimated cost "
+        f"- {caps.max_total_tokens:,} tokens - {caps.max_tool_calls} tools."
     )
     print("+--------------------------------------------------------------------------+")
     try:
@@ -562,7 +563,7 @@ def _confirm_paid_sol_launch(caps_profile: str, caps: CapConfig) -> bool:
     except EOFError:
         return False
     # Tolerate surrounding whitespace (a stray leading/trailing space or newline
-    # from a paste) — the exact phrase, spacing, and case are still required.
+    # from a paste) - the exact phrase, spacing, and case are still required.
     return answer.strip() == "LAUNCH GPT-5.6 SOL"
 
 
@@ -611,9 +612,9 @@ def _onboard(
         console = Console(sys.stdout)
         if console.enabled:
             console.banner("U N C H A I N E D", "One case, profiled locally before any model call.")
-            console.step("bounded local probes · SHA-256 custody · zero OpenAI calls")
+            console.step("bounded local probes - SHA-256 custody - zero OpenAI calls")
         else:
-            print("UNCHAINED — profiling one case locally (zero OpenAI calls)...", flush=True)
+            print("UNCHAINED - profiling one case locally (zero OpenAI calls)...", flush=True)
 
     session = EvidenceSession(evidence, mount=mount, case_card_stream=None)
     with session:
@@ -670,14 +671,14 @@ def _onboard(
         caps = CapConfig.from_env(caps_profile)
         depth_name = "HEAVY (FLAGSHIP)" if caps_profile == "default" else "LIGHT (CAUTIOUS)"
         print(
-            f"Depth set: {depth_name} — ceilings {caps.max_tool_calls} tools / "
+            f"Depth set: {depth_name} - ceilings {caps.max_tool_calls} tools / "
             f"{caps.max_total_tokens:,} tokens / {caps.max_wall_seconds / 60:g} min / "
             f"${caps.max_cost_usd:.2f} estimated cost"
         )
     if not _confirm_paid_sol_launch(caps_profile, caps):
         print("Launch cancelled. The local profile remains valid; OpenAI calls: 0.")
         return EXIT_COMPLETE
-    print("Confirmation accepted. Starting the bounded GPT-5.6 Sol lifecycle...")
+    print("Confirmation accepted. Starting the bounded GPT-5.6 lifecycle...")
     return run_cli(
         evidence,
         caps_profile,
@@ -691,7 +692,7 @@ _SECRET_LIKE = re.compile(r"^[A-Za-z0-9_\-]{20,}$")
 
 def _looks_like_pasted_secret(text: str) -> bool:
     """True when a long, high-entropy, separator-free token is pasted where a
-    path or menu answer is expected — almost certainly an API key. Shape-based
+    path or menu answer is expected - almost certainly an API key. Shape-based
     and vendor-agnostic; real paths carry separators and menu answers are short.
     """
 
@@ -702,7 +703,7 @@ def _looks_like_pasted_secret(text: str) -> bool:
 
 
 def _prompt_evidence_path() -> Path | None:
-    """Ask the one question a run needs — where the evidence is — and return a
+    """Ask the one question a run needs - where the evidence is - and return a
     resolved path, or None to quit. Re-asks on a bad path; a pasted key is
     discarded, never used, so a fat-fingered credential can't leak into a path.
     """
@@ -720,7 +721,7 @@ def _prompt_evidence_path() -> Path | None:
             continue
         if _looks_like_pasted_secret(answer):
             print(
-                "  That looked like an API key pasted at the path prompt — discarded "
+                "  That looked like an API key pasted at the path prompt - discarded "
                 "(never used, stored, or logged). Paste keys only at the hidden key "
                 "step, and revoke it if it was real."
             )
@@ -763,7 +764,7 @@ def _guided(*, mount: bool = False, caps_profile: str = "strict", no_color: bool
     No flags, no environment juggling: the model defaults to GPT-5.6 Sol (unless
     a cheap rehearsal was opted in), the key is auto-found or set here, and the
     depth pick sets only the hard ceilings. The paid-cloud confirmation phrase is
-    kept deliberately — it is the one honest boundary before money is spent.
+    kept deliberately - it is the one honest boundary before money is spent.
     """
 
     caps = CapConfig.from_env(caps_profile)
@@ -783,7 +784,7 @@ def _guided(*, mount: bool = False, caps_profile: str = "strict", no_color: bool
         console = Console(sys.stdout)
         if console.enabled:
             console.phase("LOCAL PROFILE")
-            console.step("bounded content probes · SHA-256 custody · zero OpenAI calls")
+            console.step("bounded content probes - SHA-256 custody - zero OpenAI calls")
         else:
             print("Profiling this case locally (zero OpenAI calls)...", flush=True)
 
@@ -816,20 +817,20 @@ def _guided(*, mount: bool = False, caps_profile: str = "strict", no_color: bool
         )
         if assessment.profile_ready:
             break
-        print("  This case is not route-ready yet — fix the blockers above, or pick another.")
+        print("  This case is not route-ready yet - fix the blockers above, or pick another.")
         try:
-            again = input("  Try another case? [Enter = yes · q = quit]: ").strip().lower()
+            again = input("  Try another case? [Enter = yes - q = quit]: ").strip().lower()
         except (EOFError, OSError):
             return EXIT_INVALID
         if again in ("q", "quit", "exit", "n", "no"):
             return EXIT_INVALID
 
-    # Step 3: depth — hard ceilings only, same investigator model either way.
+    # Step 3: depth - hard ceilings only, same investigator model either way.
     caps_profile = _choose_analysis_depth(caps_profile)
     caps = CapConfig.from_env(caps_profile)
     depth_name = "HEAVY (FLAGSHIP)" if caps_profile == "default" else "LIGHT (CAUTIOUS)"
     print(
-        f"  Depth: {depth_name} — ceilings {caps.max_tool_calls} tools / "
+        f"  Depth: {depth_name} - ceilings {caps.max_tool_calls} tools / "
         f"{caps.max_total_tokens:,} tokens / {caps.max_wall_seconds / 60:g} min / "
         f"${caps.max_cost_usd:.2f} estimated cost"
     )
@@ -840,9 +841,9 @@ def _guided(*, mount: bool = False, caps_profile: str = "strict", no_color: bool
     if not os.getenv("UNCHAINED_MODEL") and not cheap_model_opt_in():
         os.environ["UNCHAINED_MODEL"] = "gpt-5.6"
 
-    # Step 5: key — auto-found, or set now with hidden input. Never dead-ends.
+    # Step 5: key - auto-found, or set now with hidden input. Never dead-ends.
     if not _ensure_key_for_launch():
-        print("  No API key configured — cannot launch. Run 'sentinel key', then start again.")
+        print("  No API key configured - cannot launch. Run 'sentinel key', then start again.")
         return EXIT_INVALID
 
     # Step 6: the one deliberate boundary before any spend.
@@ -875,7 +876,7 @@ class _AuditNarrator:
     """Display-only proxy over :class:`AuditLog` for an interactive terminal.
 
     Every call is forwarded to the wrapped audit log unchanged before any
-    narration happens, so the appended record — not the narration — remains the
+    narration happens, so the appended record - not the narration - remains the
     sole authority. A narration failure can never alter or abort the run.
     """
 
@@ -923,8 +924,8 @@ class _AuditNarrator:
                 executed = payload.get("executed")
                 rejected = payload.get("rejected")
                 self._console.ok(
-                    f"opening book: {selected} selected · {executed} executed · "
-                    f"{rejected} rejected — all-or-none validated"
+                    f"opening book: {selected} selected - {executed} executed - "
+                    f"{rejected} rejected - all-or-none validated"
                 )
             elif event_type == "investigator.notes.updated" and isinstance(payload, dict):
                 turn = payload.get("turn")
@@ -938,12 +939,12 @@ class _AuditNarrator:
                 findings = [f for f in payload.get("findings") or [] if isinstance(f, dict)]
                 self._proposed = {str(f.get("finding_id")): f for f in findings}
                 self._console.ok(
-                    f"typed DONE accepted · {len(findings)} structured finding(s) proposed"
+                    f"typed DONE accepted - {len(findings)} structured finding(s) proposed"
                 )
                 for finding in findings:
                     self._console.detail(
-                        f"● {finding.get('finding_id')} · {finding.get('proposed_status')} · "
-                        f"{finding.get('severity')} · {str(finding.get('title', ''))[:56]}"
+                        f"● {finding.get('finding_id')} - {finding.get('proposed_status')} - "
+                        f"{finding.get('severity')} - {str(finding.get('title', ''))[:56]}"
                     )
             elif event_type == "judge.completed" and isinstance(payload, dict):
                 for verdict in payload.get("verdicts") or []:
@@ -954,16 +955,16 @@ class _AuditNarrator:
                     proposed = str(self._proposed.get(fid, {}).get("proposed_status", "?"))
                     rationale = str(verdict.get("rationale", ""))[:48]
                     if status == proposed:
-                        self._console.ok(f"{fid} · {proposed} → preserved · {rationale}")
+                        self._console.ok(f"{fid} - {proposed} → preserved - {rationale}")
                     else:
                         self._console.warn(
-                            f"{fid} · {proposed} → downgraded to {status} · {rationale}"
+                            f"{fid} - {proposed} → downgraded to {status} - {rationale}"
                         )
             elif event_type == "report.completed" and isinstance(payload, dict):
                 report_bytes = payload.get("report_bytes")
                 digest = str(payload.get("report_sha256", ""))[:12]
                 self._console.ok(
-                    f"deterministic report sealed · {report_bytes:,} bytes · sha256 {digest}…"
+                    f"deterministic report sealed - {report_bytes:,} bytes - sha256 {digest}…"
                 )
             elif event_type == "judge.started":
                 self._phase_header("judge")
@@ -999,7 +1000,7 @@ class _AuditNarrator:
             provider = getattr(response, "provider_model", None) or "response"
             running = kwargs.get("running_cost_usd", 0.0)
             self._console.detail(
-                f"↓ {provider} · in {tokens_in:,} / out {tokens_out:,} tokens · "
+                f"↓ {provider} - in {tokens_in:,} / out {tokens_out:,} tokens - "
                 f"${float(running):.4f} est. total"
             )
 
@@ -1017,7 +1018,7 @@ class _AuditNarrator:
             status = getattr(result, "status", "?")
             byte_count = len(getattr(result, "output", "").encode("utf-8", "replace"))
             duration = getattr(result, "duration_ms", 0)
-            line = f"{name} · {status} · {byte_count:,} bytes retained · {duration:,} ms"
+            line = f"{name} - {status} - {byte_count:,} bytes retained - {duration:,} ms"
             if status == "success":
                 self._console.ok(line)
             else:
@@ -1491,13 +1492,13 @@ def run_cli(
         stdout_console.rule()
         stdout_console.line(
             f"  {stdout_console.badge(terminal_status.value)}"
-            f"  run {run_id}  ·  wall {_elapsed() or '?'}"
+            f"  run {run_id}  -  wall {_elapsed() or '?'}"
         )
         stdout_console.kv("Proof bundle", str(run_directory))
-        stdout_console.kv("Verification", "PASS — report, viewer, custody, and audit chain")
+        stdout_console.kv("Verification", "PASS - report, viewer, custody, and audit chain")
         stdout_console.kv(
             "Strict gates",
-            "packets · receipts · spans · usage · cost · report bytes · viewer bytes",
+            "packets - receipts - spans - usage - cost - report bytes - viewer bytes",
         )
         stdout_console.kv("Verify again", f'sentinel verify "{run_directory}" --require-complete')
         stdout_console.kv("Open viewer", f'sentinel view "{run_directory}"')

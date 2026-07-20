@@ -16,6 +16,10 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VENV="$REPO_DIR/.venv"
 PY="$VENV/bin/python3"
 
+# Always operate from the repo root, so `bash /any/path/setup.sh` installs THIS
+# project (its pyproject.toml) rather than whatever the current directory is.
+cd "$REPO_DIR"
+
 c_cyan="\033[36m"; c_green="\033[32m"; c_yellow="\033[33m"; c_gray="\033[90m"; c_reset="\033[0m"
 say()  { printf "%b%s%b\n" "$1" "$2" "$c_reset"; }
 
@@ -76,7 +80,15 @@ PY311="$(find_py311 || true)"
 if [ -z "$PY311" ]; then
     say "$c_yellow" "CPython 3.11 was not found. Install it, then rerun ./setup.sh:"
     say "$c_gray"   "  Debian/Ubuntu:  sudo apt install python3.11 python3.11-venv"
-    say "$c_gray"   "  macOS (brew):   brew install python@3.11"
+    say "$c_gray"   "  macOS (Docker lane preferred): see the README; or brew install python@3.11"
+    exit 1
+fi
+
+# The install pulls one pinned dependency over git+https, so git must be present.
+if ! command -v git >/dev/null 2>&1; then
+    say "$c_yellow" "git was not found - it is required to fetch one pinned dependency."
+    say "$c_gray"   "  Debian/Ubuntu:  sudo apt install git"
+    say "$c_gray"   "  macOS:          xcode-select --install"
     exit 1
 fi
 

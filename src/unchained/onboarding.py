@@ -408,7 +408,7 @@ def render_welcome(
     width = _CARD_WIDTH
     banner_styles = {
         "UNCHAINED": _WHITE + _BOLD,
-        "Digital Forensics & Incident Response · OpenAI GPT-5.6 Sol": _VIOLET,
+        "Digital Forensics & Incident Response · OpenAI GPT-5.6": _VIOLET,
         '"Point me at one case. I will profile it before any model call."': _DIM,
     }
     print(_paint("╔" + "═" * (width - 2) + "╗", _BLUE + _BOLD, color), file=stream)
@@ -452,7 +452,7 @@ def render_welcome(
         "DEPTH",
         f"LIGHT {strict.max_tool_calls} tools/${strict.max_cost_usd:.2f}  ·  "
         f"HEAVY {flagship.max_tool_calls} tools/${flagship.max_cost_usd:.0f}  — "
-        "same GPT-5.6 Sol, hard ceilings only.",
+        "same model either way, hard ceilings only.",
     )
     line(
         _AMBER,
@@ -603,16 +603,21 @@ def render_profile(
         ),
         file=stream,
     )
-    print(
-        _paint(
-            f"◆ HARD CEILINGS (not a price quote): {caps.max_tool_calls} calls · "
-            f"{caps.max_total_tokens:,} tokens · {caps.max_wall_seconds / 60:g} min · "
-            f"${caps.max_cost_usd:.2f}",
-            _AMBER,
-            color,
-        ),
-        file=stream,
-    )
+    if not guided:
+        # In the guided flow the depth is chosen AFTER this card, so a single
+        # pre-choice ceiling number here would go stale the moment the user picks
+        # HEAVY. The depth options above and the launch box below both show the
+        # real, chosen ceilings, so this standalone line is omitted when guided.
+        print(
+            _paint(
+                f"◆ HARD CEILINGS (not a price quote): {caps.max_tool_calls} calls · "
+                f"{caps.max_total_tokens:,} tokens · {caps.max_wall_seconds / 60:g} min · "
+                f"${caps.max_cost_usd:.2f}",
+                _AMBER,
+                color,
+            ),
+            file=stream,
+        )
     if guided:
         launch_line = (
             "◆ NEXT (same command): choose depth below, then type the exact "

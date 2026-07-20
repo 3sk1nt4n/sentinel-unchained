@@ -8,6 +8,10 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+# Render the box-drawing and colored glyphs correctly even when the console
+# started on a legacy code page (cp437/850). Best-effort; never fatal.
+try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch {}
+
 function Write-Step { param([string]$Tag, [string]$Message)
     Write-Host "[$Tag] " -ForegroundColor Cyan -NoNewline; Write-Host $Message -ForegroundColor White }
 function Write-Skip { param([string]$Message)
@@ -204,7 +208,7 @@ if (-not $chosenCase) {
 # 3/4 - OpenAI key (hidden paste), before anything can be spent
 Write-Step "3/4" "OpenAI key for the paid run (hidden input, saved privately)"
 $keyStatus = & $sentinelExe key --status 2>$null | Out-String
-while (-not ($keyStatus -match "Key configured")) {
+while (-not ($keyStatus -match "Key configured via")) {
     if ((Read-Host "      Paste your OpenAI key now with hidden input? (Y/n)") -match '^[nN]$') {
         Write-Info "No key, no paid run. Add one any time with: sentinel key"
         break
@@ -214,12 +218,12 @@ while (-not ($keyStatus -match "Key configured")) {
     $env:UNCHAINED_MODEL = "gpt-5.6"
     $keyStatus = & $sentinelExe key --status 2>$null | Out-String
 }
-if ($keyStatus -match "Key configured") { Write-Skip "key configured; every command finds it" }
+if ($keyStatus -match "Key configured via") { Write-Skip "key configured; every command finds it" }
 
 # 4/4 - pick the model, then the live run. onboard --launch shows the card,
 # asks LIGHT/HEAVY (spending ceilings), takes the exact phrase, and runs live.
 Write-Step "4/4" "Choose your model, then launch"
-if ($keyStatus -match "Key configured") {
+if ($keyStatus -match "Key configured via") {
     Write-Host ""
     # Title rule only (fixed width, always aligns). The option lines below carry
     # double-width emoji, so they deliberately have NO right border - that avoids

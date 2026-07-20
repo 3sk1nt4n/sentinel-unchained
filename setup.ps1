@@ -8,6 +8,8 @@ param(
 Set-StrictMode -Version Latest
 $ExpectedPythonVersion = "3.11.9"
 $ErrorActionPreference = "Stop"
+# Render the box-drawing banners correctly even on a legacy code page. Best-effort.
+try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch {}
 if ($env:OS -ne "Windows_NT") {
     throw "setup.ps1 supports Windows only. Use the documented container workflow elsewhere."
 }
@@ -94,6 +96,12 @@ if ($Check) {
 
 if (-not (Get-Command py -ErrorAction SilentlyContinue)) {
     throw "Python Launcher was not found. Install official CPython 3.11 AMD64, then reopen PowerShell."
+}
+# Verify 3.11 specifically, not just that the launcher exists, so a missing 3.11
+# fails here with a clear message instead of later at 'py -3.11 -m venv'.
+& py -3.11 --version > $null 2>&1
+if ($LASTEXITCODE -ne 0) {
+    throw "CPython 3.11 was not found by the Python Launcher. Install official CPython $ExpectedPythonVersion AMD64 (tick 'Add to PATH'), reopen PowerShell, and rerun setup."
 }
 
 Set-Location $root
@@ -200,7 +208,7 @@ Write-Host "READY" -ForegroundColor Green
 Write-Host ""
 Write-Host "+-- ONE COMMAND. IT WALKS YOU THROUGH THE REST. -------------------------+" -ForegroundColor Cyan
 Write-Host "| Just run the word below. It profiles one case locally (`$0, no key, no  |" -ForegroundColor White
-Write-Host "| OpenAI), shows a verified card, asks the depth, and only then stops for |" -ForegroundColor White
+Write-Host "| OpenAI) shows a verified card, asks the depth, and only then stops for |" -ForegroundColor White
 Write-Host "| your explicit launch phrase. No flags, no environment variables.       |" -ForegroundColor White
 Write-Host "+------------------------------------------------------------------------+" -ForegroundColor Cyan
 Write-Host ""
