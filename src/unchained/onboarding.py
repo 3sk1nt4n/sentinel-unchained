@@ -245,6 +245,59 @@ def _boxed(
     print(_paint(f"└{'─' * inner}┘", accent, color), file=stream)
 
 
+def render_depth_menu(caps_profile: str, *, stream: TextIO, no_color: bool = False) -> None:
+    """Render the colorful, non-spilling CHOOSE DEPTH card (the prompt follows it).
+
+    Content is routed through :func:`_boxed`, which wraps every line to the fixed
+    card width, so nothing can overrun the border on any console.
+    """
+
+    stream = _encoding_safe_stream(stream)
+    color = _supports_color(stream, no_color=no_color)
+    flagship = _preset_caps("default")
+    strict = _preset_caps("strict")
+    heavy_tag = "   [current]" if caps_profile == "default" else ""
+    light_tag = "   [current]" if caps_profile == "strict" else ""
+    lines = [
+        f"1) HEAVY{heavy_tag}",
+        f"   {flagship.max_tool_calls} tools / {flagship.max_total_tokens:,} tokens / "
+        f"{flagship.max_wall_seconds / 60:g} min / ${flagship.max_cost_usd:.2f} ceiling",
+        f"2) LIGHT{light_tag}",
+        f"   {strict.max_tool_calls} tools / {strict.max_total_tokens:,} tokens / "
+        f"{strict.max_wall_seconds / 60:g} min / ${strict.max_cost_usd:.2f} ceiling",
+        "",
+        f"Same model either way: {active_model_label()}",
+        "Ceilings are hard stops, not price quotes - the depth never changes the model.",
+    ]
+    _boxed("CHOOSE DEPTH - HEAVY OR LIGHT", lines, stream=stream, color=color, accent=_VIOLET)
+
+
+def render_launch_gate(
+    caps_profile: str, caps: CapConfig, *, stream: TextIO, no_color: bool = False
+) -> None:
+    """Render the colorful, non-spilling EXPLICIT PAID CLOUD LAUNCH card.
+
+    Names the ACTUAL model for the run (so a cheap rehearsal never claims Sol)
+    and presents the launch/back/quit choices; the interactive prompt follows.
+    """
+
+    stream = _encoding_safe_stream(stream)
+    color = _supports_color(stream, no_color=no_color)
+    depth_name = "HEAVY (FLAGSHIP)" if caps_profile == "default" else "LIGHT (CAUTIOUS)"
+    lines = [
+        f"Model for this run: {active_model_label()}",
+        "It may receive the bounded profile and typed-tool observations; the original "
+        "evidence bytes stay local. This is no longer the $0 preview.",
+        f"{depth_name} ceiling: ${caps.max_cost_usd:.2f} estimated cost / "
+        f"{caps.max_total_tokens:,} tokens / {caps.max_tool_calls} tools.",
+        "",
+        "1) LAUNCH - start the paid run now (this spends real money)",
+        "B) Back - change the depth first",
+        "Q) Quit - cancel; nothing is sent, nothing is spent",
+    ]
+    _boxed("EXPLICIT PAID CLOUD LAUNCH", lines, stream=stream, color=color, accent=_AMBER)
+
+
 def active_model_label() -> str:
     """Human label for the model this run will actually use.
 

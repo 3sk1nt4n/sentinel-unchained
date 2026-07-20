@@ -519,25 +519,11 @@ def _choose_analysis_depth(selected: str) -> str | None:
     noninteractive callers are unaffected.
     """
 
-    from .onboarding import active_model_label
+    from .onboarding import render_depth_menu
 
-    flagship = CapConfig.from_env("default")
-    strict = CapConfig.from_env("strict")
     current = "HEAVY" if selected == "default" else "LIGHT"
     print()
-    print("  -- CHOOSE DEPTH " + "-" * 49)
-    print(
-        f"     1) HEAVY  {flagship.max_tool_calls} tools / "
-        f"{flagship.max_total_tokens:,} tokens / "
-        f"{flagship.max_wall_seconds / 60:g} min / ${flagship.max_cost_usd:.2f} ceiling"
-    )
-    print(
-        f"     2) LIGHT  {strict.max_tool_calls} tools / "
-        f"{strict.max_total_tokens:,} tokens / "
-        f"{strict.max_wall_seconds / 60:g} min / ${strict.max_cost_usd:.2f} ceiling"
-    )
-    print(f"     Same model either way: {active_model_label()}.")
-    print("     Ceilings are hard stops, not price quotes.")
+    render_depth_menu(selected, stream=sys.stdout)
     while True:
         try:
             answer = input(f"  > Pick 1 or 2 [Enter = {current}] - q = quit: ").strip().lower()
@@ -563,23 +549,10 @@ def _confirm_paid_sol_launch(caps_profile: str, caps: CapConfig) -> str:
     Enter alone re-asks - an accidental keypress can never start a paid run.
     """
 
-    from .onboarding import active_model_label
+    from .onboarding import render_launch_gate
 
-    model_label = active_model_label()
-    depth_name = "HEAVY (FLAGSHIP)" if caps_profile == "default" else "LIGHT (CAUTIOUS)"
     print()
-    print("+-- EXPLICIT PAID CLOUD LAUNCH --------------------------------------------+")
-    print(f"|  Model for this run: {model_label}")
-    print("|  It may receive the bounded profile and typed-tool observations; the")
-    print("|  original evidence bytes stay local. This is no longer the $0 preview.")
-    print(
-        f"|  {depth_name} hard ceiling: ${caps.max_cost_usd:.2f} estimated cost "
-        f"- {caps.max_total_tokens:,} tokens - {caps.max_tool_calls} tools."
-    )
-    print("+--------------------------------------------------------------------------+")
-    print("     1) LAUNCH - start the paid run now (this spends real money)")
-    print("     B) Back   - change the depth first")
-    print("     Q) Quit   - cancel; nothing is sent, nothing is spent")
+    render_launch_gate(caps_profile, caps, stream=sys.stdout)
     while True:
         try:
             answer = input("  > Pick 1, B, or Q: ").strip().lower()
