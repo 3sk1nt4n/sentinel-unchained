@@ -19,6 +19,8 @@
   <img src="https://img.shields.io/badge/Evidence-read--only-dc2626.svg" alt="Read-only evidence">
   <img src="https://img.shields.io/badge/Proof-offline--verifiable-f59e0b.svg" alt="Offline-verifiable proof">
   <img src="https://img.shields.io/badge/OpenAI-GPT--5.6-111827.svg?logo=openai&logoColor=white" alt="OpenAI GPT-5.6">
+  <img src="https://img.shields.io/badge/tests-404%20passing-22c55e.svg" alt="404 tests passing">
+  <img src="https://img.shields.io/badge/proof%20bundle-ships%20in%20this%20repo-8b5cf6.svg" alt="Proof bundle ships in this repo">
 </p>
 
 <p align="center">
@@ -62,11 +64,13 @@
 zero OpenAI calls. It welcomes you, asks where the evidence is, and prints a
 local SHA-256 case card before any model is involved.
 
+> [!IMPORTANT]
 > **What “proves” means here:** code verifies what ran, what bytes were retained,
 > what exact text was cited, and whether custody still matches. It does **not**
 > prove that a model's forensic interpretation is true. A human analyst still
 > owns that judgment.
 
+> [!TIP]
 > **New analyst? There is exactly one command:** `sentinel`
 >
 > It opens the welcome, asks one thing (where the evidence is), prints a local
@@ -82,8 +86,10 @@ local SHA-256 case card before any model is involved.
 | Track | **Developer Tools** — OpenAI Build Week |
 | Built with | **Codex** (implementation + adversarial review) and **GPT-5.6** (Sol investigator/reviewer, Luna canary) |
 | Codex Session ID | `019f61e5-5755-7a02-adb4-618d32baab27` — see [Built with Codex](#built-with-codex) |
-| Fastest no-key test | A few commands, zero spend — top of the [judge quickstart](JUDGE-QUICKSTART.md) |
-| Live receipts | [Sol capped opening on real memory](docs/runs/sol-capped-dc01-opening.json) · [Luna canary](docs/runs/luna-canary-receipt.json) |
+| Fastest no-key test | Two-command install, then `sentinel verify examples/public-run-partial` → **VALID**. A real GPT-5.6 run, zero spend ([judge quickstart](JUDGE-QUICKSTART.md)) |
+| Shipped live proof | [`examples/public-run-partial`](examples/public-run-partial) — an authentic GPT-5.6 bundle **inside this repo**: 14/14 typed tools on real memory, verifies `VALID` offline |
+| Live receipts | [Sol capped opening receipt](docs/runs/sol-capped-dc01-opening.json) · [Luna canary](docs/runs/luna-canary-receipt.json) |
+| One-page judge brief | [submission/JUDGE-ONE-PAGER.md](submission/JUDGE-ONE-PAGER.md) |
 | Honest gaps | `COMPLETE` bundle, benchmark, and video are pending; the [proof status](#proof-status) table never overstates |
 
 **Where each judging criterion lives:**
@@ -102,6 +108,7 @@ local SHA-256 case card before any model is involved.
 | 🟢 Public MIT repo, Codex Session ID, provenance boundary | **Done** |
 | 🟢 404-test offline gate, ruff clean, hardened Docker | **Done** |
 | 🟢 Live GPT-5.6 Sol opening on real 2 GiB Windows memory | **Done** — retained, capped `PARTIAL` by design |
+| 🟢 Authentic GPT-5.6 bundle **ships in the repo** and verifies `VALID` offline | **Done** — [`examples/public-run-partial`](examples/public-run-partial): 14/14 typed tools, honest `PARTIAL` at the hard cap |
 | 🟢 Zero-key guided onboarding + colorful live run experience | **Done** — see the screen above |
 | 🟡 Authentic `COMPLETE` proof bundle | **In progress** — the final live run |
 | 🟡 Public sub-3-minute video | **In progress** — recorded against the real bundle |
@@ -131,6 +138,20 @@ Point it at a folder and you get a local, cryptographic case card — every file
 SHA-256-hashed, classified, and routed **before any model is allowed near it**.
 The tool refuses to overstate: a synthetic logs-only fixture honestly gets an
 amber `ACTION NEEDED` card, not a fake green light.
+
+### 🧾 Verify a real GPT-5.6 investigation in your first minute
+
+An authentic retained GPT-5.6 bundle **ships in this repository**. After
+either install above, run:
+
+```powershell
+sentinel verify examples\public-run-partial   # → VALID · 20 artifacts · 62 audit entries
+sentinel view   examples\public-run-partial   # inert, no-JS proof viewer
+```
+
+That is a real `gpt-5.6-luna` investigation on a real 2 GiB Windows memory
+image — 14 typed tool receipts, custody intact, sealed, and re-checked on
+**your** machine with no key and no network.
 
 **Pick your machine. Every lane starts with zero keys and zero spend.**
 
@@ -196,6 +217,7 @@ It profiles a committed synthetic fixture with zero OpenAI calls (public evidenc
 ID `E001`, matching custody), runs non-root with a read-only filesystem and every
 Linux capability dropped, and honestly reports `logs-only`.
 
+> [!NOTE]
 > **Honest macOS label:** the container is the same hardened `linux/amd64` image
 > running under Docker Desktop through emulation. It has not been verified on
 > Mac hardware, and emulation makes large-image work slower — same container,
@@ -402,20 +424,28 @@ Read the full [architecture](docs/ARCHITECTURE.md) or the detailed
 | OpenAI-native controller and independent offline verifier | ✅ Verified offline |
 | Linux/AMD64 Docker build, 404-test suite, CLI, profile, and custody | ✅ Verified locally |
 | Cheap GPT-5.6 Luna typed-tool canary | ✅ Demonstrated live; second-reviewer-attested (project-affiliated) sanitized receipt |
-| Authentic GPT-5.6 Sol capped opening on real Windows memory | ✅ Retained bundle verifies `VALID`; terminal state is intentionally `PARTIAL` |
+| Authentic GPT-5.6 Sol capped opening on real Windows memory | ✅ Sanitized receipt committed; `VALID` recorded at creation; terminal state intentionally `PARTIAL` |
+| Shipped verifiable GPT-5.6 bundle in this repo | ✅ [`examples/public-run-partial`](examples/public-run-partial): `gpt-5.6-luna`, 14/14 typed tools, custody match, verifies `VALID` on current code |
 | Authentic `COMPLETE` GPT-5.6 Sol evidence bundle | ⏳ Opening/tool path proven; findings → reviewer → final report still pending |
 | Same-evidence speed/cost/accuracy comparison with Qwen | ⏳ Fail-closed comparison scaffold ready; fact set, freeze lock, and measurements pending |
 
-**Live milestone:** the first retained Sol run used a 2 GiB Windows memory image,
-recorded `gpt-5.6-sol` on both model responses, executed all six model-selected
-opening tools successfully (under the earlier six-tool opening cap; the opening
-now allows up to twelve), and stopped honestly when the next reservation would
-exceed that cap. It used 59,254 provider-reported tokens, took
-43.702 seconds end to end, and produced a local cost estimate of $0.38789875.
-This proves the live opening, typed execution, cap, custody, and bundle path—not
-a completed investigation. See the
-[release handoff](docs/OPENAI_VNEXT_RELEASE_HANDOFF.md) for the full scorecard
-and fastest submission path.
+**Live milestones — two authentic GPT-5.6 runs on the same public 2 GiB Windows
+memory image are retained.** The newest **ships in this repository** at
+[`examples/public-run-partial`](examples/public-run-partial): `gpt-5.6-luna`
+across 4 responses chose and ran **14 typed Volatility tools** (all success),
+custody matched, and the run stopped honestly at its hard tool budget
+(`MAX_TOOL_CALLS: reservation would reach 14 > 13`) after 55.5 seconds and
+180,285 provider-reported tokens (~$1.16 local estimate).
+`sentinel verify examples/public-run-partial` returns **VALID** — 20 artifacts,
+62 hash-chained audit entries — on any fresh clone, no key required. The
+earlier run recorded `gpt-5.6-sol` on both responses and executed all six
+model-selected opening tools under the then six-tool cap in 43.702 seconds
+(59,254 tokens, $0.38789875 local estimate); its sanitized receipt is committed
+at [docs/runs/sol-capped-dc01-opening.json](docs/runs/sol-capped-dc01-opening.json)
+with `VALID` recorded at creation. These prove the live opening, typed
+execution, cap, custody, and bundle path — not a completed investigation. See
+the [release handoff](docs/OPENAI_VNEXT_RELEASE_HANDOFF.md) for the full
+scorecard and fastest submission path.
 
 **Post-rehearsal hardening:** four later unscored attempts exposed a real
 terminal-contract problem. Their retained audits show completed responses with
@@ -441,7 +471,8 @@ schema. A live `COMPLETE` v2 bundle remains pending.
 | Independent strict verifier | Re-chained adversarial mutations across lifecycle, usage, retry, cost, and custody |
 | Linux Docker packaging | CPython 3.11 test target: the same 404-test suite (a few Windows-only tests skip on Linux), Ruff, format, and `pip check`; non-root runtime/profile gate |
 | Live GPT-5.6 Luna canary | Independently demonstrated; [attested sanitized projection](docs/runs/luna-canary-receipt.json), with no raw receipt available for bundle proof |
-| Authentic GPT-5.6 Sol opening on real memory | [Bundle-derived sanitized receipt](docs/runs/sol-capped-dc01-opening.json): 2 model responses, 6 successful opening tools, recorded custody match, offline `VALID` |
+| Authentic GPT-5.6 Sol opening on real memory | [Bundle-derived sanitized receipt](docs/runs/sol-capped-dc01-opening.json): 2 model responses, 6 successful opening tools, recorded custody match, `VALID` recorded at creation |
+| Shipped GPT-5.6 bundle in this repo | [`examples/public-run-partial`](examples/public-run-partial): 4 responses, 14 successful typed tools, custody match, verifies `VALID` on current code (20 artifacts, 62 audit entries) |
 | Authentic complete GPT-5.6 Sol case | Pending; retained Sol run is explicitly `PARTIAL` at `MAX_TOOL_CALLS` |
 | Faster/better than Qwen | Architectural thesis only until the frozen benchmark is run |
 
@@ -590,6 +621,7 @@ processors=6
 |---|---|
 | [Start Here](docs/START-HERE.md) | First install, first case card, safe launch choice, and verify/view handoff |
 | [Judge quickstart](JUDGE-QUICKSTART.md) | First judge walkthrough or native setup |
+| [Submission kit](submission/README.md) | Devpost form blocks, business case, video script, slides, judge one-pager, checklist |
 | [OpenAI vNext release handoff](docs/OPENAI_VNEXT_RELEASE_HANDOFF.md) | Completed jobs, comparison, Docker gate, winning story, demo, and next actions |
 | [Architecture](docs/ARCHITECTURE.md) | Trust boundary and lifecycle design |
 | [OpenAI vNext review](docs/OPENAI_VNEXT_REVIEW.md) | Baseline comparison and defect disposition |
