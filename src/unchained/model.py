@@ -670,13 +670,36 @@ def _provider_request_id(error: Exception) -> str | None:
     return None
 
 
+def _provider_error_code(error: Exception) -> str | None:
+    """Extract the provider's machine-readable error code, if any."""
+
+    code = getattr(error, "code", None)
+    if isinstance(code, str) and code:
+        return code
+    body = getattr(error, "body", None)
+    if isinstance(body, dict):
+        detail = body.get("error")
+        source = detail if isinstance(detail, dict) else body
+        for key in ("code", "type"):
+            value = source.get(key)
+            if isinstance(value, str) and value:
+                return value
+    return None
+
+
 def _is_transient_provider_error(error: Exception) -> bool:
-    """Match the SDK's retry-safe transport and status failures only."""
+    """Match the SDK's retry-safe transport and status failures only.
+
+    A 429 whose provider code is ``insufficient_quota`` is billing exhaustion,
+    not rate limiting: no retry can ever succeed, so it is terminal.
+    """
 
     if isinstance(error, ModelProviderError):
         return False
     status_code = _provider_status_code(error)
     if status_code is not None:
+        if status_code == 429 and _provider_error_code(error) == "insufficient_quota":
+            return False
         return status_code in _RETRYABLE_STATUS_CODES or status_code >= 500
     if isinstance(error, (ConnectionError, TimeoutError)):
         return True

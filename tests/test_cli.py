@@ -14,6 +14,25 @@ from unchained.models import FunctionCall, ModelResponse, ModelUsage
 from unchained.verify import VerificationResult
 
 
+def test_partial_next_step_names_billing_when_quota_is_exhausted() -> None:
+    # The provider code sits past the panel's 160-character Why truncation, so
+    # the decision must read the full reason text, not the display slice.
+    quota_reason = (
+        "model request failed during opening: RateLimitError: Error code: 429 - "
+        "{'error': {'message': 'You exceeded your current quota, please check your "
+        "plan and billing details.', 'type': 'insufficient_quota', 'param': None, "
+        "'code': 'insufficient_quota'}}"
+    )
+    assert "insufficient_quota" not in quota_reason[:160]
+    billing_step = cli_module._partial_next_step(quota_reason)
+    assert "billing" in billing_step
+    assert "re-run" in billing_step
+    assert (
+        cli_module._partial_next_step("judge quote does not resolve in span")
+        == "re-run when the reported condition is resolved"
+    )
+
+
 def test_root_help_lists_the_user_lifecycle(capsys: pytest.CaptureFixture[str]) -> None:
     assert main(["--help"]) == EXIT_COMPLETE
 

@@ -955,6 +955,22 @@ def _elapsed() -> str | None:
     return f"{int(seconds // 60):02d}:{seconds % 60:04.1f}"
 
 
+def _partial_next_step(reason: str) -> str:
+    """Honest next action for a PARTIAL run, keyed off the full failure text.
+
+    The panel's Why line truncates to 160 characters, which can cut the reason
+    before the provider's machine code appears, so this decision reads the
+    untruncated text.
+    """
+
+    if "insufficient_quota" in reason:
+        return (
+            "the OpenAI account behind this key has no API credit - billing, "
+            "not code; add credit or switch keys, then re-run"
+        )
+    return "re-run when the reported condition is resolved"
+
+
 def _progress(message: str) -> None:
     console = Console(sys.stderr)
     if console.enabled:
@@ -1088,6 +1104,14 @@ class _AuditNarrator:
                 self._console.warn(f"hard cap fired: {payload.get('kind')}")
             elif event_type.startswith("model.retry"):
                 self._console.warn("transient provider error; bounded audited retry")
+            elif event_type == "model.attempt.error" and isinstance(payload, dict):
+                if not payload.get("retryable") and "insufficient_quota" in str(
+                    payload.get("error", "")
+                ):
+                    self._console.warn(
+                        "OpenAI account has no API credit (insufficient_quota) - "
+                        "terminal billing stop, no retry"
+                    )
 
         self._narrate(render)
         return record
@@ -1650,8 +1674,9 @@ def run_cli(
             )
         else:
             reason = investigation.partial_reason if investigation is not None else None
-            why_partial = (reason or terminal_reason or "the run stopped early")[:160]
-            next_step = "re-run when the reported condition is resolved"
+            raw_reason = reason or terminal_reason or "the run stopped early"
+            why_partial = raw_reason[:160]
+            next_step = _partial_next_step(raw_reason)
     verify_hint = (
         f'sentinel verify "{run_directory}" --require-complete'
         if complete

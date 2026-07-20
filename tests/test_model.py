@@ -17,6 +17,7 @@ from unchained.model import (
     ModelProviderError,
     ModelRequest,
     OpenAIResponsesModel,
+    _is_transient_provider_error,
 )
 
 
@@ -478,6 +479,83 @@ def test_transient_retries_stop_after_three_mock_transport_attempts(tmp_path: Pa
     ]
     assert entries[-1]["event_type"] == "model.error"
     assert entries[-1]["payload"]["attempt"] == 3
+
+
+def test_quota_exhausted_429_is_terminal_and_never_retried(tmp_path: Path) -> None:
+    """insufficient_quota is billing exhaustion; a retry can never succeed."""
+
+    attempts = 0
+
+    def handle(_request: httpx.Request) -> httpx.Response:
+        nonlocal attempts
+        attempts += 1
+        return httpx.Response(
+            429,
+            headers={"x-request-id": "req_quota"},
+            json={
+                "error": {
+                    "message": (
+                        "You exceeded your current quota, "
+                        "please check your plan and billing details."
+                    ),
+                    "type": "insufficient_quota",
+                    "param": None,
+                    "code": "insufficient_quota",
+                }
+            },
+        )
+
+    adapter, http_client = mock_transport_adapter(handle)
+    audit_path = tmp_path / "audit.jsonl"
+    delays: list[float] = []
+    try:
+        with (
+            AuditLog(audit_path, "run-quota-terminal", fsync=False) as audit,
+            pytest.raises(ModelProviderError, match="RateLimitError"),
+        ):
+            AuditedModel(
+                adapter,
+                audit,
+                permissive_budget(),
+                retry_sleeper=delays.append,
+            ).create(
+                ModelRequest(
+                    phase="opening",
+                    instructions="Choose one supplied tool.",
+                    input_items="bounded profile",
+                )
+            )
+    finally:
+        http_client.close()
+
+    assert attempts == 1
+    assert delays == []
+    entries = AuditLog.verify(audit_path)
+    attempt_entries = [entry for entry in entries if entry["event_type"] == "model.attempt.error"]
+    assert len(attempt_entries) == 1
+    assert attempt_entries[0]["payload"]["retryable"] is False
+    assert attempt_entries[0]["payload"]["status_code"] == 429
+    assert not any(entry["event_type"].startswith("model.retry") for entry in entries)
+    assert entries[-1]["event_type"] == "model.error"
+
+
+def test_quota_exhausted_429_is_not_transient_but_plain_429_is() -> None:
+    class FakeStatusError(Exception):
+        def __init__(self, code: str | None = None, body: Any = None) -> None:
+            super().__init__("Error code: 429")
+            self.status_code = 429
+            self.code = code
+            self.body = body
+
+    assert _is_transient_provider_error(FakeStatusError()) is True
+    assert _is_transient_provider_error(FakeStatusError(code="rate_limit_exceeded")) is True
+    assert _is_transient_provider_error(FakeStatusError(code="insufficient_quota")) is False
+    assert (
+        _is_transient_provider_error(
+            FakeStatusError(body={"error": {"type": "insufficient_quota"}})
+        )
+        is False
+    )
 
 
 def test_protocol_error_from_mock_transport_is_not_retried(tmp_path: Path) -> None:
