@@ -295,6 +295,26 @@ def render_launch_gate(
     _boxed("LAUNCH - EVERYTHING ON ONE CARD", lines, stream=stream, color=color, accent=_AMBER)
 
 
+def render_result_card(
+    status: str,
+    subtitle: str,
+    lines: list[str],
+    *,
+    good: bool,
+    stream: TextIO,
+    no_color: bool = False,
+) -> None:
+    """The end-of-run RESULT card: findings, verdicts, exec summary, and the
+    honest why/next on one shiny card - green when COMPLETE, amber when the
+    run stopped early. Long copy-paste paths stay OUTSIDE the box on purpose,
+    so wrapping borders never break a pasted command."""
+
+    stream = _encoding_safe_stream(stream)
+    color = _supports_color(stream, no_color=no_color)
+    accent = _GREEN if good else _AMBER
+    _boxed(f"RESULT - {status} - {subtitle}", lines, stream=stream, color=color, accent=accent)
+
+
 def render_case_prompt_card(*, stream: TextIO, no_color: bool = False) -> None:
     """The one question a run needs, as a colorful card: what a good case
     folder looks like, and where to get a public practice case when you have

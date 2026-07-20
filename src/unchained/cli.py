@@ -1053,7 +1053,7 @@ def _findings_table_lines(findings: list[Any], verdicts: list[Any]) -> list[str]
         final_status = status_by_id.get(finding.finding_id, finding.proposed_status.value)
         lines.append(
             f"    ● {finding.finding_id:<6} {str(finding.severity).upper():<9} "
-            f"{final_status:<13} {finding.title[:52]}"
+            f"{final_status:<13} {finding.title[:40]}"
         )
     return lines
 
@@ -1076,7 +1076,7 @@ def _exec_summary_lines(report_markdown: str) -> list[str]:
     text = re.sub(r"\\(.)", r"\1", " ".join(body.split())).strip()
     if not text:
         return []
-    return [f"    {line}" for line in textwrap.wrap(text, width=88)[:8]]
+    return [f"    {line}" for line in textwrap.wrap(text, width=72)[:8]]
 
 
 def _bundle_artifact_rows(run_directory: Path) -> list[tuple[str, str]]:
@@ -1256,6 +1256,16 @@ class _AuditNarrator:
                 self._phase_header("report")
             elif event_type == "cap.fired" and isinstance(payload, dict):
                 self._console.warn(f"hard cap fired: {payload.get('kind')}")
+                # The step numbering visibly jumps here on purpose; say so, or
+                # the missing banners read as a broken pipeline.
+                self._console.detail(
+                    "ceilings are hard stops: the remaining model steps are "
+                    "skipped, the lifecycle resumes at custody -> seal -> verify"
+                )
+                self._console.detail(
+                    "for the full 13 steps with findings, judge, and report: "
+                    "press 2 on the launch card next run (HEAVY ceilings)"
+                )
             elif event_type.startswith("model.retry"):
                 self._console.warn("transient provider error; bounded audited retry")
             elif event_type == "model.attempt.error" and isinstance(payload, dict):
@@ -1850,40 +1860,50 @@ def run_cli(
     summary_rows = _exec_summary_lines(report_markdown) if report_markdown else []
     stdout_console = Console(sys.stdout)
     if stdout_console.enabled:
-        stdout_console.rule()
-        stdout_console.line(
-            f"  {stdout_console.badge(terminal_status.value)}"
-            f"  run {run_id}  -  wall {_elapsed() or '?'}"
-        )
-        stdout_console.kv("Findings", findings_line)
+        from .onboarding import render_result_card
+
+        card_lines: list[str] = [f"Findings  {findings_line}"]
         for row in finding_rows:
-            stdout_console.line(row)
+            card_lines.append(f" {row.strip()}")
         if summary_rows:
-            stdout_console.kv("Exec summary", "(model-authored, nonauthoritative)")
-            for row in summary_rows:
-                stdout_console.line(row)
+            card_lines.append("")
+            card_lines.append("Executive summary (model-authored, nonauthoritative):")
+            card_lines.extend(f" {row.strip()}" for row in summary_rows)
+        if complete:
+            card_lines.append("")
+            card_lines.append(
+                "Qualifying: YES - Sol COMPLETE; passes --require-live-gpt56"
+                if qualifying
+                else "Qualifying: NO - rehearsal (non-Sol) COMPLETE; press 3 on "
+                "the launch card for the Sol qualifying seal"
+            )
+        if why_partial:
+            card_lines.append("")
+            card_lines.append(f"Why PARTIAL: {why_partial}")
+            card_lines.append(f"Next: {next_step}")
+        print()
+        render_result_card(
+            terminal_status.value,
+            f"run {run_id} - wall {_elapsed() or '?'}",
+            card_lines,
+            good=complete,
+            stream=sys.stdout,
+        )
         stdout_console.kv("Report", str(run_directory / "report.md"))
         stdout_console.kv("Proof bundle", str(run_directory))
         for label, value in artifact_rows:
             stdout_console.kv(label, value)
         stdout_console.kv("Verification", "PASS - report, viewer, custody, and audit chain")
-        if complete:
-            stdout_console.kv(
-                "Qualifying",
-                "YES - Sol COMPLETE; passes --require-live-gpt56"
-                if qualifying
-                else "NO - rehearsal (non-Sol) COMPLETE; press 3 on the launch "
-                "card for the Sol qualifying seal",
-            )
         stdout_console.kv(
             "Strict gates",
             "packets - receipts - spans - usage - cost - report bytes - viewer bytes",
         )
-        if why_partial:
-            stdout_console.kv("Why PARTIAL", why_partial)
-            stdout_console.kv("Next", next_step)
-        stdout_console.kv("Verify again", verify_hint)
-        stdout_console.kv("Open viewer", f'sentinel view "{run_directory}"')
+        stdout_console.phase("OPEN YOUR RESULTS - copy-paste either command")
+        stdout_console.line(f'  sentinel view "{run_directory}"')
+        stdout_console.line("      verifies the bundle, then opens the visual proof viewer")
+        stdout_console.line(f"  {verify_hint}")
+        stdout_console.line("      independent offline check - prints VALID if untampered")
+        stdout_console.line("  (viewer.html also opens with a double-click - no install needed)")
         stdout_console.rule()
     else:
         print(f"Run status: {terminal_status.value}")
