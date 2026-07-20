@@ -132,9 +132,17 @@ docs) against the current design. Verified defects fixed this session:
 
 ### E. Next steps to WIN — prioritized and honest
 
-The single thing that converts this from "polished tool" to "winning
-submission" is **one authentic, verifiable COMPLETE run**. Everything else is
-secondary.
+> **Correction (rules-grounded, 2026-07-20):** a full honest scoring against the
+> official rules is in [docs/HONEST-WIN-ASSESSMENT.md](docs/HONEST-WIN-ASSESSMENT.md).
+> It corrects an earlier overstatement in our own notes: per the rules, the
+> **mandatory** gate is the **demo video (< 3 min, audio, shows Codex + GPT-5.6)**
+> plus the testable no-key path, the Codex Session ID, and install instructions —
+> **NOT** an authentic COMPLETE run. The demo video is the true blocker; the
+> COMPLETE Sol bundle raises the ceiling but is optional. Honest win estimate:
+> **~12–18%** for a 1st/2nd in Developer Tools *if* a strong video ships and the
+> no-key judge path is smooth; **~0%** without the video. Record the video FIRST.
+
+The COMPLETE run below is high-value but, per the rules, secondary to the video.
 
 1. **Produce ONE authentic COMPLETE GPT-5.6 Sol bundle** on a real Windows memory
    image and verify it strictly:
