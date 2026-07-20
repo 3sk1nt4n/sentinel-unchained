@@ -733,15 +733,21 @@ def _prompt_evidence_path() -> Path | None:
 
 
 def _ensure_key_for_launch() -> bool:
-    """A run needs a key. If one is already configured (env, secret file, or the
-    saved sentinel key), use it silently; otherwise run the one-time hidden setup
-    right here so the flow never dead-ends on a missing key."""
+    """A run needs a key. Always shows a visible key step: if one is already
+    configured (env, secret file, or the saved sentinel key) it says so and uses
+    it; otherwise it runs the one-time hidden paste right here so the flow never
+    dead-ends on a missing key. To re-paste, run ``sentinel key`` (or
+    ``sentinel key --remove`` first)."""
 
-    present, _source = openai_api_key_status()
-    if present:
-        return True
     console = Console(sys.stdout)
-    message = "No OpenAI key found yet — saving one now (hidden input, owner-only file)."
+    present, source = openai_api_key_status()
+    if present:
+        label = _KEY_SOURCE_LABELS.get(source or "", source or "a configured source")
+        message = f"OpenAI key: found via {label} - using it (no paste needed)."
+        console.ok(message) if console.enabled else print(f"  {message}")
+        console.detail("Change it any time with 'sentinel key'.") if console.enabled else None
+        return True
+    message = "OpenAI key: none saved yet - paste it now (hidden input, owner-only file)."
     console.step(message) if console.enabled else print(f"  {message}")
     if _key_command(status=False, remove=False) != EXIT_COMPLETE:
         return False
