@@ -216,12 +216,43 @@ while (-not ($keyStatus -match "Key configured")) {
 }
 if ($keyStatus -match "Key configured") { Write-Skip "key configured; every command finds it" }
 
-# 4/4 - the live run. onboard --launch shows the card, asks LIGHT/HEAVY, takes
-# the exact LAUNCH GPT-5.6 SOL phrase, and runs the pipeline live on screen.
-Write-Step "4/4" "Launch the live investigation"
+# 4/4 - pick the model, then the live run. onboard --launch shows the card,
+# asks LIGHT/HEAVY (spending ceilings), takes the exact phrase, and runs live.
+Write-Step "4/4" "Choose your model, then launch"
 if ($keyStatus -match "Key configured") {
-    Write-Host "      Next you'll see the case card, pick LIGHT/HEAVY, and type" -ForegroundColor Gray
-    Write-Host "      the exact phrase LAUNCH GPT-5.6 SOL to confirm the spend." -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "   ╭───────────────── HOW DO YOU WANT TO RUN? ─────────────────╮" -ForegroundColor DarkCyan
+    Write-Host "   │                                                           │" -ForegroundColor DarkCyan
+    Write-Host "   │  " -ForegroundColor DarkCyan -NoNewline
+    Write-Host "1) 💚 REHEARSE " -ForegroundColor Green -NoNewline
+    Write-Host "gpt-5.6-luna " -ForegroundColor White -NoNewline
+    Write-Host "· ~cents · practice, non-official" -ForegroundColor Gray -NoNewline
+    Write-Host "   │" -ForegroundColor DarkCyan
+    Write-Host "   │  " -ForegroundColor DarkCyan -NoNewline
+    Write-Host "2) ⚡ REAL RUN " -ForegroundColor Magenta -NoNewline
+    Write-Host "gpt-5.6 Sol  " -ForegroundColor White -NoNewline
+    Write-Host "· costs more · official bundle" -ForegroundColor Gray -NoNewline
+    Write-Host "  │" -ForegroundColor DarkCyan
+    Write-Host "   │                                                           │" -ForegroundColor DarkCyan
+    Write-Host "   ╰───────────────────────────────────────────────────────────╯" -ForegroundColor DarkCyan
+    $modelPick = (Read-Host "   Pick 1 (rehearse - recommended first) or 2 (real Sol)").Trim()
+    # Headroom learned from live testing: the full lifecycle can exceed default caps.
+    $env:MAX_TOTAL_TOKENS = "3000000"
+    $env:MAX_COST_USD = "30"
+    if ($modelPick -eq "2") {
+        [Environment]::SetEnvironmentVariable("UNCHAINED_ALLOW_TEST_MODEL", $null, "Process")
+        $env:UNCHAINED_ALLOW_TEST_MODEL = $null
+        $env:UNCHAINED_MODEL = "gpt-5.6"
+        Write-Host "   ⚡ REAL Sol run selected - this produces your official bundle." -ForegroundColor Magenta
+    } else {
+        $env:UNCHAINED_ALLOW_TEST_MODEL = "1"
+        $env:UNCHAINED_MODEL = "gpt-5.6-luna"
+        Write-Host "   💚 REHEARSAL on Luna selected - cheap and clearly non-official." -ForegroundColor Green
+    }
+    Write-Host "   Next: the case card, a LIGHT/HEAVY spending pick, then type" -ForegroundColor Gray
+    Write-Host "   the exact phrase " -ForegroundColor Gray -NoNewline
+    Write-Host "LAUNCH GPT-5.6 SOL" -ForegroundColor Yellow -NoNewline
+    Write-Host " to confirm the spend." -ForegroundColor Gray
     Write-Host ""
     & $sentinelExe onboard $chosenCase --launch --caps strict
 } else {

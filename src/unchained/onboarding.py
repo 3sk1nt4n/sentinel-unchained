@@ -234,9 +234,27 @@ def _boxed(
     print(_paint(f"└{'─' * inner}┘", accent, color), file=stream)
 
 
+def active_model_label() -> str:
+    """Human label for the model this run will actually use.
+
+    LIGHT and HEAVY change only the spending ceilings, never the model. The
+    model is the flagship GPT-5.6 Sol unless the operator explicitly opted into
+    a cheaper non-Sol test model (UNCHAINED_ALLOW_TEST_MODEL=1), in which case
+    the label names that model and flags it as a nonqualifying rehearsal.
+    """
+
+    from .model import cheap_model_opt_in
+
+    configured = os.getenv("UNCHAINED_MODEL", "").strip()
+    if cheap_model_opt_in() and configured and "sol" not in configured.lower():
+        return f"{configured} (CHEAP TEST — nonqualifying rehearsal)"
+    return "GPT-5.6 Sol"
+
+
 def _budget_choice_lines(selected: str, effective: CapConfig) -> list[str]:
     strict = _preset_caps("strict")
     flagship = _preset_caps("default")
+    model_label = active_model_label()
 
     def marker(profile: str) -> str:
         return "[SELECTED]" if selected == profile else ""
@@ -267,11 +285,9 @@ def _budget_choice_lines(selected: str, effective: CapConfig) -> list[str]:
             f"{effective.max_total_tokens:,} tokens / "
             f"{effective.max_wall_seconds / 60:g} min / ${effective.max_cost_usd:.2f}"
         ),
-        (
-            "Both depths run the same GPT-5.6 Sol investigator. These are hard stop "
-            "ceilings, not price quotes, reasoning modes, or promises of result quality. "
-            "Environment overrides may change effective ceilings."
-        ),
+        f"Model for this run: {model_label}.",
+        "LIGHT and HEAVY change only the hard spending ceilings, not the model.",
+        "These are stop ceilings, not price quotes or promises of result quality.",
         (
             "Model invocations per completed case: 4 fixed (opening book, findings "
             "serialization, fresh review, report draft) + one per adaptive action — "

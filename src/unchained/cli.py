@@ -517,11 +517,14 @@ def _choose_analysis_depth(selected: str) -> str:
     selection so noninteractive callers are unaffected.
     """
 
+    from .onboarding import active_model_label
+
     current = "HEAVY (FLAGSHIP)" if selected == "default" else "LIGHT (CAUTIOUS)"
+    model_label = active_model_label()
     try:
         answer = input(
-            f"Choose analysis depth [Enter = keep {current} · 1 = HEAVY · 2 = LIGHT · "
-            "both GPT-5.6 Sol]: "
+            f"Choose spending depth [Enter = keep {current} · 1 = HEAVY · 2 = LIGHT] "
+            f"— both on {model_label}: "
         ).strip()
     except (EOFError, OSError):
         return selected
