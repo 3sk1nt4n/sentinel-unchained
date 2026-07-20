@@ -31,9 +31,12 @@ def test_windows_bootstrap_is_key_safe_and_hands_off_to_onboarding() -> None:
     assert "Get-FileHash -Algorithm MD5" in script
     assert "64A4E2CB47138084A5C2878066B2D7B1" in script
     assert "MD5 MISMATCH" in script
-    # Idempotency: finished work is detected and skipped.
+    # Idempotency without staleness: finished steps are detected (Write-Skip),
+    # but the install ALWAYS runs so a freshly cloned/pulled fix reaches the venv
+    # instead of an old installed copy silently persisting.
     assert "function Write-Skip" in script
-    assert "already installed" in script
+    assert "ALWAYS (re)install" in script
+    assert "git -C $repo pull" in script
 
 
 def test_posix_bootstrap_is_key_safe_and_uses_the_offline_lane() -> None:

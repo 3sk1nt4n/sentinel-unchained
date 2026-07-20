@@ -298,6 +298,30 @@ def render_launch_gate(
     _boxed("EXPLICIT PAID CLOUD LAUNCH", lines, stream=stream, color=color, accent=_AMBER)
 
 
+def render_key_card(
+    found: bool, source_label: str | None = None, *, stream: TextIO, no_color: bool = False
+) -> None:
+    """Render the OpenAI-key step as a card: configured-and-using, or paste-now."""
+
+    stream = _encoding_safe_stream(stream)
+    color = _supports_color(stream, no_color=no_color)
+    if found:
+        lines = [
+            f"Status: configured - via {source_label or 'a configured source'}.",
+            "Using it for this run - no paste needed.",
+            "Change it any time with:  sentinel key",
+        ]
+        accent = _GREEN
+    else:
+        lines = [
+            "Status: no key saved yet.",
+            "Paste your OpenAI key at the HIDDEN prompt below. It never echoes,",
+            "is never logged, and never leaves this machine (owner-only file).",
+        ]
+        accent = _AMBER
+    _boxed("OPENAI API KEY", lines, stream=stream, color=color, accent=accent)
+
+
 def active_model_label() -> str:
     """Human label for the model this run will actually use.
 

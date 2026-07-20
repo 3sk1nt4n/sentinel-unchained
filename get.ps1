@@ -52,19 +52,22 @@ if (Test-Path (Join-Path (Get-Location) "setup.ps1")) {
     $repo = (Get-Location).Path
 } else {
     $repo = Join-Path $env:USERPROFILE "Unchained"
-    if (-not (Test-Path (Join-Path $repo "setup.ps1"))) {
+    if (Test-Path (Join-Path $repo ".git")) {
+        Write-Info "Updating the existing clone to the latest main..."
+        git -C $repo pull --ff-only 2>&1 | Out-Null
+    } else {
         git clone https://github.com/3sk1nt4n/Unchained.git $repo
         if ($LASTEXITCODE -ne 0) { throw "git clone failed with exit code $LASTEXITCODE." }
     }
 }
 Set-Location $repo
+# ALWAYS (re)install so the freshly cloned/pulled code is what actually runs.
+# setup.ps1 is idempotent and fast (health check by default) and installs a
+# NON-EDITABLE copy into the venv; skipping it when the venv exists is exactly
+# how an old installed copy keeps running after a fix is pushed.
+powershell -NoProfile -ExecutionPolicy Bypass -File .\setup.ps1
+if ($LASTEXITCODE -ne 0) { throw "setup.ps1 failed with exit code $LASTEXITCODE." }
 $sentinelExe = Join-Path $env:LOCALAPPDATA "venvs\sentinel-unchained-py311\Scripts\sentinel.exe"
-if (Test-Path $sentinelExe) {
-    Write-Skip "toolchain already installed"
-} else {
-    powershell -NoProfile -ExecutionPolicy Bypass -File .\setup.ps1
-    if ($LASTEXITCODE -ne 0) { throw "setup.ps1 failed with exit code $LASTEXITCODE." }
-}
 
 $knownMd5 = @{
     "DC01-memory.zip" = "64A4E2CB47138084A5C2878066B2D7B1"

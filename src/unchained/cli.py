@@ -849,16 +849,14 @@ def _ensure_key_for_launch() -> bool:
     dead-ends on a missing key. To re-paste, run ``sentinel key`` (or
     ``sentinel key --remove`` first)."""
 
-    console = Console(sys.stdout)
+    from .onboarding import render_key_card
+
     present, source = openai_api_key_status()
     if present:
         label = _KEY_SOURCE_LABELS.get(source or "", source or "a configured source")
-        message = f"OpenAI key: found via {label} - using it (no paste needed)."
-        console.ok(message) if console.enabled else print(f"  {message}")
-        console.detail("Change it any time with 'sentinel key'.") if console.enabled else None
+        render_key_card(True, label, stream=sys.stdout)
         return True
-    message = "OpenAI key: none saved yet - paste it now (hidden input, owner-only file)."
-    console.step(message) if console.enabled else print(f"  {message}")
+    render_key_card(False, stream=sys.stdout)
     if _key_command(status=False, remove=False) != EXIT_COMPLETE:
         return False
     present, _source = openai_api_key_status()

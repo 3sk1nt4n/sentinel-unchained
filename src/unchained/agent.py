@@ -54,6 +54,13 @@ class AgentProtocolError(RuntimeError):
 
 MAX_CASE_LEDGER_UPDATE_BYTES = CASE_LEDGER_UPDATE_MAX_BYTES
 
+# When the remaining total-token budget falls to this reserve, the adaptive loop
+# is forced to finish gracefully so the closing phases (forced serialization ->
+# exact spans -> fresh judge -> report) run within budget and the run reaches
+# COMPLETE. Sized to cover those phases (their bounded observation inputs plus
+# output ceilings) even on the LIGHT 100k-token profile.
+_CLOSING_PHASE_RESERVE_TOKENS = 60_000
+
 
 @dataclass(frozen=True, slots=True)
 class AgentRun:
@@ -428,6 +435,25 @@ analysis from an unavailable capability.
 """.strip()
         while True:
             self.budget.check()
+            # Reserve budget for the closing phases (serialize -> judge -> report)
+            # so a long investigation never dies PARTIAL with zero findings. When
+            # the remaining budget falls to the reserve, force a graceful typed
+            # finish; the closing phases then run within the reserve and the run
+            # reaches COMPLETE with real findings and a full report.
+            remaining_now = self.budget.remaining_total_tokens()
+            force_finish = remaining_now <= _CLOSING_PHASE_RESERVE_TOKENS
+            turn_tools = (investigation_finish_schema(),) if force_finish else available
+            turn_tool_choice: object = (
+                {"type": "function", "name": INVESTIGATION_FINISH_TOOL_NAME}
+                if force_finish
+                else "required"
+            )
+            if force_finish:
+                self.audit.append(
+                    "investigator.budget_finish",
+                    {"turn": state.turns + 1, "remaining_total_tokens": remaining_now},
+                    actor="runner",
+                )
             packet = {
                 "evidence_profile": profile.public_dict(),
                 "case_ledger": {
@@ -460,9 +486,9 @@ analysis from an unavailable capability.
                     phase="investigate",
                     instructions=instructions,
                     input_items=current_input,
-                    tools=available,
+                    tools=turn_tools,
                     parallel_tool_calls=False,
-                    tool_choice="required",
+                    tool_choice=turn_tool_choice,
                     previous_response_id=None,
                     max_output_tokens=4_096,
                     minimum_output_tokens=4_096,
