@@ -27,7 +27,7 @@ docker compose run --rm offline profile /evidence --json
 | Criterion | Strongest evidence |
 |---|---|
 | Technological Implementation | Codex Session ID `019f61e5-5755-7a02-adb4-618d32baab27`; Codex-built control plane (evidence lifecycle, Responses API adapter, typed execution boundary, caps, typed-DONE-v2, forced serializer, exact spans, downgrade-only review, renderers, verifier, CLI, Docker, tests); 404/404 tests pass in 25.11s, ruff clean |
-| Design | One-word self-driving `sentinel` front door; $0 no-key judge lane above; exact-phrase `LAUNCH GPT-5.6 SOL` spend gate; static inert no-JS `viewer.html`; honest PARTIAL/INVALID labeling |
+| Design | One-word self-driving `sentinel` front door; $0 no-key judge lane above; explicit LAUNCH spend gate (money screen with hard cost ceilings); static inert no-JS `viewer.html`; honest PARTIAL/INVALID labeling |
 | Potential Impact | An IR consultancy must show a regulator or opposing counsel exactly what the AI did; the pattern (model picks bounded strategy, code executes typed authority and retains exact receipts) generalizes to security testing, compliance review, financial operations |
 | Quality of the Idea | The authority split: model chooses strategy; code owns evidence identity, legality, caps, execution, citation spans, verdict monotonicity, report rows, and verification — sealed in a content-addressed bundle verified offline |
 

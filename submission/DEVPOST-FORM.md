@@ -150,7 +150,7 @@ Honest, framed as engineering maturity: the failures are recorded, capped, and l
 - **Byte-exact offline verification**: the shipped bundle verifies VALID on current code — 20 artifacts and 62 hash-chained audit entries reconstructed and checked with no network and no key (proven 2026-07-20).
 - **Measured, capped spend**: shipped run 180,285 provider-reported tokens, 55.5 s, ~$1.16 local estimate; Sol opening 59,254 tokens, 43.702 s, $0.38789875 under a $1.00 cap.
 - **A $0 judge lane**: onboarding, fixture profiling, bundle verify/view, an offline Docker container, and a no-key demo script — none of which contact OpenAI.
-- **A two-key spend gate**: paid runs require typing the exact phrase LAUNCH GPT-5.6 SOL. No accidental spend.
+- **An explicit spend gate**: a paid run starts only after a deliberate LAUNCH confirmation on a money screen showing the model and hard cost ceilings. No accidental spend.
 - **A bounded invocation budget**: exactly 4 fixed GPT-5.6 requests plus one per adaptive action — minimum five, never an unbounded loop.
 - **An inert deliverable**: a static no-JS viewer.html plus an authoritative report, sealed in a content-addressed bundle with a manifest and SHA-256.
 ```
@@ -251,7 +251,7 @@ Optional secondary thread (Docker/README work; thread provenance only, not a fee
 
 After install, bare `sentinel` is identical to the launcher. Re-verify anytime with `.\setup.ps1 -Check` (or `./setup.sh --check`). `-FullTest` runs pytest/Ruff/format/build. Installs are non-editable, so `sentinel` keeps working if the clone moves.
 
-**API key (only for paid runs)**: `sentinel key` prompts hidden and saves to `%LOCALAPPDATA%\sentinel-unchained\openai_api_key` (owner-only). Paid runs are gated behind typing the exact phrase: LAUNCH GPT-5.6 SOL
+**API key (only for paid runs)**: `sentinel key` prompts hidden and saves to `%LOCALAPPDATA%\sentinel-unchained\openai_api_key` (owner-only). Paid runs are gated behind an explicit LAUNCH confirmation (1 = LAUNCH / B = back / Q = quit) on a money screen showing hard cost ceilings.
 ```
 
 ---

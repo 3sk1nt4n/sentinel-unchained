@@ -48,7 +48,7 @@ bundle that ships in the repository.
 | Time | Screen content | Command / slide | Narration (read aloud) |
 |---|---|---|---|
 | 0:00-0:15 | **Slide 1** (hero + pitch) | Slide 1 | Autonomous forensic agents are easy to demo and hard to trust. Unchained splits the job: GPT-5.6 chooses where to look; deterministic code controls what may run and verifies exactly what was executed and cited. |
-| 0:15-0:38 | Terminal. Type the one word `sentinel`. Guided flow appears: onboarding, evidence checks, the API-key step (skip it, type nothing), the launch gate text. | `sentinel` | One word starts a case. Typing sentinel opens the guided flow: onboarding, evidence checks, and a clearly gated launch step. Nothing here spends money. A paid GPT-5.6 run starts only after the exact phrase LAUNCH GPT-5.6 SOL is typed. Everything before that gate is free and offline. |
+| 0:15-0:38 | Terminal. Type the one word `sentinel`. Guided flow appears: onboarding, evidence checks, the API-key step (skip it, type nothing), the launch gate text. | `sentinel` | One word starts a case. Typing sentinel opens the guided flow: onboarding, evidence checks, and a clearly gated launch step. Nothing here spends money. A paid GPT-5.6 run starts only after an explicit launch confirmation on a money screen that shows the model and its hard cost ceilings. Everything before that gate is free and offline. |
 | 0:38-0:58 | The $0 case card: `E001 · Windows memory · 2,147,483,648 bytes · SHA-256 8079a7459b1739caf7d4fbf6dde5eb0ae7a9d24dbde657debf4d5202c8dc6b62` and `openai_called: false` highlighted. | `sentinel profile <EVIDENCE_FOLDER> --json` (see Scene 3 note) | Before any model call, deterministic code profiles the evidence: public ID E001, Windows memory, two gigabytes, and its SHA-256 custody hash. Note openai underscore called: false. This step costs zero dollars. Local paths never become model authority. |
 | 0:58-1:23 | Run verify on the shipped authentic bundle. As output prints, highlight fourteen typed tool receipts, all status success, and `gpt-5.6-luna` on the model line. On-screen caption: "Committed copy of run 20260720T013927Z-9f12ec6f — clone the repo and run this yourself." | `sentinel verify examples\public-run-partial` | Now the real thing. This bundle ships in the repository: an authentic GPT-5.6 run on that two-gigabyte memory image, provider-recorded gpt-5.6-luna across four responses. GPT-5.6 opened with a parallel batch of typed Volatility tools and kept investigating: fourteen tool receipts, every one successful, every byte of output retained. |
 | 1:23-1:43 | Same terminal. Highlight: terminal cap reason `MAX_TOOL_CALLS: reservation would reach 14 > 13`; result **VALID**; terminal status PARTIAL; 20 artifacts and 62 audit entries verified. **[SPLICE SLOT eligible, see below]** | (same command, output already on screen) | Then the hard tool budget ended the run as an honest PARTIAL before any overspend: about fifty-six seconds, one hundred eighty thousand provider tokens, a local cost estimate near a dollar sixteen. The offline verifier reconstructs 20 artifacts and 62 hash-chained audit entries and returns VALID. No network, no key. |
@@ -161,8 +161,9 @@ cut. Section breaks match the scene table.
    what may run and verifies exactly what was executed and cited.
 2. One word starts a case. Typing sentinel opens the guided flow: onboarding,
    evidence checks, and a clearly gated launch step. Nothing here spends money.
-   A paid GPT-5.6 run starts only after the exact phrase LAUNCH GPT-5.6 SOL is
-   typed. Everything before that gate is free and offline.
+   A paid GPT-5.6 run starts only after an explicit launch confirmation on a
+   money screen that shows the model and its hard cost ceilings. Everything
+   before that gate is free and offline.
 3. Before any model call, deterministic code profiles the evidence: public ID
    E001, Windows memory, two gigabytes, and its SHA-256 custody hash. Note
    openai underscore called: false. This step costs zero dollars. Local paths
@@ -213,7 +214,7 @@ cut. Section breaks match the scene table.
       key step by typing nothing.
 - [ ] No private filesystem paths, hidden browser tabs, or notification pop-ups
       in frame; enable Do Not Disturb.
-- [ ] At the guided-flow launch gate, do NOT type LAUNCH GPT-5.6 SOL on camera;
+- [ ] At the guided-flow money screen, do NOT press 1 (LAUNCH) on camera;
       show the gate, spend nothing.
 - [ ] Every number shown exists in a committed artifact
       (`docs/runs/sol-capped-dc01-opening.json` for all bundle figures).
