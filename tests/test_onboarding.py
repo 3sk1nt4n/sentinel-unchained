@@ -226,7 +226,7 @@ def test_human_case_card_is_junior_friendly_and_does_not_echo_child_paths(
     assert "CAUTIOUS [SELECTED]" in output
     assert "FLAGSHIP" in output
     assert "promises of result quality" in output
-    assert "LAUNCH GPT-5.6 SOL" in output
+    assert "explicit launch menu" in output
     assert "never-print-host" not in output
     assert "C:/private" not in output
     assert "\x1b[" not in output
@@ -300,23 +300,28 @@ def test_legacy_windows_console_gets_a_clean_ascii_fallback(
     output.encode("cp1252")
 
 
-def test_paid_sol_confirmation_accepts_only_the_exact_phrase(
+def test_paid_launch_menu_is_explicit_and_enter_never_launches(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     caps = CapConfig.from_env("strict")
-    monkeypatch.setattr("builtins.input", lambda _prompt: "launch gpt-5.6 sol")
-    assert cli_module._confirm_paid_sol_launch("strict", caps) is False
 
-    monkeypatch.setattr("builtins.input", lambda _prompt: "LAUNCH GPT-5.6 SOL")
-    assert cli_module._confirm_paid_sol_launch("strict", caps) is True
+    def feed(*answers: str):
+        pending = list(answers)
+        monkeypatch.setattr("builtins.input", lambda _prompt: pending.pop(0))
 
-    # A stray leading/trailing space (e.g. from a paste) must still be accepted;
-    # the exact phrase, spacing, and case are still required.
-    monkeypatch.setattr("builtins.input", lambda _prompt: "  LAUNCH GPT-5.6 SOL \n")
-    assert cli_module._confirm_paid_sol_launch("strict", caps) is True
-
-    monkeypatch.setattr("builtins.input", lambda _prompt: "LAUNCH  GPT-5.6  SOL")
-    assert cli_module._confirm_paid_sol_launch("strict", caps) is False
+    feed("1")
+    assert cli_module._confirm_paid_sol_launch("strict", caps) == "launch"
+    feed("b")
+    assert cli_module._confirm_paid_sol_launch("strict", caps) == "back"
+    feed("q")
+    assert cli_module._confirm_paid_sol_launch("strict", caps) == "cancel"
+    # Enter alone must never start a paid run - it re-asks until an explicit
+    # choice arrives.
+    feed("", "", "q")
+    assert cli_module._confirm_paid_sol_launch("strict", caps) == "cancel"
+    # Gibberish re-asks instead of silently cancelling or launching.
+    feed("wat", "1")
+    assert cli_module._confirm_paid_sol_launch("strict", caps) == "launch"
 
 
 def test_launch_requires_interactive_terminal_before_evidence_is_read(
@@ -342,7 +347,7 @@ def test_declined_exact_confirmation_keeps_profile_offline(
 ) -> None:
     install_fake_session(monkeypatch, ready_profile())
     monkeypatch.setattr(cli_module, "_interactive_terminal", lambda: True)
-    monkeypatch.setattr(cli_module, "_confirm_paid_sol_launch", lambda *_args: False)
+    monkeypatch.setattr(cli_module, "_confirm_paid_sol_launch", lambda *_args: "cancel")
     monkeypatch.setattr(
         cli_module,
         "run_cli",
@@ -358,7 +363,7 @@ def test_confirmed_launch_calls_existing_lifecycle_with_hidden_child_case_card(
 ) -> None:
     install_fake_session(monkeypatch, ready_profile())
     monkeypatch.setattr(cli_module, "_interactive_terminal", lambda: True)
-    monkeypatch.setattr(cli_module, "_confirm_paid_sol_launch", lambda *_args: True)
+    monkeypatch.setattr(cli_module, "_confirm_paid_sol_launch", lambda *_args: "launch")
     captured: dict[str, object] = {}
 
     def fake_run(

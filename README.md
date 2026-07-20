@@ -71,7 +71,7 @@ local SHA-256 case card before any model is involved.
 >
 > It opens the welcome, asks one thing (where the evidence is), prints a local
 > SHA-256 case card, asks the depth, and only then stops for the exact
-> interactive phrase `LAUNCH GPT-5.6 SOL` before any spend. No flags, no
+> interactive launch menu (`1 = LAUNCH - B = back - Q = quit`) before any spend. No flags, no
 > environment variables. Follow the card-by-card
 > [first-case guide](docs/START-HERE.md).
 
@@ -136,12 +136,12 @@ amber `ACTION NEEDED` card, not a fake green light.
 
 | Your machine | Lane | First result in | Spend | Verified state |
 |---|---|---|---|---|
-| 🪟 **Windows 10/11** | Native CPython 3.11 — the flagship forensic lane | ~5 min | $0 until you type the launch phrase | ✅ Tested; the live Sol run happened here |
+| 🪟 **Windows 10/11** | Native CPython 3.11 — the flagship forensic lane | ~5 min | $0 until you pick LAUNCH at the explicit menu | ✅ Tested; the live Sol run happened here |
 | 🐧 **Linux (AMD64)** | Hardened Docker offline lane | ~3 min | $0 | ✅ Same 404-test suite in-container (a few Windows-only tests skip) |
 | 🍎 **macOS** | Same Docker lane via Docker Desktop | ~3 min | $0 | ⚠️ Expected via Docker's `linux/amd64` emulation; not yet verified on Mac hardware |
 
 Every lane converges on the same experience: a colorful guided onboarding, a
-SHA-256 case card, an explicit two-key launch gate, and — after a run — an
+SHA-256 case card, an explicit launch menu, and — after a run — an
 offline-verifiable proof bundle.
 
 ### Two commands. Any OS.
@@ -171,7 +171,8 @@ git clone https://github.com/3sk1nt4n/Unchained.git && cd Unchained
 **What the second command does** (identical on every OS): a full-color welcome,
 **one question** (where the evidence is), a SHA-256 verified case card computed
 locally (`$0`, no key, no OpenAI), a depth pick, automatic key resolution (or one
-hidden prompt), and only then a stop for the exact phrase `LAUNCH GPT-5.6 SOL`
+hidden prompt), and only then a stop at the explicit launch menu
+(`1 = LAUNCH - B = back - Q = quit`)
 before it runs live and verifies the sealed bundle. No flags, no environment
 variables. Depth sets only hard stop ceilings — the same GPT-5.6 Sol
 investigator either way:
@@ -258,7 +259,7 @@ sentinel
 
 It profiles the case, asks the depth, saves your key at a one-time hidden prompt
 if you have not already (`sentinel key`), and stops for the exact interactive
-phrase `LAUNCH GPT-5.6 SOL` before spending. At completion it prints the exact
+launch menu (`1 = LAUNCH`) before spending. At completion it prints the exact
 next `verify` and `view` commands. Advanced automation may still invoke
 `sentinel run` directly when authorization is established outside the CLI.
 

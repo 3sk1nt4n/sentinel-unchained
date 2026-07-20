@@ -19,8 +19,8 @@ New to this? You're in the right place. It's really just **two commands**:
 install once, then run one word that walks you through everything else.
 
 > **You can't break anything.** Everything is local and free until the very
-> last step, and even then nothing spends money until you type an exact
-> confirmation phrase. If a step ever errors, nothing bad happened — read the
+> last step, and even then nothing spends money until you pick
+> `1 = LAUNCH` at the explicit launch menu. If a step ever errors, nothing bad happened — read the
 > message and try again.
 
 ```text
@@ -53,7 +53,7 @@ thing at a time:
    **case card** (no key, no OpenAI, `$0`);
 4. asks the **depth** (1 = HEAVY, 2 = LIGHT — Enter keeps LIGHT);
 5. finds your API key automatically, or asks for it once at a hidden prompt;
-6. stops for your explicit launch phrase, then runs the investigation live and
+6. stops at the explicit launch menu (1 = LAUNCH), then runs the investigation live and
    verifies the sealed proof bundle.
 
 No flags. No environment variables. If you'd rather type a launcher, `.\unchained.ps1`
@@ -114,12 +114,9 @@ sentinel
 ```
 
 That's the whole experience. Answer one question (the evidence folder), read the
-case card, pick a depth by pressing `1`, `2`, or Enter, and — when it asks — type
-the exact phrase to launch:
-
-```text
-LAUNCH GPT-5.6 SOL
-```
+case card, pick a depth by pressing `1`, `2`, or Enter, and — when it asks —
+confirm from the explicit launch menu: press `1` to LAUNCH (or `B` = back,
+`Q` = quit). Nothing spends money until you pick `1`.
 
 Then **watch it live**: the opening tools with timings, the model's reasoning
 each turn, findings, the reviewer keeping or downgrading them, and a sealed,

@@ -470,7 +470,7 @@ def render_welcome(
     line(
         _AMBER,
         "BOUNDARY",
-        "OpenAI calls 0 · paid run not started · launch needs the phrase LAUNCH GPT-5.6 SOL.",
+        "OpenAI calls 0 · paid run not started · a paid run needs the explicit launch menu.",
     )
 
 
@@ -606,13 +606,17 @@ def render_profile(
         return
 
     # Launch-ready: the depth pick plus three compact honest lines.
-    _boxed(
-        "CHOOSE ANALYSIS DEPTH — HEAVY OR LIGHT",
-        _budget_choice_lines(caps_profile, caps, guided=guided),
-        stream=stream,
-        color=color,
-        accent=_VIOLET,
-    )
+    if not guided:
+        # In the guided flow the depth is ONE compact menu right after this
+        # card; showing a full options box here too made it read like the same
+        # question asked twice.
+        _boxed(
+            "CHOOSE ANALYSIS DEPTH — HEAVY OR LIGHT",
+            _budget_choice_lines(caps_profile, caps, guided=guided),
+            stream=stream,
+            color=color,
+            accent=_VIOLET,
+        )
     print(
         _paint(
             "◆ THIS STEP: local profile + custody only · OpenAI calls 0 · paid run not started",
@@ -638,12 +642,12 @@ def render_profile(
         )
     if guided:
         launch_line = (
-            "◆ NEXT (same command): choose depth below, then type the exact "
-            "confirmation phrase LAUNCH GPT-5.6 SOL to start."
+            "◆ NEXT (same command): pick the depth from the menu below - "
+            "the explicit launch menu follows."
         )
     else:
         launch_line = (
             f"◆ LAUNCH: sentinel onboard <same-evidence> --launch --caps {caps_profile}  "
-            "→ then type the exact confirmation phrase LAUNCH GPT-5.6 SOL"
+            "→ then confirm from the explicit launch menu"
         )
     print(_paint(launch_line, _CYAN + _BOLD, color), file=stream)

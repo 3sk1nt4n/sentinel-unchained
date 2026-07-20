@@ -72,7 +72,7 @@ custody locally to print a deterministic case card. Archives are not unpacked;
 unsupported documents are hashed/listed and set aside. The router accepts at
 most one ready memory image and one ready disk image per case; same-class
 multiples fail closed. It then asks the depth, finds your key (or asks once at a
-hidden prompt), and stops for the explicit launch phrase — no flags, no
+hidden prompt), and stops at the explicit launch menu — no flags, no
 environment variables.
 
 If PATH changes are restricted, the full form always works:
@@ -91,7 +91,7 @@ model either way:
 
 These are hard ceilings, not price quotes, reasoning-depth modes, or promises of
 finding quality. The effective values appear in the case card. A paid run starts
-only in an interactive terminal after the exact phrase `LAUNCH GPT-5.6 SOL`;
+only in an interactive terminal after the explicit launch menu (`1 = LAUNCH`);
 JSON and noninteractive runs cannot launch.
 
 The full junior-analyst walkthrough is [Start Here](docs/START-HERE.md).
@@ -326,7 +326,7 @@ sentinel
 ```
 
 You point it at `C:\Evidence\sentinel\dc01` when it asks, pick the depth, and
-type exactly `LAUNCH GPT-5.6 SOL` only after checking the case and cap cards.
+press `1` at the explicit launch menu only after checking the case and cap cards.
 Anything else cancels with no investigation request. (Prefer a launcher?
 `.\unchained.ps1` is identical.) The onboarding path keeps disk handling
 raw-only unless you later opt into a contained read-only mount.

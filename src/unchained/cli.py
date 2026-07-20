@@ -510,61 +510,88 @@ def _interactive_terminal() -> bool:
     )
 
 
-def _choose_analysis_depth(selected: str) -> str:
-    """Offer the interactive HEAVY/LIGHT pick; any non-answer keeps the selection.
+def _choose_analysis_depth(selected: str) -> str | None:
+    """One compact HEAVY/LIGHT menu: 1 / 2 / Enter keeps / q quits.
 
-    Both depths run the same GPT-5.6 Sol investigator - this chooses hard stop
-    ceilings, never a different model. EOF or a closed stdin keeps the current
-    selection so noninteractive callers are unaffected.
+    Both depths run the same investigator model - this chooses hard stop
+    ceilings, never a different model. Returns the chosen caps profile, or None
+    when the user quits. EOF or a closed stdin keeps the current selection so
+    noninteractive callers are unaffected.
     """
 
     from .onboarding import active_model_label
 
-    current = "HEAVY (FLAGSHIP)" if selected == "default" else "LIGHT (CAUTIOUS)"
-    model_label = active_model_label()
-    try:
-        answer = input(
-            f"Choose spending depth [Enter = keep {current} - 1 = HEAVY - 2 = LIGHT] "
-            f"- both on {model_label}: "
-        ).strip()
-    except (EOFError, OSError):
-        return selected
-    if answer == "1":
-        return "default"
-    if answer == "2":
-        return "strict"
-    return selected
+    flagship = CapConfig.from_env("default")
+    strict = CapConfig.from_env("strict")
+    current = "HEAVY" if selected == "default" else "LIGHT"
+    print()
+    print("  -- CHOOSE DEPTH " + "-" * 49)
+    print(
+        f"     1) HEAVY  {flagship.max_tool_calls} tools / "
+        f"{flagship.max_total_tokens:,} tokens / "
+        f"{flagship.max_wall_seconds / 60:g} min / ${flagship.max_cost_usd:.2f} ceiling"
+    )
+    print(
+        f"     2) LIGHT  {strict.max_tool_calls} tools / "
+        f"{strict.max_total_tokens:,} tokens / "
+        f"{strict.max_wall_seconds / 60:g} min / ${strict.max_cost_usd:.2f} ceiling"
+    )
+    print(f"     Same model either way: {active_model_label()}.")
+    print("     Ceilings are hard stops, not price quotes.")
+    while True:
+        try:
+            answer = input(f"  > Pick 1 or 2 [Enter = {current}] - q = quit: ").strip().lower()
+        except (EOFError, OSError):
+            return selected
+        if answer == "":
+            return selected
+        if answer == "1":
+            return "default"
+        if answer == "2":
+            return "strict"
+        if answer in ("q", "quit", "exit"):
+            return None
+        print("     (1 = HEAVY - 2 = LIGHT - Enter keeps the selection - q = quit)")
 
 
-def _confirm_paid_sol_launch(caps_profile: str, caps: CapConfig) -> bool:
-    """Require a high-friction, exact phrase before crossing the cloud boundary.
+def _confirm_paid_sol_launch(caps_profile: str, caps: CapConfig) -> str:
+    """Explicit menu gate before crossing the paid cloud boundary.
 
-    The confirmation names the ACTUAL model for this run (Sol for a real run, or
-    the labeled cheap model during a rehearsal) so a Luna rehearsal never claims
-    "Sol". The typed phrase stays the fixed ``LAUNCH GPT-5.6 SOL`` safety ritual.
+    Returns ``"launch"``, ``"back"`` (change the depth), or ``"cancel"``. The
+    box names the ACTUAL model for this run (Sol for a real run, or the labeled
+    cheap model during a rehearsal) so a Luna rehearsal never claims "Sol".
+    Enter alone re-asks - an accidental keypress can never start a paid run.
     """
 
     from .onboarding import active_model_label
 
     model_label = active_model_label()
+    depth_name = "HEAVY (FLAGSHIP)" if caps_profile == "default" else "LIGHT (CAUTIOUS)"
     print()
     print("+-- EXPLICIT PAID CLOUD LAUNCH --------------------------------------------+")
     print(f"|  Model for this run: {model_label}")
     print("|  It may receive the bounded profile and typed-tool observations; the")
     print("|  original evidence bytes stay local. This is no longer the $0 preview.")
-    depth_name = "HEAVY (FLAGSHIP)" if caps_profile == "default" else "LIGHT (CAUTIOUS)"
     print(
         f"|  {depth_name} hard ceiling: ${caps.max_cost_usd:.2f} estimated cost "
         f"- {caps.max_total_tokens:,} tokens - {caps.max_tool_calls} tools."
     )
     print("+--------------------------------------------------------------------------+")
-    try:
-        answer = input("Type exactly LAUNCH GPT-5.6 SOL (anything else cancels): ")
-    except EOFError:
-        return False
-    # Tolerate surrounding whitespace (a stray leading/trailing space or newline
-    # from a paste) - the exact phrase, spacing, and case are still required.
-    return answer.strip() == "LAUNCH GPT-5.6 SOL"
+    print("     1) LAUNCH - start the paid run now (this spends real money)")
+    print("     B) Back   - change the depth first")
+    print("     Q) Quit   - cancel; nothing is sent, nothing is spent")
+    while True:
+        try:
+            answer = input("  > Pick 1, B, or Q: ").strip().lower()
+        except (EOFError, OSError):
+            return "cancel"
+        if answer in ("1", "launch", "l", "go", "y", "yes"):
+            return "launch"
+        if answer in ("b", "back"):
+            return "back"
+        if answer in ("q", "quit", "cancel", "n", "no"):
+            return "cancel"
+        print("     (1 = LAUNCH - B = back - Q = quit)")
 
 
 def _onboard(
@@ -665,8 +692,11 @@ def _onboard(
         return EXIT_INVALID
     if not launch:
         return EXIT_COMPLETE
-    chosen_profile = _choose_analysis_depth(caps_profile)
-    if chosen_profile != caps_profile:
+    while True:
+        chosen_profile = _choose_analysis_depth(caps_profile)
+        if chosen_profile is None:
+            print("Launch cancelled. The local profile remains valid; OpenAI calls: 0.")
+            return EXIT_COMPLETE
         caps_profile = chosen_profile
         caps = CapConfig.from_env(caps_profile)
         depth_name = "HEAVY (FLAGSHIP)" if caps_profile == "default" else "LIGHT (CAUTIOUS)"
@@ -675,9 +705,13 @@ def _onboard(
             f"{caps.max_total_tokens:,} tokens / {caps.max_wall_seconds / 60:g} min / "
             f"${caps.max_cost_usd:.2f} estimated cost"
         )
-    if not _confirm_paid_sol_launch(caps_profile, caps):
-        print("Launch cancelled. The local profile remains valid; OpenAI calls: 0.")
-        return EXIT_COMPLETE
+        decision = _confirm_paid_sol_launch(caps_profile, caps)
+        if decision == "back":
+            continue
+        if decision != "launch":
+            print("Launch cancelled. The local profile remains valid; OpenAI calls: 0.")
+            return EXIT_COMPLETE
+        break
     print("Confirmation accepted. Starting the bounded GPT-5.6 lifecycle...")
     return run_cli(
         evidence,
@@ -936,17 +970,7 @@ def _guided(*, mount: bool = False, caps_profile: str = "strict", no_color: bool
         if again in ("q", "quit", "exit", "n", "no"):
             return EXIT_INVALID
 
-    # Step 3: depth - hard ceilings only, same investigator model either way.
-    caps_profile = _choose_analysis_depth(caps_profile)
-    caps = CapConfig.from_env(caps_profile)
-    depth_name = "HEAVY (FLAGSHIP)" if caps_profile == "default" else "LIGHT (CAUTIOUS)"
-    print(
-        f"  Depth: {depth_name} - ceilings {caps.max_tool_calls} tools / "
-        f"{caps.max_total_tokens:,} tokens / {caps.max_wall_seconds / 60:g} min / "
-        f"${caps.max_cost_usd:.2f} estimated cost"
-    )
-
-    # Step 4: default the model so a first-time user needs no $env: juggling and
+    # Step 3: default the model so a first-time user needs no $env: juggling and
     # the run never dead-ends AFTER the paid gate on a missing model. A configured
     # UNCHAINED_MODEL always wins; otherwise pick GPT-5.6 Sol, or the cheap Luna
     # model when a rehearsal was opted in (so cheap mode without a model set does
@@ -954,15 +978,27 @@ def _guided(*, mount: bool = False, caps_profile: str = "strict", no_color: bool
     if not os.getenv("UNCHAINED_MODEL"):
         os.environ["UNCHAINED_MODEL"] = "gpt-5.6-luna" if cheap_model_opt_in() else "gpt-5.6"
 
-    # Step 5: key - auto-found, or set now with hidden input. Never dead-ends.
+    # Step 4: key - auto-found, or set now with hidden input. Never dead-ends.
     if not _ensure_key_for_launch():
         print("  No API key configured - cannot launch. Run 'sentinel key', then start again.")
         return EXIT_INVALID
 
-    # Step 6: the one deliberate boundary before any spend.
-    if not _confirm_paid_sol_launch(caps_profile, caps):
-        print("Launch cancelled. The local profile remains valid; OpenAI calls: 0.")
-        return EXIT_COMPLETE
+    # Step 5-6: one depth menu, then the explicit launch menu. 'B' at the launch
+    # menu comes back here so a depth change never requires starting over.
+    while True:
+        chosen_profile = _choose_analysis_depth(caps_profile)
+        if chosen_profile is None:
+            print("Launch cancelled. The local profile remains valid; OpenAI calls: 0.")
+            return EXIT_COMPLETE
+        caps_profile = chosen_profile
+        caps = CapConfig.from_env(caps_profile)
+        decision = _confirm_paid_sol_launch(caps_profile, caps)
+        if decision == "back":
+            continue
+        if decision != "launch":
+            print("Launch cancelled. The local profile remains valid; OpenAI calls: 0.")
+            return EXIT_COMPLETE
+        break
     print("Confirmation accepted. Starting the bounded GPT-5.6 lifecycle...")
     return run_cli(evidence, caps_profile, show_case_card=False, mount_evidence=mount)
 

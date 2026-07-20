@@ -26,8 +26,8 @@ Write-Host "|            Unchained reasoning. Chained evidence.                 
 Write-Host "|        Install -> pick a case -> add your key -> launch live.          |" -ForegroundColor Gray
 Write-Host "+========================================================================+" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "Never reads evidence or calls OpenAI on its own. A paid run always needs" -ForegroundColor Yellow
-Write-Host "the exact phrase LAUNCH GPT-5.6 SOL. Every step is safe to re-run." -ForegroundColor Yellow
+Write-Host "Never reads evidence or calls OpenAI on its own. A paid run always stops" -ForegroundColor Yellow
+Write-Host "at an explicit launch menu first. Every step is safe to re-run." -ForegroundColor Yellow
 Write-Host ""
 
 if ($env:OS -ne "Windows_NT") { throw "get.ps1 is Windows-only. Use get.sh with Docker on Linux/macOS." }
@@ -125,23 +125,22 @@ function Resolve-EvidenceFolder {
     }
 
     # A folder: are there zips to prepare, or already-extracted images?
+    # ALL zips are extracted into ONE case folder so a memory+disk PAIR runs
+    # together (split EWF segments are grouped as one disk by the profiler).
     $zips = @(Get-ChildItem -LiteralPath $Path -File -ErrorAction SilentlyContinue |
         Where-Object { $_.Extension -ieq '.zip' })
     if ($zips.Count -gt 0) {
-        $memZip = $zips | Where-Object { $_.Name -imatch 'memory|[-_]mem\b|[-_]mem\.' } | Select-Object -First 1
-        if ($memZip) {
-            Write-Host "      Found $($memZip.Name) - preparing a clean memory case." -ForegroundColor Cyan
-            $dest = Join-Path $env:USERPROFILE "Evidence\dc01-mem"
-            if (Expand-EvidenceZip $memZip.FullName $dest) { return $dest } else { return $null }
+        $isDc01 = @($zips | Where-Object { $knownMd5.ContainsKey($_.Name) }).Count -gt 0
+        $label = if ($isDc01) { "dc01-pair" } else { (Split-Path $Path -Leaf) + "-prepared" }
+        if ($zips.Count -gt 1) {
+            Write-Host "      Found $($zips.Count) zips - preparing the FULL case (memory AND disk together)." -ForegroundColor Cyan
+        } else {
+            Write-Host "      Found $($zips[0].Name) - preparing the case." -ForegroundColor Cyan
         }
-        Write-Host "      Found $($zips.Count) zip(s) but no memory-image zip in that folder." -ForegroundColor Yellow
-        if ((Read-Host "      Extract them all and try to onboard? (y/N)") -match '^[yY]') {
-            $dest = Join-Path $env:USERPROFILE ("Evidence\" + (Split-Path $Path -Leaf) + "-prepared")
-            $ok = $true
-            foreach ($z in $zips) { if (-not (Expand-EvidenceZip $z.FullName $dest)) { $ok = $false } }
-            if ($ok) { return $dest } else { return $null }
-        }
-        return $null
+        $dest = Join-Path $env:USERPROFILE ("Evidence\" + $label)
+        $ok = $true
+        foreach ($z in $zips) { if (-not (Expand-EvidenceZip $z.FullName $dest)) { $ok = $false } }
+        if ($ok) { return $dest } else { return $null }
     }
 
     $img = Get-ChildItem -LiteralPath $Path -File -Recurse -ErrorAction SilentlyContinue |
@@ -172,7 +171,7 @@ function Get-CaseFolder {
         if ((Read-Host "      Open the official download page now? (y/N)") -match '^[yY]') {
             Start-Process "https://dfirmadness.com/the-stolen-szechuan-sauce/"
         }
-        $p = (Read-Host "      Path to DC01-memory.zip OR the folder that holds the DC01 zips (Enter to skip)")
+        $p = (Read-Host "      Path to the folder holding the DC01 zips - memory + disk pair; a single zip works too (Enter to skip)")
         if (-not $p.Trim()) { return "" }
         $c = Resolve-EvidenceFolder $p
         if ($c) { return $c } else { return "" }
@@ -255,10 +254,10 @@ if ($keyStatus -match "Key configured via") {
         $env:UNCHAINED_MODEL = "gpt-5.6-luna"
         Write-Host "   💚 REHEARSAL on Luna selected - cheap and clearly non-official." -ForegroundColor Green
     }
-    Write-Host "   Next: the case card, a LIGHT/HEAVY spending pick, then type" -ForegroundColor Gray
-    Write-Host "   the exact phrase " -ForegroundColor Gray -NoNewline
-    Write-Host "LAUNCH GPT-5.6 SOL" -ForegroundColor Yellow -NoNewline
-    Write-Host " to confirm the spend." -ForegroundColor Gray
+    Write-Host "   Next: the case card, a 1/2 depth pick, then confirm the spend" -ForegroundColor Gray
+    Write-Host "   from the explicit " -ForegroundColor Gray -NoNewline
+    Write-Host "1 = LAUNCH" -ForegroundColor Yellow -NoNewline
+    Write-Host " menu (B = back, Q = quit)." -ForegroundColor Gray
     Write-Host ""
     & $sentinelExe onboard $chosenCase --launch --caps strict
 } else {

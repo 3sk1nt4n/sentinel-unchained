@@ -84,7 +84,7 @@ def test_bare_sentinel_self_drives_one_command_to_the_live_run(
     monkeypatch.setattr(cli_module, "_prompt_evidence_path", lambda: Path("operator-case"))
     monkeypatch.setattr(cli_module, "_choose_analysis_depth", lambda _selected: "default")
     monkeypatch.setattr(cli_module, "_ensure_key_for_launch", lambda: True)
-    monkeypatch.setattr(cli_module, "_confirm_paid_sol_launch", lambda *_a: True)
+    monkeypatch.setattr(cli_module, "_confirm_paid_sol_launch", lambda *_a: "launch")
     captured: dict[str, object] = {}
 
     def fake_run(evidence, caps_profile, *, show_case_card, mount_evidence):
@@ -121,7 +121,7 @@ def test_guided_defaults_the_model_so_no_env_juggling_is_needed(
 
     def fake_confirm(_profile, _caps):
         seen["model"] = cli_module.os.getenv("UNCHAINED_MODEL")
-        return False  # cancel before any spend
+        return "cancel"  # cancel before any spend
 
     monkeypatch.setattr(cli_module, "_confirm_paid_sol_launch", fake_confirm)
     monkeypatch.setattr(
@@ -144,7 +144,7 @@ def test_guided_cancelled_launch_stays_offline(
     monkeypatch.setattr(cli_module, "_prompt_evidence_path", lambda: Path("operator-case"))
     monkeypatch.setattr(cli_module, "_choose_analysis_depth", lambda _selected: "strict")
     monkeypatch.setattr(cli_module, "_ensure_key_for_launch", lambda: True)
-    monkeypatch.setattr(cli_module, "_confirm_paid_sol_launch", lambda *_a: False)
+    monkeypatch.setattr(cli_module, "_confirm_paid_sol_launch", lambda *_a: "cancel")
     monkeypatch.setattr(
         cli_module,
         "run_cli",
