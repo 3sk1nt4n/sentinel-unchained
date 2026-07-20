@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param(
     [switch]$SkipTests,
+    [switch]$FullTest,
     [switch]$Check
 )
 
@@ -132,17 +133,28 @@ if (
 Write-Host "      PASS  CPython $actualPythonVersion AMD64 (64-bit)" -ForegroundColor Green
 
 Write-Host "[2/5] Installing the pinned bootstrap tools" -ForegroundColor Cyan
-& $python -m pip install -r requirements/bootstrap.txt
+& $python -m pip install -q -r requirements/bootstrap.txt
 Assert-NativeSuccess "Bootstrap dependency installation"
+Write-Host "      PASS  bootstrap tools ready" -ForegroundColor Green
 
 Write-Host "[3/5] Installing Unchained and its constrained DFIR dependencies" -ForegroundColor Cyan
-& $python -m pip install -c requirements/constraints.windows-amd64-cp311.txt -e ".[dev]"
+Write-Host "      (first run downloads a few packages - this is the only real wait)" -ForegroundColor Gray
+# NON-editable install: the package is COPIED into the isolated venv, so
+# `sentinel` keeps working no matter where this folder lives - or even if you
+# move or delete it afterwards. An editable (-e) install would pin the clone
+# path and break the moment the folder moves (e.g. a OneDrive-redirected
+# Documents folder), which is not "install anywhere, works anywhere".
+& $python -m pip install -q -c requirements/constraints.windows-amd64-cp311.txt ".[dev]"
 Assert-NativeSuccess "Unchained dependency installation"
-& $python -m pip check
+& $python -m pip check | Out-Null
 Assert-NativeSuccess "Dependency integrity check"
+Write-Host "      PASS  dependencies installed and consistent" -ForegroundColor Green
 
-if (-not $SkipTests) {
-    Write-Host "[4/5] Running the complete no-key quality gate" -ForegroundColor Cyan
+if ($SkipTests) {
+    Write-Host "[4/5] Verification skipped (-SkipTests)" -ForegroundColor Yellow
+}
+elseif ($FullTest) {
+    Write-Host "[4/5] Running the full developer gate (tests, lint, format, build)" -ForegroundColor Cyan
     & $python -m pytest
     Assert-NativeSuccess "Test suite"
     & $python -m ruff check .
@@ -153,7 +165,15 @@ if (-not $SkipTests) {
     Assert-NativeSuccess "Package build"
 }
 else {
-    Write-Host "[4/5] Quality gate skipped because -SkipTests was explicit" -ForegroundColor Yellow
+    # Fast, user-facing health check - NOT the developer test suite. Proves the
+    # toolchain imports and the CLI responds, in a couple of seconds.
+    Write-Host "[4/5] Verifying the toolchain is healthy (fast - not the dev suite)" -ForegroundColor Cyan
+    & $python -c "import unchained, openai, volatility3"
+    Assert-NativeSuccess "Import check"
+    & $python -m unchained --help *> $null
+    Assert-NativeSuccess "CLI smoke"
+    Write-Host "      PASS  unchained + openai + volatility3 import; the CLI responds" -ForegroundColor Green
+    Write-Host "      (want the full test/lint/build gate? run:  .\setup.ps1 -FullTest)" -ForegroundColor DarkGray
 }
 
 Write-Host "[5/5] Making 'sentinel' a one-word command in every terminal" -ForegroundColor Cyan

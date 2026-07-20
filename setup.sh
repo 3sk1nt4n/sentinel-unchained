@@ -87,7 +87,9 @@ say "$c_cyan" "[2/4] Upgrading pip and build front-end"
 "$PY" -m pip install --upgrade pip >/dev/null
 
 say "$c_cyan" "[3/4] Installing Unchained and its pinned DFIR dependencies"
-"$PY" -m pip install -e ".[dev]"
+# NON-editable install: the package is copied into .venv, so `sentinel` works no
+# matter where this folder lives - or even if you move or delete it afterwards.
+"$PY" -m pip install ".[dev]"
 "$PY" -m pip check
 
 say "$c_cyan" "[4/4] Proving the toolchain imports"

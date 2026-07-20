@@ -29,5 +29,9 @@ def test_setup_is_fail_closed_and_hands_off_to_guided_onboarding() -> None:
     assert "-I -S $probeFile" in script
     assert "-I -S -c" not in script
     assert script.index("platform.python_implementation()") < script.index(
-        "pip install -r requirements/bootstrap.txt"
+        "pip install -q -r requirements/bootstrap.txt"
     )
+    # The default install path is a FAST health check, not the full dev suite;
+    # the heavy gate is opt-in via -FullTest.
+    assert "$FullTest" in script
+    assert "not the dev suite" in script
