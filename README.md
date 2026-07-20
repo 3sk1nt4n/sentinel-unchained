@@ -151,12 +151,14 @@ case. Pick your line:
 
 ```powershell
 # 🪟 Windows (Git + CPython 3.11)
+git clone https://github.com/3sk1nt4n/Unchained.git; cd Unchained
 .\setup.ps1          # install + verify everything (one command)
 .\unchained.ps1      # start a whole case — it walks you through the rest
 ```
 
 ```bash
 # 🐧 Linux / 🍎 macOS (Git + Python 3.11)
+git clone https://github.com/3sk1nt4n/Unchained.git && cd Unchained
 ./setup.sh           # install + verify everything (one command)
 ./unchained.sh       # start a whole case — it walks you through the rest
 ```

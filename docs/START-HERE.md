@@ -19,6 +19,9 @@ install once, then run one word that walks you through everything else.
 ## The whole thing in two commands
 
 ```powershell
+# 0) get the project and step into it
+git clone https://github.com/3sk1nt4n/Unchained.git; cd Unchained
+
 # 1) install + verify everything (one command)
 powershell -NoProfile -ExecutionPolicy Bypass -File .\setup.ps1
 
