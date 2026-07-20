@@ -928,6 +928,11 @@ def _mount_is_active(path: Path) -> bool:
         return any(len(fields := line.split()) >= 5 and fields[4] == target for line in lines)
     try:
         return path.is_mount()
+    except NotImplementedError:
+        # Platforms without mount semantics (e.g. native Windows, where
+        # Path.is_mount() is unsupported on CPython 3.11) cannot hold this kind
+        # of mount, so nothing is active to clean up. Degrade to raw-only.
+        return False
     except OSError:
         return True
 
