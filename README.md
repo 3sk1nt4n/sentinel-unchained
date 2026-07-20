@@ -144,41 +144,35 @@ Every lane converges on the same experience: a colorful guided onboarding, a
 SHA-256 case card, an explicit two-key launch gate, and — after a run — an
 offline-verifiable proof bundle.
 
-### 🪟 Windows — the flagship lane
+### Two commands. Any OS.
 
-**The one-liner** — clone, install the pinned toolchain, optionally paste your
-key with hidden input, and land in the guided onboarding:
-
-```powershell
-irm https://raw.githubusercontent.com/3sk1nt4n/Unchained/main/get.ps1 | iex
-```
-
-Prefer the manual path? It is the same **two commands**:
-
-**1 — install + verify everything** (reads no evidence, asks for no key, makes
-no OpenAI call):
+The first installs and verifies everything; the second walks you through a whole
+case. Pick your line:
 
 ```powershell
-git clone https://github.com/3sk1nt4n/Unchained.git
-cd Unchained
-powershell -NoProfile -ExecutionPolicy Bypass -File .\setup.ps1
+# 🪟 Windows (Git + CPython 3.11)
+.\setup.ps1          # install + verify everything (one command)
+.\unchained.ps1      # start a whole case — it walks you through the rest
 ```
 
-**2 — run one word. It walks you through the rest.**
-
-```powershell
-sentinel
+```bash
+# 🐧 Linux / 🍎 macOS (Git + Python 3.11)
+./setup.sh           # install + verify everything (one command)
+./unchained.sh       # start a whole case — it walks you through the rest
 ```
 
-That single command shows a full-color welcome, asks **one thing** (where the
-evidence is), prints a SHA-256 verified case card locally (`$0`, no key, no
-OpenAI), asks the depth (`1` = HEAVY, `2` = LIGHT), finds your key or asks once
-at a hidden prompt, and only then stops for the exact phrase `LAUNCH GPT-5.6 SOL`
-before running live and verifying the sealed bundle. No flags, no environment
-variables. (`.\unchained.ps1` does the same if you like a launcher; re-verify
-anytime with `.\setup.ps1 -Check`.)
+> Prefer a one-liner install? `irm …/get.ps1 | iex` (Windows) or
+> `curl -fsSL …/get.sh | bash` (Linux/macOS) do the clone + install for you.
+> After install, bare `sentinel` is identical to the launcher; re-verify anytime
+> with `.\setup.ps1 -Check` (or `./setup.sh --check`).
 
-Depth sets only hard stop ceilings — the same GPT-5.6 Sol investigator either way:
+**What the second command does** (identical on every OS): a full-color welcome,
+**one question** (where the evidence is), a SHA-256 verified case card computed
+locally (`$0`, no key, no OpenAI), a depth pick, automatic key resolution (or one
+hidden prompt), and only then a stop for the exact phrase `LAUNCH GPT-5.6 SOL`
+before it runs live and verifies the sealed bundle. No flags, no environment
+variables. Depth sets only hard stop ceilings — the same GPT-5.6 Sol
+investigator either way:
 
 | Depth | Hard ceilings (not a price quote) |
 |---|---|
@@ -188,30 +182,16 @@ Depth sets only hard stop ceilings — the same GPT-5.6 Sol investigator either 
 Read the concise [Start Here guide](docs/START-HERE.md) for evidence formats,
 mount outcomes, cloud boundaries, and the post-run verify/view steps.
 
-### 🐧 Linux / 🍎 macOS — the same one command
-
-Requirements: Git, Python 3.11 (native) or Docker (isolated). Native gives you
-the identical self-driving flow:
-
-```bash
-./setup.sh        # install + verify everything (one command)
-./unchained.sh    # start a whole case — it walks you through the rest
-```
-
-`./unchained.sh` behaves exactly like `sentinel` on Windows: one question, a
-verified card, the depth pick, and the explicit `LAUNCH GPT-5.6 SOL` gate.
-Re-verify anytime with `./setup.sh --check`.
-
-Zero-install and fully isolated? The hardened container reads no evidence, takes
-no key, and has **no network**:
+**Zero-install, fully isolated** (any OS with Docker): the hardened container
+reads no evidence, takes no key, and has **no network** —
 
 ```bash
 docker compose run --rm offline
 ```
 
-It profiles a committed synthetic fixture with zero OpenAI calls (public
-evidence ID `E001`, matching custody), runs non-root with a read-only filesystem
-and every Linux capability dropped, and honestly reports `logs-only`.
+It profiles a committed synthetic fixture with zero OpenAI calls (public evidence
+ID `E001`, matching custody), runs non-root with a read-only filesystem and every
+Linux capability dropped, and honestly reports `logs-only`.
 
 > **Honest macOS label:** the container is the same hardened `linux/amd64` image
 > running under Docker Desktop through emulation. It has not been verified on
