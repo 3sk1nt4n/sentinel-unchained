@@ -69,6 +69,35 @@ def test_bundle_artifact_rows_list_only_artifacts_that_exist(tmp_path: Path) -> 
     assert cli_module._bundle_artifact_rows(tmp_path / "missing") == []
 
 
+def test_exec_summary_lines_unescape_and_wrap_the_report_section() -> None:
+    report = (
+        "# Unchained DFIR Report - COMPLETE\n\n"
+        "## Executive summary (model-authored, nonauthoritative)\n\n"
+        "Memory evidence strongly supports that the Print Spooler process was "
+        "hosting injected content\\. The evidence establishes suspicious private "
+        "executable memory but does not identify the payload\\, its source\\, or "
+        "the responsible injector\\.\n\n"
+        "## Investigative narrative (model-authored, nonauthoritative)\n\nOther text.\n"
+    )
+
+    rows = cli_module._exec_summary_lines(report)
+
+    assert rows, "the executive summary must render on the closing panel"
+    joined = " ".join(row.strip() for row in rows)
+    # Escapes are display-unescaped and the next section never bleeds in.
+    assert "injected content." in joined
+    assert "\\." not in joined
+    assert "Investigative narrative" not in joined
+    # A report without the section, or an empty one, promises nothing.
+    assert cli_module._exec_summary_lines("# Report\n\n## Findings\n") == []
+    assert (
+        cli_module._exec_summary_lines(
+            "## Executive summary (model-authored, nonauthoritative)\n\n\n## Next\n"
+        )
+        == []
+    )
+
+
 def test_partial_next_step_names_billing_when_quota_is_exhausted() -> None:
     # The provider code sits past the panel's 160-character Why truncation, so
     # the decision must read the full reason text, not the display slice.

@@ -1061,6 +1061,27 @@ def _findings_table_lines(findings: list[Any], verdicts: list[Any]) -> list[str]
     return lines
 
 
+def _exec_summary_lines(report_markdown: str) -> list[str]:
+    """The model's executive summary from the sealed report, unescaped and
+    wrapped for the closing panel. Display-only: the authoritative rows stay
+    the findings table, and the nonauthoritative label travels with the text."""
+
+    import textwrap
+
+    marker = "## Executive summary (model-authored, nonauthoritative)"
+    start = report_markdown.find(marker)
+    if start < 0:
+        return []
+    body = report_markdown[start + len(marker) :]
+    boundary = body.find("\n## ")
+    if boundary >= 0:
+        body = body[:boundary]
+    text = re.sub(r"\\(.)", r"\1", " ".join(body.split())).strip()
+    if not text:
+        return []
+    return [f"    {line}" for line in textwrap.wrap(text, width=88)[:8]]
+
+
 def _bundle_artifact_rows(run_directory: Path) -> list[tuple[str, str]]:
     """Direct paths to the promised bundle artifacts, printed right after the
     pipeline so 'What you get' is delivered on-screen, not just documented.
@@ -1826,6 +1847,10 @@ def run_cli(
     )
     finding_rows = _findings_table_lines(findings_list, verdict_list)
     artifact_rows = _bundle_artifact_rows(run_directory)
+    report_markdown = (
+        getattr(investigation, "report_markdown", None) if investigation is not None else None
+    )
+    summary_rows = _exec_summary_lines(report_markdown) if report_markdown else []
     stdout_console = Console(sys.stdout)
     if stdout_console.enabled:
         stdout_console.rule()
@@ -1836,6 +1861,10 @@ def run_cli(
         stdout_console.kv("Findings", findings_line)
         for row in finding_rows:
             stdout_console.line(row)
+        if summary_rows:
+            stdout_console.kv("Exec summary", "(model-authored, nonauthoritative)")
+            for row in summary_rows:
+                stdout_console.line(row)
         stdout_console.kv("Report", str(run_directory / "report.md"))
         stdout_console.kv("Proof bundle", str(run_directory))
         for label, value in artifact_rows:
@@ -1864,6 +1893,10 @@ def run_cli(
         print(f"Findings: {findings_line}")
         for row in finding_rows:
             print(row)
+        if summary_rows:
+            print("Exec summary (model-authored, nonauthoritative):")
+            for row in summary_rows:
+                print(row)
         print(f"Report: {run_directory / 'report.md'}")
         print(f"Proof bundle: {run_directory}")
         for label, value in artifact_rows:
