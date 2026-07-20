@@ -55,14 +55,19 @@ def is_gpt56_sol_model(value: str) -> bool:
     return value == "gpt-5.6" or value == "gpt-5.6-sol" or value.startswith("gpt-5.6-sol-")
 
 
-def is_gpt56_luna_model(value: str) -> bool:
-    """Return whether *value* is the Luna alias or a Luna snapshot."""
+def is_gpt56_terra_model(value: str) -> bool:
+    """Return whether *value* is the Terra alias or a Terra snapshot.
 
-    return value == "gpt-5.6-luna" or value.startswith("gpt-5.6-luna-")
+    Terra is the balanced GPT-5.6 tier used as the rehearsal / connectivity model
+    (it replaced Luna). It is cheaper than Sol but is not the qualifying model:
+    only Sol passes ``--require-live-gpt56``.
+    """
+
+    return value == "gpt-5.6-terra" or value.startswith("gpt-5.6-terra-")
 
 
 def is_gpt56_model(value: str) -> bool:
-    """Return whether *value* is any GPT-5.6 family model (Sol, Luna, Terra...)."""
+    """Return whether *value* is any GPT-5.6 family model (Sol, Terra, Luna...)."""
 
     return value == "gpt-5.6" or value.startswith("gpt-5.6-")
 
@@ -71,10 +76,10 @@ def is_gpt5_family(value: str) -> bool:
     """Return whether *value* is any GPT-5.x model.
 
     The pipeline sends GPT-5.x reasoning controls (reasoning_effort, verbosity)
-    on every request, so a cheap test run must stay within the GPT-5 family
-    (e.g. gpt-5.6-luna or gpt-5.4-nano). Non-5.x models would reject those
-    parameters. gpt-5.6-luna is the recommended cheap test model: same family
-    as Sol, cheap, and capable enough to complete the typed forensic protocol.
+    on every request, so a rehearsal run must stay within the GPT-5 family
+    (e.g. gpt-5.6-terra or gpt-5.4-nano). Non-5.x models would reject those
+    parameters. gpt-5.6-terra is the recommended rehearsal model: same family
+    as Sol, cheaper, and capable enough to complete the typed forensic protocol.
     """
 
     return value.startswith("gpt-5")
@@ -192,12 +197,12 @@ class OpenAIResponsesModel:
         if not configured_model:
             raise ValueError("UNCHAINED_MODEL is required (for example: gpt-5.6)")
         if connectivity_smoke:
-            if not is_gpt56_luna_model(configured_model):
-                raise ValueError("connectivity smoke model must identify GPT-5.6 Luna")
+            if not is_gpt56_terra_model(configured_model):
+                raise ValueError("connectivity smoke model must identify GPT-5.6 Terra")
         elif cheap_model_opt_in():
             if not is_gpt5_family(configured_model):
                 raise ValueError(
-                    "test-model runs require a GPT-5 model (e.g. gpt-5.6-luna); "
+                    "test-model runs require a GPT-5 model (e.g. gpt-5.6-terra); "
                     "non-5.x models reject the reasoning parameters this pipeline sends"
                 )
         elif not is_gpt56_sol_model(configured_model):

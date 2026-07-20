@@ -75,18 +75,18 @@ def adapter_for(endpoint: FakeResponsesEndpoint) -> OpenAIResponsesModel:
     return adapter
 
 
-def test_luna_connectivity_policy_does_not_weaken_sol_proof_policy() -> None:
+def test_terra_connectivity_policy_does_not_weaken_sol_proof_policy() -> None:
     with pytest.raises(ValueError, match="must identify GPT-5.6 Sol"):
-        OpenAIResponsesModel(model_id="gpt-5.6-luna", api_key="sk-test")
+        OpenAIResponsesModel(model_id="gpt-5.6-terra", api_key="sk-test")
 
     smoke = OpenAIResponsesModel(
-        model_id="gpt-5.6-luna",
+        model_id="gpt-5.6-terra",
         api_key="sk-test",
         connectivity_smoke=True,
     )
-    assert smoke.model_id == "gpt-5.6-luna"
+    assert smoke.model_id == "gpt-5.6-terra"
 
-    with pytest.raises(ValueError, match="must identify GPT-5.6 Luna"):
+    with pytest.raises(ValueError, match="must identify GPT-5.6 Terra"):
         OpenAIResponsesModel(
             model_id="gpt-5-mini",
             api_key="sk-test",

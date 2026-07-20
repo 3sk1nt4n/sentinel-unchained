@@ -14,7 +14,7 @@ if (-not (Test-Path $python)) {
 # It never contacts OpenAI: empty evidence is refused during local profiling,
 # before any model call. A placeholder key only satisfies model construction and
 # is never sent anywhere.
-$env:UNCHAINED_MODEL = "gpt-5.6-luna"
+$env:UNCHAINED_MODEL = "gpt-5.6-terra"
 $env:UNCHAINED_ALLOW_TEST_MODEL = "1"
 $env:OPENAI_API_KEY = "sk-demo-placeholder-never-sent"
 

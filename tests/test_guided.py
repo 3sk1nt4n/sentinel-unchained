@@ -111,13 +111,13 @@ def test_launch_menu_defaults_to_the_cheap_rehearsal_and_owns_the_model(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     # A stale environment variable can never silently preselect the expensive
-    # model: the card starts on the Luna rehearsal no matter what is inherited.
+    # model: the card starts on the Terra rehearsal no matter what is inherited.
     monkeypatch.setenv("UNCHAINED_MODEL", "gpt-5.6")
     monkeypatch.setenv("UNCHAINED_ALLOW_TEST_MODEL", "0")
     _script_input(monkeypatch, ["1"])
 
     assert cli_module._launch_menu("strict") == "strict"
-    assert cli_module.os.getenv("UNCHAINED_MODEL") == "gpt-5.6-luna"
+    assert cli_module.os.getenv("UNCHAINED_MODEL") == "gpt-5.6-terra"
     assert cli_module.os.getenv("UNCHAINED_ALLOW_TEST_MODEL") == "1"
 
 

@@ -161,7 +161,7 @@ def test_luna_smoke_is_one_bounded_nonqualifying_typed_call(
             return ModelResponse(
                 response_id="resp_smoke",
                 request_id="req_smoke",
-                provider_model="gpt-5.6-luna-2026-07-14",
+                provider_model="gpt-5.6-terra-2026-07-14",
                 function_calls=(
                     FunctionCall(
                         call_id="call_smoke",
@@ -184,7 +184,7 @@ def test_luna_smoke_is_one_bounded_nonqualifying_typed_call(
     payload = json.loads(capsys.readouterr().out)
     request = captured["request"]
     assert captured == {
-        "model_id": "gpt-5.6-luna",
+        "model_id": "gpt-5.6-terra",
         "connectivity_smoke": True,
         "request": request,
     }
@@ -245,7 +245,7 @@ def test_luna_smoke_rejects_non_luna_before_provider_construction(
     monkeypatch.setattr(cli_module, "OpenAIResponsesModel", forbidden_model)
 
     assert main(["smoke-openai", "--model", "gpt-5-mini"]) == EXIT_INVALID
-    assert "must identify GPT-5.6 Luna" in capsys.readouterr().err
+    assert "must identify GPT-5.6 Terra" in capsys.readouterr().err
 
 
 def test_luna_smoke_suppresses_provider_and_credential_text_on_failure(
@@ -256,7 +256,7 @@ def test_luna_smoke_suppresses_provider_and_credential_text_on_failure(
 
     class FailingSmokeModel:
         def __init__(self, *, model_id: str, connectivity_smoke: bool) -> None:
-            assert model_id == "gpt-5.6-luna"
+            assert model_id == "gpt-5.6-terra"
             assert connectivity_smoke is True
 
         def create(self, request: object) -> ModelResponse:

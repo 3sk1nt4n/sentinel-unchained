@@ -37,8 +37,8 @@ from .model import (
     OpenAIResponsesModel,
     cheap_model_opt_in,
     is_gpt5_family,
-    is_gpt56_luna_model,
     is_gpt56_sol_model,
+    is_gpt56_terra_model,
     openai_api_key_status,
 )
 from .models import EvidenceProfile, RunStatus
@@ -56,7 +56,7 @@ EXIT_COMPLETE = 0
 EXIT_FATAL = 1
 EXIT_INVALID = 2
 EXIT_PARTIAL = 3
-_SMOKE_MODEL = "gpt-5.6-luna"
+_SMOKE_MODEL = "gpt-5.6-terra"
 _SMOKE_TOKEN = "SENTINEL_SMOKE_OK"
 _SMOKE_MAX_OUTPUT_TOKENS = 128
 
@@ -187,14 +187,14 @@ def build_smoke_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="sentinel smoke-openai",
         description=(
-            "Run one cheap, non-forensic GPT-5.6 Luna typed-tool protocol canary. "
+            "Run one cheap, non-forensic GPT-5.6 Terra typed-tool protocol canary. "
             "This never creates a proof bundle."
         ),
     )
     parser.add_argument(
         "--model",
         default=os.getenv("SENTINEL_SMOKE_MODEL", _SMOKE_MODEL),
-        help="allowlisted Luna alias or snapshot (default: gpt-5.6-luna)",
+        help="allowlisted Terra alias or snapshot (default: gpt-5.6-terra)",
     )
     parser.add_argument("--json", action="store_true", dest="json_output")
     return parser
@@ -367,10 +367,10 @@ def _doctor(*, json_output: bool) -> int:
 
 
 def _smoke_openai(*, model_id: str, json_output: bool) -> int:
-    """Exercise one bounded Luna Responses call without creating forensic authority."""
+    """Exercise one bounded Terra Responses call without creating forensic authority."""
 
-    if not is_gpt56_luna_model(model_id):
-        raise ValueError("--model must identify GPT-5.6 Luna")
+    if not is_gpt56_terra_model(model_id):
+        raise ValueError("--model must identify GPT-5.6 Terra")
     model = OpenAIResponsesModel(model_id=model_id, connectivity_smoke=True)
     tool = {
         "type": "function",
@@ -416,8 +416,8 @@ def _smoke_openai(*, model_id: str, json_output: bool) -> int:
         problems.append("response ID was absent")
     if not response.request_id:
         problems.append("request ID was absent")
-    if not response.provider_model or not is_gpt56_luna_model(response.provider_model):
-        problems.append("provider-returned model was absent or not GPT-5.6 Luna")
+    if not response.provider_model or not is_gpt56_terra_model(response.provider_model):
+        problems.append("provider-returned model was absent or not GPT-5.6 Terra")
     if response.usage_error:
         problems.append(f"usage accounting was invalid: {response.usage_error}")
     if response.usage.output_tokens > _SMOKE_MAX_OUTPUT_TOKENS:
@@ -520,7 +520,7 @@ def _set_run_model(rehearsal: bool) -> None:
 
     if rehearsal:
         os.environ["UNCHAINED_ALLOW_TEST_MODEL"] = "1"
-        os.environ["UNCHAINED_MODEL"] = "gpt-5.6-luna"
+        os.environ["UNCHAINED_MODEL"] = "gpt-5.6-terra"
     else:
         os.environ.pop("UNCHAINED_ALLOW_TEST_MODEL", None)
         os.environ["UNCHAINED_MODEL"] = "gpt-5.6"
@@ -531,7 +531,7 @@ def _launch_menu(caps_profile: str) -> str | None:
     single card. 1 = LAUNCH, 2 = switch depth, 3 = switch model, Q = quit -
     no question is ever asked twice, and each switch redraws the same card.
 
-    Starts on the cheap Luna rehearsal (recommended first run); 3 flips to the
+    Starts on the cheaper Terra rehearsal (recommended first run); 3 flips to the
     official Sol run. Returns the final caps profile on launch, or None on
     cancel. Enter alone re-asks - an accidental keypress can never start a
     paid run.

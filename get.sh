@@ -2,7 +2,7 @@
 # Unchained one-line bootstrap for Linux and macOS (Docker lane).
 #   curl -fsSL https://raw.githubusercontent.com/3sk1nt4n/Unchained/main/get.sh | bash
 # Clones the repo, builds the hardened offline container, optionally stores
-# your OpenAI key with hidden input for the live Luna canary, and opens the
+# your OpenAI key with hidden input for the live Terra canary, and opens the
 # guided onboarding. It never echoes, logs, or uploads the key, and never
 # reads evidence.
 
@@ -76,7 +76,7 @@ else
   docker compose build
 fi
 
-step "3/6" "Optional: store your OpenAI key for the live Luna canary (hidden input)"
+step "3/6" "Optional: store your OpenAI key for the live Terra canary (hidden input)"
 note "The key is written to a private local file (chmod 600) and referenced through"
 note "OPENAI_API_KEY_FILE. It is never echoed, never committed, never logged."
 note "Press Enter on an empty prompt to skip and stay fully offline."

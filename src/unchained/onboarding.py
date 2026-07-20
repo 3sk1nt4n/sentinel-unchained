@@ -268,7 +268,7 @@ def render_launch_gate(
     other_model = (
         "GPT-5.6 Sol - the official, qualifying bundle (costs more)"
         if cheap_model_opt_in()
-        else "gpt-5.6-luna - cheap rehearsal, clearly nonqualifying"
+        else "gpt-5.6-terra - cheaper rehearsal, nonqualifying (Sol is the seal)"
     )
     lines = [
         f"Model  {active_model_label()}",
@@ -324,7 +324,7 @@ def active_model_label() -> str:
 
     configured = os.getenv("UNCHAINED_MODEL", "").strip()
     if cheap_model_opt_in() and configured and "sol" not in configured.lower():
-        return f"{configured} (CHEAP TEST - nonqualifying rehearsal)"
+        return f"{configured} (rehearsal - nonqualifying; Sol is the qualifying model)"
     return "GPT-5.6 Sol"
 
 
