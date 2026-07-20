@@ -231,15 +231,16 @@ class OpenAIResponsesModel:
                 "effort": request.reasoning_effort,
             },
             "text": {"verbosity": request.text_verbosity},
-            # GPT-5.6 exposes this experimental request field before the pinned
-            # SDK's typed ``Responses.create`` signature does.  ``extra_body``
-            # is the SDK-supported escape hatch for forwarding such fields.
-            # Implicit mode lets GPT-5.6 reuse matching stable prefixes.  The
-            # adapter still audits provider-reported cache reads and writes.
-            "extra_body": {
-                "prompt_cache_options": {"mode": request.prompt_cache_mode},
-            },
         }
+        # ``prompt_cache_options`` is a GPT-5.6 experimental request field carried
+        # via ``extra_body`` (the SDK escape hatch). Other GPT-5 models used for a
+        # cheap test run reject it with a 400, so send it only for 5.6. The
+        # audited ``prompt_cache_mode`` intent and provider-reported cache
+        # reads/writes are recorded either way.
+        if is_gpt56_model(self._model_id):
+            kwargs["extra_body"] = {
+                "prompt_cache_options": {"mode": request.prompt_cache_mode},
+            }
         if request.include:
             kwargs["include"] = list(request.include)
         if request.tools:
