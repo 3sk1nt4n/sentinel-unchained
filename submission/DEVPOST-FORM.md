@@ -93,6 +93,62 @@ The differentiator is not that an LLM can call forensic tools. It is that model 
 Closing: "Unchained is not an LLM pretending to be evidence. It is GPT-5.6 directing a bounded investigation whose actions, citations, custody, and final report can be checked independently."
 ```
 
+### Architecture pipeline (optional paste — include if the description field has room)
+
+Verbatim from `docs/ARCHITECTURE.md`. Every `[GPT-5.6]` stage is model judgment inside the protocol; every `[deterministic]` stage is code authority.
+
+```
+evidence file or folder
+      |
+      v
+PROFILE + ROUTE [deterministic]
+  content classification, evidence OS/shape, EID-keyed SHA-256, capability truth
+      |
+      v
+OPENING BOOK [GPT-5.6]
+  choose up to twelve distinct route-valid typed tools; the batch is all-or-none
+      |
+      v
+PARALLEL TYPED EXECUTION [deterministic authority]
+  reserve caps atomically, own paths, bind each receipt to evidence ID + digest
+      |
+      v
+CASE LEDGER + LATEST OBSERVATION [deterministic packet]
+      |
+      v
+PLAN -> ACT -> OBSERVE -> UPDATE [GPT-5.6]
+  exactly one typed action per turn: an eligible forensic tool with a visible
+  <=8,192-byte ledger update, or finish_investigation({"status":"DONE"})
+      |
+      v
+FORCED INVESTIGATION SERIALIZATION [strict schema, no forensic tools]
+      |
+      v
+EXACT SPAN RESOLUTION [deterministic]
+  quote -> artifact SHA-256 + UTF-8 byte start/end + stable span ID
+      |
+      v
+FRESH JUDGE [GPT-5.6]
+  existing findings + their spans only; preserve or downgrade, never promote
+      |
+      v
+STRUCTURED REPORT DRAFT [GPT-5.6]
+  narrative fields plus exact existing finding/span references
+      |
+      v
+DETERMINISTIC RENDERER [code authority]
+  authoritative rows/verdicts/citations; model prose labeled nonauthoritative
+      |
+      v
+CLOSE TOOLS/MOUNTS -> FINAL FULL SHA-256 CUSTODY CHECK [deterministic]
+      |
+      v
+SEAL REPORT + STATIC VIEWER + CONTENT-ADDRESSED PROOF BUNDLE
+      |
+      v
+OFFLINE LIFECYCLE, HASH, RECEIPT, AND SPAN VERIFICATION
+```
+
 ---
 
 ## How we built it

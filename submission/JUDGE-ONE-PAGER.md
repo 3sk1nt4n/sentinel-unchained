@@ -47,6 +47,7 @@ docker compose run --rm offline profile /evidence --json
 - Repo (public, MIT): https://github.com/3sk1nt4n/Unchained
 - Demo video: ADDED-ON-UPLOAD
 - Codex Session ID: `019f61e5-5755-7a02-adb4-618d32baab27`
+- Full pipeline diagram: `docs/ARCHITECTURE.md`
 - Shipped verifiable bundle: `examples/public-run-partial` (run `sentinel verify` on it — no key)
 - Live receipts: `docs/runs/sol-capped-dc01-opening.json`, `docs/runs/luna-canary-receipt.json`
 - Public evidence source: https://dfirmadness.com/the-stolen-szechuan-sauce/
