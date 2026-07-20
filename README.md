@@ -58,12 +58,9 @@
   offline verifier that rebuilds the report and viewer byte-for-byte. If one
   byte changes, verification fails.
 
-**This is the real first screen** — just `sentinel`, no key, no evidence, zero
-OpenAI calls:
-
-<p align="center">
-  <img src="docs/assets/cli-welcome.svg" alt="The real sentinel welcome: guided cards, budget choice, and an explicit cloud/cost boundary" width="760">
-</p>
+**The real first screen is one word** — just `sentinel`: no key, no evidence,
+zero OpenAI calls. It welcomes you, asks where the evidence is, and prints a
+local SHA-256 case card before any model is involved.
 
 > **What “proves” means here:** code verifies what ran, what bytes were retained,
 > what exact text was cited, and whether custody still matches. It does **not**
@@ -125,18 +122,15 @@ curl -fsSL https://raw.githubusercontent.com/3sk1nt4n/Unchained/main/get.sh | ba
 ```
 
 **Ready-made samples, no hunting:** a safe synthetic case ships in the repo
-(`sentinel onboard docker/fixtures` — instant, free), and the installer walks
-you to the public **DFIR Madness 001** practice case (official download page
-plus the publisher's checksums; Unchained never fetches evidence for you).
+(run `sentinel` and point it at the bundled `docker/fixtures` folder for an
+instant, free `$0` preview), and the installer walks you to the public
+**DFIR Madness 001** practice case (official download page plus the publisher's
+checksums; Unchained never fetches evidence for you).
 
 Point it at a folder and you get a local, cryptographic case card — every file
 SHA-256-hashed, classified, and routed **before any model is allowed near it**.
 The tool refuses to overstate: a synthetic logs-only fixture honestly gets an
-amber `ACTION NEEDED` card, not a fake green light:
-
-<p align="center">
-  <img src="docs/assets/cli-case-card.svg" alt="The real case card: per-file SHA-256 custody, honest ACTION NEEDED status on a synthetic fixture, budget choice, and cloud/cost boundary" width="760">
-</p>
+amber `ACTION NEEDED` card, not a fake green light.
 
 **Pick your machine. Every lane starts with zero keys and zero spend.**
 
@@ -564,7 +558,7 @@ processors=6
 
 | Symptom | What to do |
 |---|---|
-| `doctor` says model/key missing | Set `UNCHAINED_MODEL=gpt-5.6` and either `OPENAI_API_KEY` or `OPENAI_API_KEY_FILE` |
+| `doctor` says model/key missing | Run `sentinel key` to save your key (the model already defaults to `gpt-5.6`; `OPENAI_API_KEY`/`OPENAI_API_KEY_FILE` also work) |
 | Docker `doctor` exits `2` with no key | Expected for the offline/no-secret service; use `profile` or `--help` for the no-key gate |
 | Luna smoke cannot find its secret | Set host `OPENAI_API_KEY_FILE` to a readable one-line file and add `--profile live` |
 | Profile says mount unavailable | Use raw inspection or a properly configured native forensic host; do not add `--privileged` casually |

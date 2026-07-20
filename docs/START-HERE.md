@@ -1,5 +1,20 @@
 # Start here: your first Unchained case
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Windows-flagship%20lane-0078D6?logo=windows&logoColor=white" alt="Windows flagship lane">
+  <img src="https://img.shields.io/badge/Linux-hardened%20container-1793D1?logo=linux&logoColor=white" alt="Linux hardened container">
+  <img src="https://img.shields.io/badge/macOS-via%20Docker-000000?logo=apple&logoColor=white" alt="macOS via Docker">
+</p>
+
+<p align="center">
+  <a href="../README.md">🏠 Overview</a> ·
+  <a href="../README.md#for-judges--the-submission-at-a-glance">🏆 For judges</a> ·
+  <a href="../README.md#quickstart">⏱️ Quickstart</a> ·
+  <a href="ARCHITECTURE.md">🧠 Architecture</a> ·
+  <a href="../README.md#proof-status">🧾 Proof status</a> ·
+  <a href="../JUDGE-QUICKSTART.md">⚖️ Judge guide</a>
+</p>
+
 New to this? You're in the right place. It's really just **two commands**:
 install once, then run one word that walks you through everything else.
 
@@ -149,6 +164,11 @@ sentinel verify "C:\path\to\bundle" --require-complete --require-live-gpt56
 
 🎉 **VALID with those flags is submission-grade proof.**
 
+> Honest note: the authentic **COMPLETE** Sol bundle is still pending (see the
+> README → Proof status). Those two flags are exactly what you run once that
+> bundle exists; today they will correctly **fail** the shipped `PARTIAL`
+> fixture, which is the verifier refusing to overstate.
+
 > Verification proves the lifecycle, custody, citations, report, and viewer are
 > internally consistent. It does **not** prove a model's forensic interpretation
 > is true, and it does not authenticate OpenAI. A human analyst owns the final
@@ -158,9 +178,12 @@ sentinel verify "C:\path\to\bundle" --require-complete --require-live-gpt56
 
 ## Linux and macOS (same one-command experience)
 
-The exact same flow runs natively with Bash mirrors of the two scripts:
+On **Linux** the exact same flow runs natively with the Bash mirrors of the two
+scripts. On **macOS** the supported route is the hardened Docker lane
+(`linux/amd64` emulation); it is not yet verified on Mac hardware.
 
 ```bash
+git clone https://github.com/3sk1nt4n/Unchained.git && cd Unchained
 ./setup.sh        # install + verify everything (one command)
 ./unchained.sh    # start a whole case (walks you through the rest)
 ```

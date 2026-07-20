@@ -1,5 +1,20 @@
 # Unchained: quick install and run
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Windows-flagship%20lane-0078D6?logo=windows&logoColor=white" alt="Windows flagship lane">
+  <img src="https://img.shields.io/badge/Linux-hardened%20container-1793D1?logo=linux&logoColor=white" alt="Linux hardened container">
+  <img src="https://img.shields.io/badge/macOS-via%20Docker-000000?logo=apple&logoColor=white" alt="macOS via Docker">
+</p>
+
+<p align="center">
+  <a href="README.md">🏠 Overview</a> ·
+  <a href="README.md#for-judges--the-submission-at-a-glance">🏆 For judges</a> ·
+  <a href="README.md#quickstart">⏱️ Quickstart</a> ·
+  <a href="docs/ARCHITECTURE.md">🧠 Architecture</a> ·
+  <a href="README.md#proof-status">🧾 Proof status</a> ·
+  <a href="docs/START-HERE.md">🚀 Start here</a>
+</p>
+
 ## Fastest no-key lane (zero spend)
 
 **If Python 3.11 is available, this is instant** — every command below returns
@@ -83,8 +98,8 @@ The full junior-analyst walkthrough is [Start Here](docs/START-HERE.md).
 
 **Hardware note:** no GPU is needed — GPT-5.6 runs on OpenAI's side. For the
 real memory-image path, 4 cores / 8 threads and 16 GB RAM are comfortable (the
-opening runs up to six Volatility processes concurrently); keep evidence on a
-local SSD path, not a OneDrive/cloud-synced folder.
+opening can fan out up to twelve typed forensic tools concurrently); keep
+evidence on a local SSD path, not a OneDrive/cloud-synced folder.
 
 ## 1. Install prerequisites
 
@@ -166,7 +181,7 @@ evidence:
 & "$venv\Scripts\vol.exe" -h
 ```
 
-The OpenAI-native vNext tree has 267 passing tests across 32 Python files. A
+The OpenAI-native vNext tree has 404 passing tests across 24 test files. A
 failure should be fixed or reported with its environment details. Do not
 silently switch interpreters.
 
@@ -281,7 +296,9 @@ path-free case card containing OS, shape, readiness, sizes, hashes, available
 tools, cloud boundary, and effective caps. It does not unpack an archive; any
 permitted extraction happens before onboarding.
 
-Profile and route it before spending an API call:
+Profile and route it first — a `$0` local preview with no key and no spend (bare
+`sentinel` does the same profile before it ever asks to launch; this explicit CLI
+form stops at the card):
 
 ```powershell
 & "$venv\Scripts\sentinel.exe" onboard C:\Evidence\sentinel\dc01
@@ -334,8 +351,8 @@ run contains a report, append-only audit log, manifest, summary, environment
 record, custody receipts, retained content-addressed tool outputs, and a
 self-contained `viewer.html`.
 
-The GPT-5.6 opening is intentionally all-or-none: it must choose one to six
-distinct route-valid typed calls. An unknown, duplicate, malformed, or seventh
+The GPT-5.6 opening is intentionally all-or-none: it must choose one to twelve
+distinct route-valid typed calls. An unknown, duplicate, malformed, or thirteenth
 call rejects the whole opening rather than running a valid-looking subset. In
 the adaptive loop, every response must contain exactly one typed action. A
 forensic action continues the loop; only the closed
