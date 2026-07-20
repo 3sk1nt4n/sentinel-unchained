@@ -634,6 +634,8 @@ processors=6
 | Multiple same-class images fail | Put each ready memory/disk image in a separate case folder |
 | `view` cannot open from Docker | Verify in the container, then open the bind-mounted `viewer.html` on the host |
 | A run is `PARTIAL` | Read `summary.json`, `report.md`, and the last audit events; do not relabel it complete |
+| `PARTIAL` with a `429 Request too large ... TPM` audit error | The findings-serializer re-sends every retained observation in one request, which can exceed a low tokens-per-minute limit. New OpenAI accounts cap at ~200k TPM; a rich 12-tool investigation's serializer can be ~270k. Use an account whose TPM exceeds your serializer size (add credit / verify to tier up), or run a smaller opening. |
+| `PARTIAL` with `MAX_TOTAL_TOKENS` before the report | The full lifecycle (opening + adaptive turns + serializer + judge + report) on a real memory image can exceed the default 400k token cap. Raise it for the complete run, e.g. `MAX_TOTAL_TOKENS=3000000 MAX_COST_USD=30`. |
 
 ## Honest limits
 
