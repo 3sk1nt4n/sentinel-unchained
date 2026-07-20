@@ -636,7 +636,29 @@ def _classify(
             warnings=warnings,
         )
 
-    is_ewf = head.startswith((b"EVF\x09\r\n\xff\x00", b"EVF2\r\n\x81\x00", b"LVF\x09\r\n\xff\x00"))
+    # Classic EWF/L01 header: 8-byte signature, 1 "fields start" byte, then a
+    # little-endian uint16 SEGMENT NUMBER. Every segment of a split image
+    # (.E01, .E02, ...) carries the same signature, so without this check each
+    # continuation segment would be counted as a second disk and a legitimate
+    # single split image would fail closed as "more than one ready disk".
+    # Segment 1 is the analysis entry point; EWF readers load the sibling
+    # segments from it automatically. EVF2 (Ex01) keeps the previous behavior.
+    is_classic_ewf = head.startswith((b"EVF\x09\r\n\xff\x00", b"LVF\x09\r\n\xff\x00"))
+    if is_classic_ewf and len(head) >= 11:
+        ewf_segment = int.from_bytes(head[9:11], "little")
+        if ewf_segment >= 2:
+            return _Classification(
+                kind="unknown",
+                filesystem=None,
+                os_hint="unknown",
+                health="ewf-continuation-segment",
+                warnings=(
+                    f"EWF continuation segment {ewf_segment} of a split disk image; "
+                    "the first segment carries the analysis and reads its siblings "
+                    "automatically.",
+                ),
+            )
+    is_ewf = is_classic_ewf or head.startswith(b"EVF2\r\n\x81\x00")
     has_partition_table = bool(offsets) or _read_at(path, 512, 8) == b"EFI PART"
     if is_ewf or has_partition_table:
         probed_filesystem, probed_offsets, probed_filesystem_offset = _probe_filesystem_with_tsk(
@@ -673,6 +695,21 @@ def _classify(
             os_hint="linux",
             health="memory-signature-recognized",
             banner="Linux LiME signature",
+        )
+
+    # Name compressed archives honestly instead of a generic "unknown", so the
+    # card can say "extract first" and the guided flow can offer to do it.
+    # Archives are still never unpacked here.
+    if head.startswith((b"PK\x03\x04", b"7z\xbc\xaf'\x1c", b"Rar!\x1a\x07")):
+        return _Classification(
+            kind="unknown",
+            filesystem=None,
+            os_hint="unknown",
+            health="archive-not-unpacked",
+            warnings=(
+                "Compressed archive; archives are never unpacked automatically - "
+                "extract its permitted contents first.",
+            ),
         )
 
     is_log, log_os = _looks_like_text_log(head)

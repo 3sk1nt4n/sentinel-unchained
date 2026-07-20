@@ -171,3 +171,95 @@ def test_guided_not_ready_case_can_be_abandoned_without_launch(
 
     assert main([]) == EXIT_INVALID
     assert "ACTION NEEDED" in capsys.readouterr().out
+
+
+def _archive_profile(case: Path, zip_name: str = "memory.zip"):
+    from unchained.models import EvidenceItem, EvidenceProfile
+
+    item = EvidenceItem(
+        evidence_id="E001",
+        path=case / zip_name,
+        kind="unknown",
+        size=(case / zip_name).stat().st_size,
+        sha256="a" * 64,
+        os_hint="unknown",
+        health="archive-not-unpacked",
+        symbols="not-applicable",
+        available=False,
+    )
+    return EvidenceProfile(
+        root=case,
+        os="unknown",
+        shape="unknown",
+        filesystems=(),
+        sizes={"E001": item.size},
+        health={"E001": item.health},
+        symbols={"E001": item.symbols},
+        hashes={"E001": item.sha256},
+        available_tool_families=(),
+        capability_label="undetermined",
+        items=(item,),
+    )
+
+
+def test_safe_extract_zip_rejects_zip_slip_members(tmp_path: Path) -> None:
+    import zipfile
+
+    hostile = tmp_path / "hostile.zip"
+    with zipfile.ZipFile(hostile, "w") as archive:
+        archive.writestr("../evil.txt", "x")
+    destination = tmp_path / "out"
+    destination.mkdir()
+
+    with pytest.raises(ValueError, match="unsafe archive member"):
+        cli_module._safe_extract_zip(hostile, destination)
+    assert not (tmp_path / "evil.txt").exists()
+
+
+def test_safe_extract_zip_extracts_nested_members(tmp_path: Path) -> None:
+    import zipfile
+
+    good = tmp_path / "good.zip"
+    with zipfile.ZipFile(good, "w") as archive:
+        archive.writestr("case/memory.raw", "MEM")
+        archive.writestr("readme.txt", "hello")
+    destination = tmp_path / "out"
+    destination.mkdir()
+
+    assert cli_module._safe_extract_zip(good, destination) == 2
+    assert (destination / "case" / "memory.raw").read_text() == "MEM"
+    assert (destination / "readme.txt").read_text() == "hello"
+
+
+def test_zip_extraction_offer_extracts_into_clean_sibling_folder(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import zipfile
+
+    case = tmp_path / "dc pair"
+    case.mkdir()
+    with zipfile.ZipFile(case / "memory.zip", "w") as archive:
+        archive.writestr("dc01-memory.raw", "MEM")
+    _script_input(monkeypatch, [""])  # Enter = yes
+
+    destination = cli_module._offer_zip_extraction(case, _archive_profile(case))
+
+    assert destination == tmp_path / "dc pair-extracted"
+    assert (destination / "dc01-memory.raw").read_text() == "MEM"
+
+
+def test_zip_extraction_offer_respects_a_decline(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import zipfile
+
+    case = tmp_path / "case"
+    case.mkdir()
+    with zipfile.ZipFile(case / "evidence.zip", "w") as archive:
+        archive.writestr("memory.raw", "MEM")
+    _script_input(monkeypatch, ["n"])
+
+    assert cli_module._offer_zip_extraction(case, _archive_profile(case, "evidence.zip")) is None
+    assert not (tmp_path / "case-extracted").exists()

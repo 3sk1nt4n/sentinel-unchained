@@ -708,9 +708,18 @@ def _prompt_evidence_path() -> Path | None:
     discarded, never used, so a fat-fingered credential can't leak into a path.
     """
 
+    print()
+    print("  -- YOUR CASE " + "-" * 52)
+    print("     Paste the path to ONE case's evidence: a folder holding a")
+    print("     memory image and/or a disk image from one host (a memory+disk")
+    print("     PAIR is welcome). ZIP archives are fine - I can extract them")
+    print("     for you. Unchained never downloads evidence itself; for the")
+    print("     public DC01 practice case, the installer walks you to it.")
+    print("     Example: C:\\Evidence\\CASE-A" + " " * 18 + "q = quit")
+    print("  " + "-" * 65)
     while True:
         try:
-            raw = input("  Where is the evidence for ONE case? (file/folder, or q to quit): ")
+            raw = input("  > Paste the evidence path (folder or file): ")
         except (EOFError, OSError):
             return None
         answer = (raw or "").strip().strip('"').strip("'").strip()
@@ -731,6 +740,99 @@ def _prompt_evidence_path() -> Path | None:
             print(f"  Not found: {answer}. Check the path and try again (or q to quit).")
             continue
         return candidate
+
+
+def _safe_extract_zip(zip_path: Path, destination: Path) -> int:
+    """Extract one ZIP into ``destination`` with zip-slip protection.
+
+    Every member path is validated (no absolute paths, no ``..``, no drive
+    prefix) before a byte is written, and the total uncompressed size must fit
+    the free space with 1 GiB headroom. Returns the number of files extracted.
+    """
+
+    import shutil
+    import zipfile
+    from pathlib import PurePosixPath
+
+    extracted = 0
+    with zipfile.ZipFile(zip_path) as archive:
+        members = archive.infolist()
+        total_bytes = sum(m.file_size for m in members if not m.is_dir())
+        free = shutil.disk_usage(destination).free
+        if total_bytes > max(0, free - 1_073_741_824):
+            raise ValueError(
+                f"not enough free space to extract {zip_path.name} ({total_bytes:,} bytes needed)"
+            )
+        for member in members:
+            if member.is_dir():
+                continue
+            name = member.filename.replace("\\", "/")
+            pure = PurePosixPath(name)
+            if (
+                not pure.parts
+                or pure.is_absolute()
+                or any(part == ".." for part in pure.parts)
+                or ":" in pure.parts[0]
+            ):
+                raise ValueError(f"unsafe archive member path: {member.filename!r}")
+            target = destination.joinpath(*pure.parts)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            with archive.open(member) as source, open(target, "wb") as sink:
+                shutil.copyfileobj(source, sink, 16 * 1024 * 1024)
+            extracted += 1
+    return extracted
+
+
+def _offer_zip_extraction(evidence: Path, profile: EvidenceProfile) -> Path | None:
+    """When a not-ready case contains ZIP archives, offer to extract them into a
+    clean sibling case folder and return that folder for re-profiling.
+
+    Local and free; nothing leaves the machine and the original archives are
+    untouched. Returns None when there is nothing to extract, the user
+    declines, or extraction fails.
+    """
+
+    import zipfile
+
+    zips = [
+        item.path
+        for item in profile.items
+        if item.health == "archive-not-unpacked" and item.path.suffix.casefold() == ".zip"
+    ]
+    if not zips:
+        return None
+    print()
+    print(f"  I found {len(zips)} ZIP archive(s) in this case. Archives are never")
+    print("  analyzed in place, but I can extract them into a clean case folder")
+    print("  right here - local and free; nothing leaves this machine.")
+    try:
+        answer = input("  Extract now and re-profile? [Enter = yes - n = no]: ")
+    except (EOFError, OSError):
+        return None
+    if answer.strip().lower() in ("n", "no", "q", "quit"):
+        return None
+    root = evidence if evidence.is_dir() else evidence.parent
+    destination = root.parent / f"{root.name}-extracted"
+    try:
+        destination.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        print(f"  Could not create the extraction folder: {exc}")
+        return None
+    total_files = 0
+    for zip_path in zips:
+        packed_gib = zip_path.stat().st_size / 1024**3
+        print(
+            f"  Extracting {zip_path.name} ({packed_gib:.2f} GiB packed) - "
+            "large images take a few minutes..."
+        )
+        try:
+            total_files += _safe_extract_zip(zip_path, destination)
+        except (ValueError, OSError, zipfile.BadZipFile) as exc:
+            print(f"  Could not extract {zip_path.name}: {exc}")
+            return None
+    print(f"  Extracted {total_files} file(s) into: {destination}")
+    print("  Re-profiling the extracted case...")
+    return destination
 
 
 def _ensure_key_for_launch() -> bool:
@@ -775,8 +877,12 @@ def _guided(*, mount: bool = False, caps_profile: str = "strict", no_color: bool
     render_welcome(caps_profile=caps_profile, caps=caps, stream=sys.stdout, no_color=no_color)
 
     # Step 1-2: one question, then the local verified case card (no key, $0).
+    # ``pending`` carries a path produced inside the loop (e.g. a freshly
+    # extracted case folder) so it is profiled next without re-asking.
+    pending: Path | None = None
     while True:
-        evidence = _prompt_evidence_path()
+        evidence = pending or _prompt_evidence_path()
+        pending = None
         if evidence is None:
             print("No case selected. Nothing was read; OpenAI calls: 0.")
             return EXIT_COMPLETE
@@ -817,6 +923,11 @@ def _guided(*, mount: bool = False, caps_profile: str = "strict", no_color: bool
         )
         if assessment.profile_ready:
             break
+        # A folder of ZIP archives is the most common first-run stumble; offer
+        # to extract them into a clean sibling case folder and re-profile.
+        pending = _offer_zip_extraction(evidence, profile)
+        if pending is not None:
+            continue
         print("  This case is not route-ready yet - fix the blockers above, or pick another.")
         try:
             again = input("  Try another case? [Enter = yes - q = quit]: ").strip().lower()

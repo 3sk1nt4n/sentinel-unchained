@@ -685,3 +685,51 @@ def test_windows_failed_info_probe_is_routable_but_labeled_degraded(
     assert item.health == "degraded-windows-symbol-probe"
     assert "memory ready" not in profile.capability_label.lower()
     assert "auto-download/probe pending" in profile.capability_label
+
+
+def test_zip_archive_is_classified_extract_first_not_generic_unknown(tmp_path: Path) -> None:
+    import zipfile
+
+    with zipfile.ZipFile(tmp_path / "evidence-package.zip", "w") as archive:
+        archive.writestr("memory.raw", "not really memory")
+
+    with EvidenceSession(tmp_path, mount=False, case_card_stream=None) as session:
+        profile = session.profile()
+
+    item = profile.items[0]
+    assert item.kind == "unknown"
+    assert item.health == "archive-not-unpacked"
+
+
+def test_split_ewf_segments_group_into_one_disk_not_two(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Both segments of a split EWF image carry the same signature; only the
+    # first (segment number 1) may count as the disk, or a legitimate single
+    # split image fails closed as "more than one ready disk".
+    monkeypatch.setattr(
+        evidence_module,
+        "_probe_filesystem_with_tsk",
+        lambda *_args, **_kwargs: (None, (), 0),
+    )
+    signature = b"EVF\x09\r\n\xff\x00" + b"\x01"
+    (tmp_path / "dc01.E01").write_bytes(
+        signature + (1).to_bytes(2, "little") + b"\x00\x00" + bytes(4_096)
+    )
+    (tmp_path / "dc01.E02").write_bytes(
+        signature + (2).to_bytes(2, "little") + b"\x00\x00" + bytes(4_096)
+    )
+
+    with EvidenceSession(tmp_path, mount=False, case_card_stream=None) as session:
+        profile = session.profile()
+
+    disks = [item for item in profile.items if item.kind == "disk"]
+    segments = [item for item in profile.items if item.health == "ewf-continuation-segment"]
+    assert len(disks) == 1
+    assert len(segments) == 1
+
+    from unchained.onboarding import assess_profile
+
+    blockers = assess_profile(profile).blockers
+    assert not any("More than one ready disk" in blocker for blocker in blockers)

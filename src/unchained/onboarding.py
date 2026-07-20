@@ -152,9 +152,16 @@ def assess_profile(profile: EvidenceProfile) -> OnboardingAssessment:
     ready_memory = len(profile.memory_items)
     ready_disk = len(profile.disk_items)
     recognized = sum(item.kind != "unknown" for item in profile.items)
+    archives = sum(item.health == "archive-not-unpacked" for item in profile.items)
     blockers: list[str] = []
     if profile.shape == "unknown" or recognized == 0:
         blockers.append("No supported memory, disk, or standalone-log content was recognized.")
+    if archives and recognized == 0:
+        blockers.append(
+            f"{archives} compressed archive(s) found - archives are never analyzed in "
+            "place. Extract them first (the guided 'sentinel' flow offers to do this "
+            "for you)."
+        )
     if not any(item.available for item in profile.items):
         blockers.append("Every recognized evidence route is currently unavailable.")
     if ready_memory > 1:
@@ -186,6 +193,10 @@ def _human_size(size: int) -> str:
 
 
 def _safe_health(item: EvidenceItem) -> str:
+    if item.health == "archive-not-unpacked":
+        return "EXTRACT FIRST"
+    if item.health == "ewf-continuation-segment":
+        return "SPLIT-IMAGE SEGMENT"
     if item.kind == "unknown":
         return "SET ASIDE"
     if item.available:
@@ -531,8 +542,13 @@ def render_profile(
         ready = item.kind != "unknown" and item.available
         marker = _paint("✓", _GREEN + _BOLD, color) if ready else _paint("○", _DIM, color)
         digest = f"{item.sha256[:12]}…{item.sha256[-12:]}"
+        display_kind = item.kind.upper()
+        if item.health == "archive-not-unpacked":
+            display_kind = "ARCHIVE"
+        elif item.health == "ewf-continuation-segment":
+            display_kind = "DISK"
         print(
-            f"  {marker} {item.evidence_id}  {item.kind.upper():<7}  "
+            f"  {marker} {item.evidence_id}  {display_kind:<7}  "
             f"{_human_size(item.size):>10}  {state}  " + _paint(f"SHA-256 {digest}", _DIM, color),
             file=stream,
         )
