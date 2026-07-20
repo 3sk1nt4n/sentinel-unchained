@@ -6,6 +6,12 @@ deterministic boundary around an autonomous GPT-5.6 investigator.
 
 ## OpenAI-native vNext pipeline
 
+<p align="center">
+  <img src="assets/architecture.png"
+       alt="Unchained pipeline — GPT-5.6 judgment stages in blue, deterministic code authority in amber, offline verification in green"
+       width="1000">
+</p>
+
 ```text
 evidence file or folder
       |

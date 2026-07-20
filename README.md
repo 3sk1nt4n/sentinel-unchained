@@ -385,6 +385,12 @@ cited.**
 
 ## How it works
 
+<p align="center">
+  <img src="docs/assets/architecture.png"
+       alt="Unchained pipeline — GPT-5.6 judgment stages in blue, deterministic code authority in amber, offline verification in green"
+       width="1000">
+</p>
+
 ```mermaid
 flowchart TD
     E[Evidence folder] --> P[Profile · route · initial SHA-256]
