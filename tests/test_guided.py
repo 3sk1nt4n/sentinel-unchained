@@ -86,7 +86,12 @@ def test_bare_sentinel_self_drives_one_command_to_the_live_run(
     monkeypatch.setattr(
         cli_module, "_launch_menu", lambda _profile: calls.append("menu") or "default"
     )
-    monkeypatch.setattr(cli_module, "_final_key_gate", lambda: calls.append("gate") or True)
+    # First gate answer is B (back to the launch card), second launches - the
+    # guided loop must redraw the launch card in between.
+    gate_answers = iter(["back", "launch"])
+    monkeypatch.setattr(
+        cli_module, "_final_key_gate", lambda: calls.append("gate") or next(gate_answers)
+    )
     captured: dict[str, object] = {}
 
     def fake_run(evidence, caps_profile, *, show_case_card, mount_evidence, show_banner):
@@ -102,8 +107,9 @@ def test_bare_sentinel_self_drives_one_command_to_the_live_run(
     monkeypatch.setattr(cli_module, "run_cli", fake_run)
 
     assert main([]) == EXIT_PARTIAL
-    # The key step is the ONE final gate: launch card first, key paste last.
-    assert calls == ["menu", "gate"]
+    # The key step is the ONE final gate: launch card first, key paste last,
+    # and B at the gate redraws the launch card before launching.
+    assert calls == ["menu", "gate", "menu", "gate"]
     assert captured == {
         "evidence": Path("operator-case"),
         "caps_profile": "default",
@@ -162,19 +168,26 @@ def test_launch_menu_enter_never_launches_and_q_cancels(
     assert cli_module._launch_menu("strict") is None
 
 
+def _script_getpass(monkeypatch: pytest.MonkeyPatch, answers: list[str]) -> None:
+    """Feed a fixed script of hidden-prompt answers; extra prompts read ''."""
+
+    pending = list(answers)
+    monkeypatch.setattr("getpass.getpass", lambda _prompt="": pending.pop(0) if pending else "")
+
+
 def test_final_key_gate_enter_uses_the_saved_key(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     monkeypatch.setattr(cli_module, "openai_api_key_status", lambda: (True, "default-key-file"))
-    monkeypatch.setattr("getpass.getpass", lambda _prompt="": "")
+    _script_getpass(monkeypatch, [""])
     monkeypatch.setattr(
         cli_module,
         "_store_key_material",
         lambda *_a: (_ for _ in ()).throw(AssertionError("must not rewrite the key")),
     )
 
-    assert cli_module._final_key_gate() is True
+    assert cli_module._final_key_gate() == "launch"
     # The card always offers the paste - never a silent "no paste needed" skip.
     out = capsys.readouterr().out
     assert "FINAL STEP - OPENAI API KEY" in out
@@ -187,11 +200,11 @@ def test_final_key_gate_paste_replaces_the_key_and_wins_for_this_run(
     # Even an inherited environment key loses to the key pasted at the gate.
     monkeypatch.setenv("OPENAI_API_KEY", "stale-environment-key")
     monkeypatch.setattr(cli_module, "openai_api_key_status", lambda: (True, "environment"))
-    monkeypatch.setattr("getpass.getpass", lambda _prompt="": "sk0proj0AbCd1234EfGh5678IjKl")
+    _script_getpass(monkeypatch, ["sk0proj0AbCd1234EfGh5678IjKl"])
     stored: list[str] = []
     monkeypatch.setattr(cli_module, "_store_key_material", stored.append)
 
-    assert cli_module._final_key_gate() is True
+    assert cli_module._final_key_gate() == "launch"
     assert stored == ["sk0proj0AbCd1234EfGh5678IjKl"]
     assert cli_module.os.environ["OPENAI_API_KEY"] == "sk0proj0AbCd1234EfGh5678IjKl"
 
@@ -200,12 +213,32 @@ def test_final_key_gate_without_a_saved_key_requires_a_paste(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(cli_module, "openai_api_key_status", lambda: (False, None))
-    monkeypatch.setattr("getpass.getpass", lambda _prompt="": "")
+    _script_getpass(monkeypatch, [""])
 
-    assert cli_module._final_key_gate() is False
+    assert cli_module._final_key_gate() == "cancel"
 
 
-def test_final_key_gate_q_cancels_and_a_malformed_paste_never_saves(
+def test_final_key_gate_rejects_garbage_and_reasks_instead_of_launching(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    # The exact reported failure: "123213" is not a key; the run must NOT
+    # start. The gate warns, re-asks, and only a credential-shaped paste (or
+    # Enter on a saved key) can launch.
+    monkeypatch.setenv("OPENAI_API_KEY", "restored-by-monkeypatch")
+    monkeypatch.setattr(cli_module, "openai_api_key_status", lambda: (False, None))
+    stored: list[str] = []
+    monkeypatch.setattr(cli_module, "_store_key_material", stored.append)
+    _script_getpass(monkeypatch, ["123213", "sk0proj0AbCd1234EfGh5678IjKl"])
+
+    assert cli_module._final_key_gate() == "launch"
+    assert stored == ["sk0proj0AbCd1234EfGh5678IjKl"]
+    out = capsys.readouterr().out
+    assert "does not look like an API key" in out
+    assert "nothing started" in out
+
+
+def test_final_key_gate_garbage_then_quit_cancels_without_saving(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
@@ -215,13 +248,25 @@ def test_final_key_gate_q_cancels_and_a_malformed_paste_never_saves(
         "_store_key_material",
         lambda *_a: (_ for _ in ()).throw(AssertionError("must not save")),
     )
+    _script_getpass(monkeypatch, ["a" * 600, "q"])
 
-    monkeypatch.setattr("getpass.getpass", lambda _prompt="": "q")
-    assert cli_module._final_key_gate() is False
+    assert cli_module._final_key_gate() == "cancel"
+    assert "does not look like an API key" in capsys.readouterr().out
 
-    monkeypatch.setattr("getpass.getpass", lambda _prompt="": "a" * 600)
-    assert cli_module._final_key_gate() is False
-    assert "single-line" in capsys.readouterr().out
+
+def test_final_key_gate_b_goes_back_to_the_launch_card(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(cli_module, "openai_api_key_status", lambda: (True, "default-key-file"))
+    monkeypatch.setattr(
+        cli_module,
+        "_store_key_material",
+        lambda *_a: (_ for _ in ()).throw(AssertionError("must not save")),
+    )
+
+    for back in ("b", "B", "back"):
+        _script_getpass(monkeypatch, [back])
+        assert cli_module._final_key_gate() == "back"
 
 
 def test_final_key_gate_a_typed_refusal_is_never_stored_as_a_credential(
@@ -237,8 +282,8 @@ def test_final_key_gate_a_typed_refusal_is_never_stored_as_a_credential(
     )
 
     for refusal in ("n", "no", "N", "NO"):
-        monkeypatch.setattr("getpass.getpass", lambda _prompt="", _r=refusal: _r)
-        assert cli_module._final_key_gate() is False
+        _script_getpass(monkeypatch, [refusal])
+        assert cli_module._final_key_gate() == "cancel"
 
 
 def test_final_key_gate_normalizes_env_style_and_quoted_pastes(
@@ -249,12 +294,10 @@ def test_final_key_gate_normalizes_env_style_and_quoted_pastes(
     monkeypatch.setattr(cli_module, "openai_api_key_status", lambda: (False, None))
     monkeypatch.setattr(cli_module, "_store_key_material", stored.append)
 
-    monkeypatch.setattr("getpass.getpass", lambda _prompt="": '"sk0proj0AbCd1234EfGh5678IjKl"')
-    assert cli_module._final_key_gate() is True
-    monkeypatch.setattr(
-        "getpass.getpass", lambda _prompt="": "OPENAI_API_KEY=sk0proj0AbCd1234EfGh5678IjKl"
-    )
-    assert cli_module._final_key_gate() is True
+    _script_getpass(monkeypatch, ['"sk0proj0AbCd1234EfGh5678IjKl"'])
+    assert cli_module._final_key_gate() == "launch"
+    _script_getpass(monkeypatch, ["OPENAI_API_KEY=sk0proj0AbCd1234EfGh5678IjKl"])
+    assert cli_module._final_key_gate() == "launch"
 
     assert stored == ["sk0proj0AbCd1234EfGh5678IjKl", "sk0proj0AbCd1234EfGh5678IjKl"]
 
@@ -273,14 +316,14 @@ def test_final_key_gate_reports_an_unwritable_key_file_and_cancels(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     monkeypatch.setattr(cli_module, "openai_api_key_status", lambda: (False, None))
-    monkeypatch.setattr("getpass.getpass", lambda _prompt="": "sk0proj0AbCd1234EfGh5678IjKl")
+    _script_getpass(monkeypatch, ["sk0proj0AbCd1234EfGh5678IjKl"])
     monkeypatch.setattr(
         cli_module,
         "_store_key_material",
         lambda *_a: (_ for _ in ()).throw(PermissionError(13, "denied")),
     )
 
-    assert cli_module._final_key_gate() is False
+    assert cli_module._final_key_gate() == "cancel"
     assert "Could not write the key file" in capsys.readouterr().out
 
 

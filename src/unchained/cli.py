@@ -675,15 +675,21 @@ def _onboard(
         return EXIT_INVALID
     if not launch:
         return EXIT_COMPLETE
-    chosen_profile = _launch_menu(caps_profile)
-    if chosen_profile is None:
-        print("Launch cancelled. The local profile remains valid; OpenAI calls: 0.")
-        return EXIT_COMPLETE
-    # The ONE final step before any money is spent: the key card with the
-    # hidden paste always offered - never a silent "no paste needed" skip.
-    if not _final_key_gate():
-        print("Launch cancelled at the key step. Nothing was sent; OpenAI calls: 0.")
-        return EXIT_COMPLETE
+    while True:
+        chosen_profile = _launch_menu(caps_profile)
+        if chosen_profile is None:
+            print("Launch cancelled. The local profile remains valid; OpenAI calls: 0.")
+            return EXIT_COMPLETE
+        # The ONE final step before any money is spent: the key card with the
+        # hidden paste always offered - never a silent "no paste needed" skip.
+        # B returns to the launch card so depth/model stay changeable.
+        decision = _final_key_gate()
+        if decision == "back":
+            continue
+        if decision != "launch":
+            print("Launch cancelled at the key step. Nothing was sent; OpenAI calls: 0.")
+            return EXIT_COMPLETE
+        break
     print("Confirmation accepted. Starting the bounded GPT-5.6 lifecycle...")
     return run_cli(
         evidence,
@@ -852,12 +858,17 @@ def _normalize_pasted_key(entered: str) -> str:
     return token.strip().strip('"').strip("'").strip()
 
 
-def _final_key_gate() -> bool:
+def _final_key_gate() -> str:
     """The ONE final step between the launch card and the pipeline: the key
-    card with the hidden paste always offered. Enter keeps a saved key, a paste
-    (never echoed) replaces the saved key file, and q/n cancels. The pasted key
-    also overrides any inherited OPENAI_API_KEY for this process, so the key
-    just pasted is always the key THIS run uses."""
+    card with the hidden paste always offered. Returns ``"launch"``, ``"back"``
+    (redraw the launch card), or ``"cancel"``.
+
+    Enter keeps a saved key; a paste (never echoed) must pass the same
+    vendor-agnostic credential-shape check the evidence prompt uses before
+    ANYTHING starts - garbage like "123213" re-asks instead of launching a run
+    that is guaranteed to fail. A stored paste also overrides any inherited
+    OPENAI_API_KEY for this process, so the key just pasted is always the key
+    THIS run uses."""
 
     from .onboarding import render_key_card
 
@@ -866,40 +877,54 @@ def _final_key_gate() -> bool:
     render_key_card(present, label if present else None, stream=sys.stdout)
     import getpass
 
+    console = Console(sys.stdout)
+
+    def warn(message: str) -> None:
+        console.warn(message) if console.enabled else print(message)
+
+    def ok(message: str) -> None:
+        console.ok(message) if console.enabled else print(message)
+
     prompt = (
-        "  > Enter = use saved key - or paste a new key (input stays hidden): "
+        "  > Enter = use saved key - paste a new key (hidden) - B = back - Q = quit: "
         if present
-        else "  > Paste your OpenAI API key (input stays hidden) - Enter/q cancels: "
+        else "  > Paste your OpenAI API key (hidden) - B = back - Enter/Q = cancel: "
     )
-    try:
-        entered = getpass.getpass(prompt).strip()
-    except (EOFError, OSError):
-        return False
-    if not entered:
-        return present
-    # The launch card just taught n = no, so honor it here too; the input is
-    # hidden, and a typed refusal must never be stored as a credential.
-    if entered.lower() in ("q", "quit", "exit", "n", "no"):
-        return False
-    entered = _normalize_pasted_key(entered)
-    if not entered or "\n" in entered or "\r" in entered or len(entered.encode("utf-8")) > 512:
-        print("  That does not look like one single-line API key; launch cancelled.")
-        return False
-    try:
-        _store_key_material(entered)
-    except OSError as exc:
-        print(f"  Could not write the key file ({type(exc).__name__}); launch cancelled.")
-        return False
-    os.environ["OPENAI_API_KEY"] = entered
-    entered = ""
-    print("  Key saved with hidden input - using it for this run.")
-    if source in ("environment", "file"):
-        variable = "OPENAI_API_KEY" if source == "environment" else "OPENAI_API_KEY_FILE"
-        print(
-            f"  Note: {variable} is set in this environment. If your shell profile"
-            f" exports it, NEW terminals will use that source, not the saved file."
-        )
-    return True
+    while True:
+        try:
+            entered = getpass.getpass(prompt).strip()
+        except (EOFError, OSError):
+            return "cancel"
+        if not entered:
+            return "launch" if present else "cancel"
+        # The launch card just taught n = no and this project uses B for back;
+        # honor both here - a typed refusal is never stored as a credential.
+        lowered = entered.lower()
+        if lowered in ("q", "quit", "exit", "n", "no"):
+            return "cancel"
+        if lowered in ("b", "back"):
+            return "back"
+        entered = _normalize_pasted_key(entered)
+        if not _looks_like_pasted_secret(entered) or len(entered.encode("utf-8")) > 512:
+            warn("That does not look like an API key - nothing was saved, nothing started.")
+            print("  Paste the full key exactly as issued (it stays hidden),")
+            print("  or press Enter/B/Q to leave this prompt.")
+            continue
+        try:
+            _store_key_material(entered)
+        except OSError as exc:
+            warn(f"Could not write the key file ({type(exc).__name__}) - launch cancelled.")
+            return "cancel"
+        os.environ["OPENAI_API_KEY"] = entered
+        entered = ""
+        ok("Key accepted (shape-checked) and saved - using it for this run.")
+        if source in ("environment", "file"):
+            variable = "OPENAI_API_KEY" if source == "environment" else "OPENAI_API_KEY_FILE"
+            warn(
+                f"{variable} is set in this environment. If your shell profile"
+                " exports it, NEW terminals will use that source, not the saved file."
+            )
+        return "launch"
 
 
 def _guided(*, mount: bool = False, caps_profile: str = "strict", no_color: bool = False) -> int:
@@ -984,17 +1009,22 @@ def _guided(*, mount: bool = False, caps_profile: str = "strict", no_color: bool
     # Step 3: ONE launch card - model, depth, ceilings, and confirmation on the
     # same menu (1 = LAUNCH, 2 = depth, 3 = model, Q = quit). The card owns the
     # model choice, so no earlier step ever asks the same question.
-    chosen_profile = _launch_menu(caps_profile)
-    if chosen_profile is None:
-        print("Launch cancelled. The local profile remains valid; OpenAI calls: 0.")
-        return EXIT_COMPLETE
-
     # Step 4: the ONE final step before money is spent - the key card with the
-    # hidden paste always offered. Enter keeps a saved key, a paste replaces a
-    # stale or exhausted one right here, q cancels. Never a silent skip.
-    if not _final_key_gate():
-        print("Launch cancelled at the key step. Nothing was sent; OpenAI calls: 0.")
-        return EXIT_COMPLETE
+    # hidden, shape-checked paste always offered. Enter keeps a saved key, a
+    # paste replaces a stale or exhausted one right here, B goes back to the
+    # launch card, q cancels. Never a silent skip, never a garbage launch.
+    while True:
+        chosen_profile = _launch_menu(caps_profile)
+        if chosen_profile is None:
+            print("Launch cancelled. The local profile remains valid; OpenAI calls: 0.")
+            return EXIT_COMPLETE
+        decision = _final_key_gate()
+        if decision == "back":
+            continue
+        if decision != "launch":
+            print("Launch cancelled at the key step. Nothing was sent; OpenAI calls: 0.")
+            return EXIT_COMPLETE
+        break
     print("Confirmation accepted. Starting the bounded GPT-5.6 lifecycle...")
     return run_cli(
         evidence, chosen_profile, show_case_card=False, mount_evidence=mount, show_banner=False

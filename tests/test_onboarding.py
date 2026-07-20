@@ -371,7 +371,7 @@ def test_confirmed_launch_calls_existing_lifecycle_with_hidden_child_case_card(
 ) -> None:
     install_fake_session(monkeypatch, ready_profile())
     monkeypatch.setattr(cli_module, "_interactive_terminal", lambda: True)
-    monkeypatch.setattr(cli_module, "_final_key_gate", lambda: True)
+    monkeypatch.setattr(cli_module, "_final_key_gate", lambda: "launch")
     monkeypatch.setattr(cli_module, "_launch_menu", lambda profile: profile)
     captured: dict[str, object] = {}
 

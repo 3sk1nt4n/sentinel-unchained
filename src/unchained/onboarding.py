@@ -300,7 +300,8 @@ def render_key_card(
             f"Status: a key is saved - via {source_label or 'a configured source'}.",
             "Enter = use the saved key and start the run now",
             "Paste = a NEW key at the HIDDEN prompt below to replace it",
-            "        (never echoes, never logged, owner-only file)",
+            "        (shape-checked; never echoes, never logged, owner-only file)",
+            "B     = back to the launch card (change depth or model)",
             "Q     = cancel; nothing is sent, nothing is spent",
         ]
         accent = _GREEN
@@ -308,8 +309,9 @@ def render_key_card(
         lines = [
             "Status: no key saved yet.",
             "Paste your OpenAI key at the HIDDEN prompt below to start the run.",
-            "It never echoes, is never logged, and never leaves this machine",
-            "(owner-only file). Enter or Q = cancel; nothing is sent or spent.",
+            "It is shape-checked before anything starts, never echoes, is never",
+            "logged, and never leaves this machine (owner-only file).",
+            "B = back to the launch card - Enter or Q = cancel; nothing is spent.",
         ]
         accent = _AMBER
     _boxed("FINAL STEP - OPENAI API KEY", lines, stream=stream, color=color, accent=accent)
