@@ -1,4 +1,4 @@
-# Unchained — sub-three-minute demo script
+# Unchained - sub-three-minute demo script
 
 > **Status:** RECORDING DRAFT. Record only from a retained authentic COMPLETE
 > GPT-5.6 Sol bundle. Replace every placeholder from verified artifacts. Do not
@@ -19,12 +19,11 @@ and cover what was built and how Codex and GPT-5.6 were used. The
 - Automated viewer-QA output: `PENDING`.
 - One authentic finding and exact supporting span: `PENDING`.
 - One authentic reviewer transition: `PENDING`.
-- Frozen comparison headline: `PENDING`; omit rather than invent if unavailable.
 
 Never show an API key, key-file path, private filesystem path, raw request body,
 or unredacted evidence-derived content that is not intended for publication.
 
-## 0:00–0:18 — Problem and promise
+## 0:00–0:18 - Problem and promise
 
 ### Screen
 
@@ -42,7 +41,7 @@ SHA-256 8079a7459b1739caf7d4fbf6dde5eb0ae7a9d24dbde657debf4d5202c8dc6b62
 > look; deterministic code controls what may run and verifies exactly what was
 > executed and cited.
 
-## 0:18–0:38 — Deterministic evidence front door
+## 0:18–0:38 - Deterministic evidence front door
 
 ### Screen
 
@@ -61,7 +60,7 @@ label, and `openai_called: false`.
 > public ID, checks symbol readiness, derives the legal tool route, and records
 > initial SHA-256 custody. Local paths never become model authority.
 
-## 0:38–1:05 — GPT-5.6 opening book and concurrent execution
+## 0:38–1:05 - GPT-5.6 opening book and concurrent execution
 
 ### Screen
 
@@ -76,7 +75,7 @@ content-addressed completions.
 > runs the valid tools concurrently. The model cannot choose a shell, command,
 > executable, path, timeout, or cap.
 
-## 1:05–1:28 — One inspectable adaptive transition
+## 1:05–1:28 - One inspectable adaptive transition
 
 ### Screen
 
@@ -92,7 +91,7 @@ PLAN -> one typed ACT -> retained OBSERVATION -> visible ledger UPDATE
 > receipt index, current budget, and only the latest relevant observations. Each
 > turn can take one new forensic action, so the state transition stays auditable.
 
-## 1:28–1:53 — Exact evidence span and monotonic review
+## 1:28–1:53 - Exact evidence span and monotonic review
 
 ### Screen
 
@@ -121,7 +120,7 @@ downgrade for the video.
 > The fresh-context reviewer preserved this status from the exact resolved span.
 > It could reduce the claim, but it could not invent a finding or upgrade it.
 
-## 1:53–2:18 — Strict offline verification
+## 1:53–2:18 - Strict offline verification
 
 ### Screen
 
@@ -140,7 +139,7 @@ python scripts/check_viewer.py <COMPLETE_BUNDLE> --require-complete --require-li
 > network or server. This establishes local proof consistency and traceability;
 > it does not claim to authenticate OpenAI or decide forensic truth.
 
-## 2:18–2:40 — Judge-friendly proof viewer
+## 2:18–2:40 - Judge-friendly proof viewer
 
 ### Screen
 
@@ -158,7 +157,7 @@ through:
 > Python environment, or running web service. The model writes bounded narrative;
 > deterministic code owns the authoritative rows and citations.
 
-## 2:40–2:50 — Close
+## 2:40–2:50 - Close
 
 ### Screen
 
@@ -172,18 +171,6 @@ Return to the hero and display the final verified commit/tag.
 
 Do not shorten the closing line to “code proves the incident.”
 
-## Optional comparison overlay
-
-Use this only after `docs/runs/comparison.md` is produced by the frozen contract.
-Show one quiet line for no more than four seconds:
-
-```text
-same evidence · frozen tools and scoring · <MEDIAN_TIME> · <F1>
-exact citation resolution <RATE> · strict verifier <RATE>
-```
-
-If the comparison is incomplete, omit the overlay. A clean truthful demo is
-stronger than an unsupported performance headline.
 
 ## Final recording gate
 

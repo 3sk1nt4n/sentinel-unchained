@@ -1,4 +1,4 @@
-# Honest win assessment — OpenAI Build Week (Developer Tools)
+# Honest win assessment - OpenAI Build Week (Developer Tools)
 
 **Date:** 2026-07-20 · **Deadline:** 2026-07-21 17:00 PT · **Judging:** 2026-07-22 → 08-05
 **Rules source:** <https://openai.devpost.com/rules> (extracted 2026-07-20)
@@ -20,12 +20,12 @@ PROVEN / CODE-FIXED / STATIC-ONLY / PENDING.
 
 All four are **equally weighted**:
 
-1. **Technological Implementation** — "How thoroughly and skillfully does the
+1. **Technological Implementation** - "How thoroughly and skillfully does the
    project use **Codex**?" (the *build* process, not the runtime AI).
-2. **Design** — a **working/runnable** project with a complete, coherent product
+2. **Design** - a **working/runnable** project with a complete, coherent product
    experience.
-3. **Potential Impact** — a **credible, specific** case for a real problem.
-4. **Quality of the Idea** — how **creative and novel** the concept is.
+3. **Potential Impact** - a **credible, specific** case for a real problem.
+4. **Quality of the Idea** - how **creative and novel** the concept is.
 
 ## Scorecard (honest, adversarially tempered)
 
@@ -54,7 +54,7 @@ is our weakest-evidenced dimension today; and our headline "autonomous DFIR with
 verifiable proof" is impressive only if the judge sees it *work*, not just reads
 claims. Why not lower: the idea is genuinely novel, the no-key verifiable
 experience is a real, runnable differentiator, and the submission-mandatory items
-are nearly all in place — the gap is executable in the time remaining.
+are nearly all in place - the gap is executable in the time remaining.
 
 ## What must be true to WIN (separated honestly)
 
@@ -66,7 +66,7 @@ are nearly all in place — the gap is executable in the time remaining.
 | Text description of features | PARTIAL | README/DevPost draft covers it; needs a tight submission writeup. |
 | Public repo + license | **PRESENT** | Public, MIT. |
 | README describing Codex collaboration | **PRESENT** | "Built with Codex" section + workflow notes; strengthen with specifics. |
-| Codex Session ID | **PRESENT** | `019f61e5-5755-7a02-adb4-618d32baab27` — re-confirm it is the final core thread. |
+| Codex Session ID | **PRESENT** | `019f61e5-5755-7a02-adb4-618d32baab27` - re-confirm it is the final core thread. |
 | Working test access a judge can run | **PRESENT** | No-key path: profile the fixture, `verify`/`view` a supplied bundle, offline container. This is a genuine strength. |
 | Install/test instructions (required for dev tools) | **PRESENT** | One-command flow + START-HERE + JUDGE-QUICKSTART. |
 
@@ -123,7 +123,7 @@ are nearly all in place — the gap is executable in the time remaining.
 
 - The authentic **COMPLETE** Sol bundle, the frozen **benchmark**, and the
   **demo video** do **not exist yet**.
-- All **Linux/macOS/Docker** claims are **STATIC-ONLY** — read and reasoned, not
+- All **Linux/macOS/Docker** claims are **STATIC-ONLY** - read and reasoned, not
   executed on a real host.
 - Offline verification proves lifecycle, custody, citations, report, and viewer
   are internally consistent; it does **not** prove the model's forensic
@@ -134,7 +134,7 @@ are nearly all in place — the gap is executable in the time remaining.
 
 ## Bottom line
 
-**Can we win? Realistically: a modest but real chance in Developer Tools —
+**Can we win? Realistically: a modest but real chance in Developer Tools - 
 conditional entirely on shipping a strong demo video and a crisp Codex story, on
 top of the runnable, verifiable, no-key experience we now have.** The idea and
 the proof mechanism are genuinely competitive; the execution gap is the video and

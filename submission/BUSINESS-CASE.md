@@ -37,7 +37,8 @@ What backs this up, all from the repository:
 
 | Proof | Status |
 |---|---|
-| 436 passing tests across 25 test files (22.5 s run, ruff clean) | Proven, run 2026-07-21 |
+| Authentic GPT-5.6 Sol COMPLETE investigation - 4 adjudicated findings, $2.92, 9m39s | Ships at `examples/public-run-complete`; strict verify VALID (37 artifacts / 194 audit entries) |
+| 378 passing tests across 23 test files (22.5 s run, ruff clean) | Proven, run 2026-07-21 |
 | Authentic retained GPT-5.6 run on real Windows DC01 memory (2,147,483,648 bytes, SHA-256 custody match), 14/14 typed tool receipts | Shipped in the repo at `examples/public-run-partial`; verifies VALID on current code (20 artifacts, 62 hash-chained audit entries) |
 | Earlier `gpt-5.6-sol` capped opening (6/6 tools, VALID recorded at creation: 13 artifacts, 38 audit entries) | Committed at `docs/runs/sol-capped-dc01-opening.json` |
 | Codex Session ID | 019f61e5-5755-7a02-adb4-618d32baab27 |
@@ -118,9 +119,9 @@ The wedge revenue is the consultancy that needs to attach a verifiable AI work-p
 
 ## Honest caveats (read before pricing anything above)
 
-- The retained real-evidence GPT-5.6 bundle proves the live opening/tool/cap/custody path, but it is PARTIAL; no authentic COMPLETE GPT-5.6 vNext bundle is published yet. Public COMPLETE viewer/bundle: pending a COMPLETE run.
+- An authentic COMPLETE GPT-5.6 Sol bundle ships at `examples/public-run-complete` and strict-verifies on current code. The remaining honest caveats: it is one case on one OS route, the same-evidence benchmark was deliberately cut, and verification is self-contained - the verifier ships in the same codebase with no external anchoring.
 - Demo video link: added on upload.
-- No frozen same-evidence Qwen latency/cost/accuracy benchmark is published yet; that comparison was deliberately cut rather than claimed without measurement.
+- No frozen same-evidence competitive latency/cost/accuracy benchmark is published yet; that comparison was deliberately cut rather than claimed without measurement.
 - Exact receipts establish execution and citation support, not forensic truth. The offline verifier validates recorded metadata; it does not prove the model's forensic interpretation is true and does not authenticate OpenAI.
 - The fresh-context reviewer is a same-family model call, not independent ground truth.
 - Private worker containment and process-tree cleanup are not a complete OS sandbox; SHA-256 pre/post checks do not defeat every privileged concurrent pathname race; a privileged actor who can rewrite and reseal the whole local bundle is outside the current trust boundary (external anchoring is future work).

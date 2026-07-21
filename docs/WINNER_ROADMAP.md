@@ -78,7 +78,7 @@ For the current vNext contract, “green offline” specifically means:
   runs strict lifecycle verification for any bundle claiming `COMPLETE`.
 
 These controls are performance-conscious, but no live latency benchmark or
-measured faster-than-Qwen result exists yet.
+measured faster-than-Sentinel-Ensemble result exists yet.
 
 Remaining boundaries are not hidden: there is no authentic completed GPT-5.6
 vNext run; offline metadata cannot independently authenticate OpenAI; local
@@ -878,7 +878,7 @@ Apply cuts in this order:
    matching the demonstrated route; C4 must still freeze it publicly, and
    paired disk is future work.
 2. Remove Linux/macOS forensic breadth, Plaso, privileged/generalized Docker
-   support, Qwen reruns, and extra tool families. Retain only the already-tested
+   support, Sentinel-Ensemble reruns, and extra tool families. Retain only the already-tested
    synthetic Linux/AMD64 container preflight and nonqualifying Luna canary.
 3. Keep one authentic primary run and label it a single-run, single-case study.
 4. Cut replicates before cutting primary proof.
@@ -1111,7 +1111,7 @@ an invoice guarantee, or present replay as authentic execution.
 15. Every public metric includes its numerator, denominator, source artifact,
     and zero-denominator behavior.
 16. Parallel opening, stateless packets, and phase-specific limits are design
-    reasons to expect less avoidable work; they are not a faster-than-Qwen claim
+    reasons to expect less avoidable work; they are not a faster-than-Sentinel-Ensemble claim
     until a frozen live benchmark measures latency and defines the denominator.
 17. Offline verification cannot authenticate OpenAI, substitute for provider
     billing, provide OS-enforced parser isolation, eliminate privileged pathname

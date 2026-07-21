@@ -93,7 +93,7 @@ caps - typed-DONE-v2 - forced serializer - exact evidence spans
 fresh-context downgrade-only review - report + inert viewer renderers
 independent offline verifier - CLI - Docker isolation - tests - docs
 
-436 passing tests across 25 test files - ruff clean
+378 passing tests across 23 test files - ruff clean
 Runs GPT-5.6 at runtime (Sol investigator/reviewer, Terra smoke canary)
 ```
 
@@ -148,7 +148,7 @@ the scene table.
       prints VALID (37 artifacts, 194 audit entries) before recording.
 - [ ] No secrets on screen: never run `sentinel key`; never echo `$env:OPENAI_API_KEY`;
       the key file path under `%LOCALAPPDATA%\sentinel-unchained\` must never appear.
-      The guided key step appears only AFTER pressing 1 = LAUNCH.
+      The guided key step appears only AFTER a launch-card choice (1/2/3).
 - [ ] No private filesystem paths, hidden tabs, or notifications in frame; Do Not Disturb on.
 - [ ] Every number shown exists in the shipped bundle `examples/public-run-complete`.
 - [ ] Audio clear at normal laptop volume; narration ~150 wpm.
@@ -163,7 +163,7 @@ True in the video and in all submission copy; none block recording.
 - The video stars the authentic COMPLETE GPT-5.6 Sol bundle at
   `examples/public-run-complete` (run `20260721T001718Z-f0cd5641`), which passes
   strict verify. All figures shown come from it.
-- No frozen same-evidence Qwen benchmark is published. The video makes no comparative
+- No frozen same-evidence competitive benchmark is published. The video makes no comparative
   speed, cost, or accuracy claim. Deliberately cut; no unmeasured claims.
 - Exact receipts establish execution and citation support, not forensic truth. Offline
   verification validates recorded metadata; it does not authenticate OpenAI and does not
@@ -180,7 +180,7 @@ True in the video and in all submission copy; none block recording.
 | Video link | Added on upload |
 | Submission commit/tag | PENDING_FINAL_FREEZE |
 | Authentic COMPLETE bundle / public viewer | Shipped: `examples/public-run-complete` (run 20260721T001718Z, strict-VALID) |
-| Same-evidence Qwen benchmark | Deliberately cut; no unmeasured claims |
+| Same-evidence competitive benchmark | Deliberately cut; no unmeasured claims |
 
 Rules of record: https://openai.devpost.com/rules (video under three minutes,
 public on YouTube, clear audio, covers what was built and how Codex and GPT-5.6

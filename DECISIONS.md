@@ -48,7 +48,7 @@ The main module boundaries are:
 | `unchained.cli` / `unchained.__main__` | Doctor/profile/run/verify/view dispatch, custody, artifacts, and exit-code propagation |
 | `unchained.models` | Dependency-free typed records shared by the runtime |
 
-Extra helpers may exist, but orchestration from the prior Qwen project must not
+Extra helpers may exist, but orchestration from the prior Sentinel-Ensemble project must not
 enter this call graph.
 
 ## D-003 - Prior-project dependency boundary
@@ -62,12 +62,12 @@ sift-sentinel @ git+https://github.com/3sk1nt4n/Sentinel-Ensemble-Qwen.git@9f309
 Allowed reuse is limited to evidence-mounting support and typed forensic tool
 functions under `src/sift_sentinel`. Imports occur lazily inside adapters.
 Unchained code must not import, copy, or invoke the old pipeline/coordinator,
-deterministic validator, Qwen prompts, report/finalizer code, or generic
+deterministic validator, Sentinel-Ensemble prompts, report/finalizer code, or generic
 interfaces that accept model-supplied commands, binaries, paths, plugins, or
 raw argument vectors.
 
 The authoritative investigator instructions in `src/unchained/prompts.py` are
-owned by Unchained. They are neither copied nor imported from Qwen.
+owned by Unchained. They are neither copied nor imported from Sentinel-Ensemble.
 Phase-specific protocol text may wrap them, but the prior project's prompt
 layer never enters the model request.
 
@@ -227,8 +227,8 @@ Every already-issued call nevertheless gets ordered `tool.started` and
 `tool.completed` events, status `capped`, and a canonical error output with its
 SHA-256/excerpt, so the audit has no unexplained model call.
 
-Production Qwen metadata discovery, parser calls, and registered Sleuth Kit tool
-execution use a fixed private worker rather than importing Qwen or executing
+Production Sentinel-Ensemble metadata discovery, parser calls, and registered Sleuth Kit tool
+execution use a fixed private worker rather than importing Sentinel-Ensemble or executing
 parser bodies in the parent/thread-pool process. The parent launches
 `python -P -m unchained._tool_worker` with `shell=False` and an environment
 stripped of Python import overrides,
@@ -240,7 +240,7 @@ allowlists; a module, callable import target, raw plugin path, arbitrary binary,
 command, or evidence path cannot be supplied by the model. The model may select
 only a logical tool name already present in its typed schema and provide that
 schema's validated arguments. The remaining run-wall allowance bounds the
-parent protocol read and is also passed into the worker's Qwen timeout
+parent protocol read and is also passed into the worker's Sentinel-Ensemble timeout
 configuration.
 
 For the pinned event-log parser, the worker enables its priority-preserving
@@ -277,13 +277,13 @@ Job Object.
 
 These controls cannot manufacture a perfect portable sandbox. They contain the
 owned process lifecycle; they do not create a network, filesystem, namespace,
-seccomp, or privilege sandbox. Qwen/TSK code retains the host authority of the
+seccomp, or privilege sandbox. Sentinel-Ensemble/TSK code retains the host authority of the
 account running Unchained, including root authority when applicable, although
 unrelated credentials are withheld from its environment. A POSIX
 descendant that deliberately creates a different process group or session can
 escape the original group kill, and uninterruptible kernel I/O can delay
 reaping. Windows provides the stronger descendant boundary and refuses to
-execute Qwen code if it cannot establish that boundary, but still depends on
+execute Sentinel-Ensemble code if it cannot establish that boundary, but still depends on
 the operating system's Job Object assignment, termination, and handle-close
 semantics.
 
@@ -299,7 +299,7 @@ use those fake executors.
 
 `src/unchained/prompts.py` is the authoritative, project-owned investigator
 prompt. It gives the model typed, read-only forensic access and explicitly no
-shell or internet. `agent.py` adds phase mechanics without importing any Qwen
+shell or internet. `agent.py` adds phase mechanics without importing any Sentinel-Ensemble
 prompt or orchestration text.
 
 The opening request receives the detected OS, evidence shape, and only the
@@ -484,7 +484,7 @@ work, supersedes the earlier cap result as `FATAL`/exit `1`.
 The wall cap begins before Step 0 and is checked during inventory, hashing,
 classification, and symbol work. Remaining wall time bounds OpenAI requests,
 fixed forensic probe/mount subprocesses, isolated reference-mount workers, and
-private Qwen/TSK tool workers as described in D-005 and D-006. No new agent work
+private Sentinel-Ensemble/TSK tool workers as described in D-005 and D-006. No new agent work
 starts after it fires.
 
 Teardown and final custody are intentionally not abandoned at the deadline.
@@ -652,7 +652,7 @@ The test suite performs no network calls. Its behavioral coverage includes:
 The fake forensic executors used to prove opening parallelism are intentionally
 in-process. Their behavior validates dependency injection, ordering, and cap
 accounting; it is not evidence that arbitrary in-process Python functions can
-be preempted. Production Qwen parser and registered TSK execution are covered by
+be preempted. Production Sentinel-Ensemble parser and registered TSK execution are covered by
 the isolated-worker tests and boundary above.
 
 Ruff and type hints/docstrings keep the implementation reviewable, but static
@@ -739,8 +739,8 @@ contract, no-rebuild judge path, prompts, schedule, and submission doctrine.
 different jobs and must not become competing completion ledgers.
 
 The project is a controlled-autonomy case study and evaluation harness, not a
-clean causal ablation of Sentinel Ensemble. A Qwen-versus-GPT-5.6 comparison
-changes too many variables to isolate the deterministic validator. Qwen results
+clean causal ablation of Sentinel Ensemble. A Sentinel-Ensemble-versus-GPT-5.6 comparison
+changes too many variables to isolate the deterministic validator. Sentinel-Ensemble results
 may appear only as labeled historical context unless a genuinely controlled
 comparison is built later.
 
@@ -753,7 +753,7 @@ possible training contamination, not an unseen dataset.
 
 The flagship is frozen to the demonstrated Windows memory-only route. Paired
 E01 disk is future work and not a Build Week gate. Linux/macOS breadth, Plaso,
-Qwen reruns, generalized Docker portability, and dashboard work do not outrank
+Sentinel-Ensemble reruns, generalized Docker portability, and dashboard work do not outrank
 the authentic run, durable outputs, provider-returned model proof,
 frozen-reference evaluation, browser viewer, video, and submission gates.
 
@@ -891,13 +891,13 @@ or experimental validity.
 real-evidence smoke proven; public/authentic experiment proof still pending.**
 
 The Windows memory flagship first uses the existing reviewed typed adapter over
-Volatility 3's cross-platform `vol` console entry point. The pinned Qwen layer
+Volatility 3's cross-platform `vol` console entry point. The pinned Sentinel-Ensemble layer
 provides typed forensic functions and fixed plugin metadata. Unchained trusted
 code seals the evidence path, callable allowlist, fixed argument vector,
 timeout, child-process containment, and receipt. The model never receives a
 shell, command string, plugin path, or evidence path.
 
-On the clean CPython 3.11.9 environment, `vol -h` succeeds and the pinned Qwen
+On the clean CPython 3.11.9 environment, `vol -h` succeeds and the pinned Sentinel-Ensemble
 catalog returns exactly 25 direct tools and 5 dynamic Volatility tools. This
 proves dependency loading and catalog compatibility. The later sealed
 `vol_pstree` smoke returned real rows as recorded in D-024.
@@ -994,11 +994,11 @@ public artifact.
 **Status: implemented and verified offline on 2026-07-18; authentic GPT-5.6
 evidence run still pending.**
 
-The Qwen repository remains a source of typed forensic adapters and useful
+The Sentinel-Ensemble repository remains a source of typed forensic adapters and useful
 patterns, not the successor's orchestration base. Preserve Unchained's single
 state machine, deterministic profiling, code-owned typed authority, hard caps,
 literal `DONE`, fresh downgrade-only judge, and content-addressed bundle. Do not
-carry forward Qwen's dual conductors, 20-to-35-tool opening floor, per-call MCP
+carry forward Sentinel-Ensemble's dual conductors, 20-to-35-tool opening floor, per-call MCP
 process churn, raw report authority, fail-open repair layers, or early custody
 rehash.
 
@@ -1171,7 +1171,7 @@ bounded `OPENAI_API_KEY_FILE` Docker secret without printing the value.
 This exception does not generalize the audited investigator to arbitrary
 models. `sentinel run`, the Sol price table, phase policy, and
 `--require-live-gpt56` completion proof remain Sol-specific. Luna cannot produce
-a qualifying bundle, enter the scored Qwen comparison, prove Windows/DC01 tool
+a qualifying bundle, enter the scored competitive comparison, prove Windows/DC01 tool
 parity, or substitute for the harmless Sol lifecycle smoke.
 
 Safe Docker mode supports offline CLI/profile/custody plus raw Volatility and

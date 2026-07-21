@@ -1,4 +1,4 @@
-# Unchained — OpenAI Build Week submission draft
+# Unchained - OpenAI Build Week submission draft
 
 > **Status:** DRAFT. This file is not evidence that the Devpost submission,
 > public video, authentic COMPLETE bundle, comparison, or final tag exists.
@@ -15,11 +15,11 @@ Paste-ready form blocks live in [submission/DEVPOST-FORM.md](../submission/DEVPO
 | Track | Developer Tools |
 | Repository | <https://github.com/3sk1nt4n/Unchained> |
 | License | MIT |
-| Submission commit/tag | PENDING — filled at final submission (see submission/SUBMISSION-CHECKLIST.md) |
-| Public video under three minutes | PENDING — filled at final submission (see submission/SUBMISSION-CHECKLIST.md) |
-| Public authentic viewer/bundle | PENDING — filled at final submission (see submission/SUBMISSION-CHECKLIST.md) |
-| Majority-core `/feedback` Session ID | `019f61e5-5755-7a02-adb4-618d32baab27` — re-evaluate after final core work |
-| Docker/README follow-up thread | `019f76f3-a19f-71d1-81b2-eed6305857f6` — thread provenance, not a feedback receipt unless submitted successfully |
+| Submission commit/tag | PENDING - filled at final submission (see submission/SUBMISSION-CHECKLIST.md) |
+| Public video under three minutes | PENDING - filled at final submission (see submission/SUBMISSION-CHECKLIST.md) |
+| Public authentic viewer/bundle | PENDING - filled at final submission (see submission/SUBMISSION-CHECKLIST.md) |
+| Majority-core `/feedback` Session ID | `019f61e5-5755-7a02-adb4-618d32baab27` - re-evaluate after final core work |
+| Docker/README follow-up thread | `019f76f3-a19f-71d1-81b2-eed6305857f6` - thread provenance, not a feedback receipt unless submitted successfully |
 
 The current Official Rules say Stage Two uses four equally weighted criteria:
 Technological Implementation, Design, Potential Impact, and Quality of the
@@ -93,8 +93,8 @@ owns interpretation and response.
 - Authentic Luna receipt: `docs/runs/luna-canary-receipt.json`.
 - Authentic capped Sol opening receipt:
   `docs/runs/sol-capped-dc01-opening.json`.
-- Authentic COMPLETE Sol metrics: PENDING — filled at final submission (see submission/SUBMISSION-CHECKLIST.md).
-- Frozen same-evidence comparison: PENDING — filled at final submission (see submission/SUBMISSION-CHECKLIST.md).
+- Authentic COMPLETE Sol metrics: PENDING - filled at final submission (see submission/SUBMISSION-CHECKLIST.md).
+- Frozen same-evidence comparison: PENDING - filled at final submission (see submission/SUBMISSION-CHECKLIST.md).
 
 ## 2. Design
 
@@ -162,7 +162,7 @@ The concept is memorable in one sentence:
 > bounded investigation whose actions, citations, custody, and final report can
 > be checked independently.
 
-No comparative claim is made today: the same-evidence Qwen benchmark was
+No comparative claim is made today: the same-evidence competitive benchmark was
 deliberately cut, and faster, cheaper, and more accurate claims remain blocked
 until the frozen same-evidence table is published. What Unchained offers now is
 an execution, custody, citation, report, and offline-verification contract that
@@ -178,7 +178,7 @@ verifier, CLI, Docker isolation, tests, benchmark design, and documentation.
 
 The human owner chose the product thesis, Developer Tools track, DFIR testbed,
 evidence case, authority split, benchmark, scope cuts, claim language, and final
-submission decisions. The dated boundary between prior MIT-licensed Qwen tool
+submission decisions. The dated boundary between prior MIT-licensed Sentinel-Ensemble tool
 substrate and new Build Week work is in `BUILD_PROVENANCE.md`.
 
 ## Judge test path without rebuilding
@@ -212,7 +212,7 @@ artifact or explicit hosted instructions before the deadline.
 | Live GPT-5.6 Sol opening on real DC01 memory | DEMONSTRATED as a capped `PARTIAL`; six tools succeeded |
 | Custody and ordinary bundle verification for capped run | VERIFIED from the retained local bundle |
 | Findings, fresh reviewer, deterministic COMPLETE report | PENDING authentic COMPLETE run |
-| Faster/cheaper/more accurate than Qwen | PENDING frozen same-evidence comparison |
+| Faster/cheaper/more accurate than Sentinel-Ensemble | PENDING frozen same-evidence comparison |
 | Offline verifier authenticates OpenAI | FORBIDDEN; it validates recorded metadata only |
 | Exact citations prove forensic truth | FORBIDDEN; they prove traceability only |
 | Docker supports privileged E01/FUSE parity | FORBIDDEN |
@@ -222,7 +222,7 @@ artifact or explicit hosted instructions before the deadline.
 - [ ] Authentic COMPLETE GPT-5.6 Sol bundle passes both strict flags.
 - [ ] Sanitized COMPLETE metrics are committed.
 - [ ] Benchmark freeze gate passes and reference facts are sealed.
-- [ ] Same-evidence Qwen comparison is committed without cherry-picking.
+- [ ] Same-evidence competitive comparison is committed without cherry-picking.
 - [ ] Automated viewer QA passes on the COMPLETE bundle.
 - [ ] Manual cross-browser and narrow-width QA passes.
 - [ ] Public YouTube video is shorter than three minutes and has clear audio.

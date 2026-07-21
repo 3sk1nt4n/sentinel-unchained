@@ -23,7 +23,7 @@ what is still missing.
 
 ---
 
-## 2026-07-20 ~01:40 ET — 5-agent win-path audit and the WINNER ACTION PLAN
+## 2026-07-20 ~01:40 ET - 5-agent win-path audit and the WINNER ACTION PLAN
 
 This section is the controlling execution plan for the final ~42 hours. It was
 produced by a 5-agent parallel audit (live-rules corroboration on three official
@@ -41,13 +41,13 @@ used literally.
 - **Live rules re-verified on all three official pages** (rules, FAQ, overview):
   deadline Tue 2026-07-21 17:00 PT confirmed; video safest read is **strictly
   under 3:00**; **AI narration is explicitly allowed** ("A screencast with
-  background music won't cut it" — audio must explain Codex use and what
+  background music won't cut it" - audio must explain Codex use and what
   GPT-5.6 is doing); free-Codex-credit request window is already closed
   (passed 2026-07-17). VERIFIED.
 - **Bundle census: 19 run bundles, 0 COMPLETE** (12 PARTIAL / 7 INVALID by
   summary.json iteration). VERIFIED.
 - **The load-bearing proof asset already exists**: authentic
-  `unchained-runs/20260719T020118Z-ede6c445` — `gpt-5.6-sol` returned on 2
+  `unchained-runs/20260719T020118Z-ede6c445` - `gpt-5.6-sol` returned on 2
   responses, 6/6 opening tools on real DC01 memory, custody match, offline
   `sentinel verify` **VALID**, honestly terminal PARTIAL at MAX_TOOL_CALLS;
   sanitized receipt committed at `docs/runs/sol-capped-dc01-opening.json`.
@@ -60,7 +60,7 @@ used literally.
   "up to six tools" (runtime now allows twelve) and lines 3-6/92-93 carry
   PENDING placeholders. VERIFIED.
 
-### A0.1 — ~02:00 ET addendum: bundle truth table and centerpiece switch (PROVEN)
+### A0.1 - ~02:00 ET addendum: bundle truth table and centerpiece switch (PROVEN)
 
 I ran `sentinel verify` on all 19 bundles with current code. Result:
 
@@ -68,7 +68,7 @@ I ran `sentinel verify` on all 19 bundles with current code. Result:
   error: `viewer.html is not the exact deterministic rendering of the proof
   bundle`. The 07-19→07-20 UX commits changed the deterministic renderer (the
   `active_model_label()` fix touched exactly this surface); the verifier is
-  doing its job — bundles verify against the code that produced them. These
+  doing its job - bundles verify against the code that produced them. These
   bundles also carry `git_commit: null` (known backlog item 3), so the creating
   commit is not recorded inside them. **Rule: never demo `verify` on a 07-19
   bundle.** This includes the former centerpiece `ede6c445`.
@@ -77,12 +77,12 @@ I ran `sentinel verify` on all 19 bundles with current code. Result:
 
 | Bundle | Tools completed | Honest terminal reason |
 |---|---|---|
-| `20260720T012452Z-f76b1eb5` | **25** | 429 TPM at investigation-finalize (271,551 vs 200k) — the retained OpenAI error is itself proof of a real model |
+| `20260720T012452Z-f76b1eb5` | **25** | 429 TPM at investigation-finalize (271,551 vs 200k) - the retained OpenAI error is itself proof of a real model |
 | `20260720T004618Z-ffdcb89c` | 19 | ledger-protocol stop |
 | `20260720T011946Z-794ede29` | 17 | MAX_TOTAL_TOKENS |
 | `20260720T013927Z-9f12ec6f` | 14 | MAX_TOOL_CALLS |
 
-**Centerpiece switch: the on-camera bundle is `9f12ec6f`** — its cap story
+**Centerpiece switch: the on-camera bundle is `9f12ec6f`** - its cap story
 matches the script's narrative shape (14/14 receipts, then `MAX_TOOL_CALLS:
 reservation would reach 14 > 13`), it verifies VALID today (20 artifacts, 62
 audit entries), and its terminal reason contains no org ID. `f76b1eb5` (25
@@ -90,7 +90,7 @@ tools, honest 429 wall) stays the depth exemplar in the written docs. Because
 `unchained-runs/` is **gitignored, no bundle previously shipped to judges**; a
 privacy-scanned copy of `9f12ec6f` is now committed at
 `examples/public-run-partial/` (scan result: only victim-machine paths from
-DC01 itself, e.g. `C:\Users\ADMINI~1`, which are forensic evidence content —
+DC01 itself, e.g. `C:\Users\ADMINI~1`, which are forensic evidence content - 
 no runner-local paths, no org ID, no key material; the copy re-verifies VALID).
 Sol nuance: the only `gpt-5.6-sol` bundle is the 07-19 one; its sanitized
 receipt stays committed at `docs/runs/sol-capped-dc01-opening.json`, and a
@@ -104,7 +104,7 @@ API (`private: False`, MIT, default branch `main`, pushed today).
 
 | Scenario | Tech | Design | Impact | Idea | Stage One |
 |---|---|---|---|---|---|
-| As-is (no video, no COMPLETE run) | 6 | 5 | 6 | 8 | **FAIL — no video** |
+| As-is (no video, no COMPLETE run) | 6 | 5 | 6 | 8 | **FAIL - no video** |
 | Video + authentic COMPLETE run + benchmark | 8 | 7 | 7 | 8 | PASS |
 
 Win-probability estimates are GUESSING, stated as ranges: this audit's critic
@@ -112,7 +112,7 @@ puts top-2 in Developer Tools at **~0%** with no video, **1–3%** with video bu
 no COMPLETE run, **3–7%** with both. `docs/HONEST-WIN-ASSESSMENT.md` argues
 **12–18%** conditional on a strong video. The difference is field-size
 assumptions, not facts; both agree on the same ordering of moves. The critic's
-controlling directive: **the video is worth more than the run — never trade
+controlling directive: **the video is worth more than the run - never trade
 video time for run retries.**
 
 ### A2. WINNER ACTION PLAN (all times ET; owner in bold when human-only)
@@ -122,16 +122,16 @@ video time for run retries.**
 | W1 | Refresh `docs/SUBMISSION.md`: fix six→twelve (line 40), strip/fill PENDING placeholders, produce paste-ready Devpost blocks | agent | Mon early | Mon 18:00 | PENDING |
 | W2 | Final video script + exact shot list from `docs/DEMO-SCRIPT.md`, overriding its COMPLETE-only recording gate; leave a 20s splice slot for a COMPLETE run | agent | Mon early | Mon 20:00 | PENDING |
 | W3 | Pre-position 429/cap mitigations: serializer packet chunking (<~150k tokens/request), documented `MAX_TOTAL_TOKENS` raise, bounded backoff; offline dry-run | agent | Mon early | Mon 10:00 (before any live attempt) | PENDING |
-| W4 | OpenAI billing: add credit, confirm real TPM tier | **HUMAN** | Mon 08:30–09:30 | Mon 12:00 | PENDING — ceiling path only |
-| W5 | Authentic COMPLETE run attempts on DC01 + strict verify (`--require-complete --require-live-gpt56`) | **HUMAN** key, agent drives | Mon 10:00–16:00 | **HARD ABANDON GATE Mon 16:00** | PENDING — optional ceiling |
+| W4 | OpenAI billing: add credit, confirm real TPM tier | **HUMAN** | Mon 08:30–09:30 | Mon 12:00 | PENDING - ceiling path only |
+| W5 | Authentic COMPLETE run attempts on DC01 + strict verify (`--require-complete --require-live-gpt56`) | **HUMAN** key, agent drives | Mon 10:00–16:00 | **HARD ABANDON GATE Mon 16:00** | PENDING - optional ceiling |
 | W6 | Benchmark comparison vs open-weight baseline | agent | Mon 14:00–15:30 | Only if W5 COMPLETE by 14:00, else first cut | PENDING |
-| W7 | Record video, **strictly under 3:00**, audio names Codex + GPT-5.6 (AI narration allowed). Plan A: splice COMPLETE verify. Plan B: shipped bundle `examples/public-run-partial` (`9f12ec6f`) → offline verify VALID → $0 no-key lane → Codex build story | **HUMAN** (voice) or AI narration; agent preps scenes | Mon 17:00–21:00 | Tue 08:00 (emergency slot) | PENDING — **the only mandatory gap** |
+| W7 | Record video, **strictly under 3:00**, audio names Codex + GPT-5.6 (AI narration allowed). Plan A: splice COMPLETE verify. Plan B: shipped bundle `examples/public-run-partial` (`9f12ec6f`) → offline verify VALID → $0 no-key lane → Codex build story | **HUMAN** (voice) or AI narration; agent preps scenes | Mon 17:00–21:00 | Tue 08:00 (emergency slot) | PENDING - **the only mandatory gap** |
 | W8 | YouTube upload public + incognito playback QA (<3:00 runtime, audio audible) | **HUMAN** | Mon 21:00–22:00 | Tue 11:30 | PENDING |
 | W9 | Final README/SUBMISSION sync with real artifact IDs, submission tag, push; re-verify repo is live-public (last checked 07-14) | agent | Mon 22:00–23:00 | Tue 09:00 | PENDING |
-| W10 | `/feedback` re-run from majority-core Codex thread; if new ID, update all 8 referencing files | **HUMAN** in Codex | Tue 07:00–07:30 | Tue 12:00 — fallback: existing ID stands | PENDING |
+| W10 | `/feedback` re-run from majority-core Codex thread; if new ID, update all 8 referencing files | **HUMAN** in Codex | Tue 07:00–07:30 | Tue 12:00 - fallback: existing ID stands | PENDING |
 | W11 | Devpost form: track = Developer Tools, description, repo URL, video URL, Session ID, install/platform/test-method extras. **SUBMIT Tue ~11:00, hard floor Tue 14:00.** Screenshot confirmation | **HUMAN** submits, agent drafts | Tue 07:30–11:00 | Tue 14:00 | PENDING |
 
-Coordination rule: two Claude sessions have committed to this repo tonight.
+Coordination rule: multiple agent sessions have committed to this repo tonight.
 **One executor per file**; every session pulls before editing and records its
 work here in the same session.
 
@@ -152,8 +152,8 @@ work here in the same session.
 
 ### A4. Cut list (top-down when behind) and never-cut
 
-Cut in order: (1) W6 benchmark — and delete every unmeasured "faster/better
-than Qwen" phrase from judge-facing copy; an unmeasured claim is a liability;
+Cut in order: (1) W6 benchmark - and delete every unmeasured "faster/better
+than Sentinel-Ensemble" phrase from judge-facing copy; an unmeasured claim is a liability;
 (2) rubric freeze / Gate B (already moot); (3) hosted HTTPS viewer + QA;
 (4) W5 the COMPLETE run itself; (5) W10 `/feedback` refresh (existing ID
 stands); (6) SUBMISSION.md polish beyond the six→twelve fix and placeholders.
@@ -172,18 +172,18 @@ the ordering changes.
 
 ---
 
-## 2026-07-20 session — one-command UX overhaul, honest cross-OS audit, and the path to win
+## 2026-07-20 session - one-command UX overhaul, honest cross-OS audit, and the path to win
 
 This section is the honest, deep record of the 2026-07-20 session. It supersedes
 older UX notes below where they conflict. Verification levels are labeled
 literally:
 
-- **PROVEN** — I ran it on this Windows host and saw the output.
-- **CODE-FIXED** — edited and covered by the unit suite (404 tests) or a direct
+- **PROVEN** - I ran it on this Windows host and saw the output.
+- **CODE-FIXED** - edited and covered by the unit suite (404 tests) or a direct
   Python check, but NOT run through the full interactive path end-to-end.
-- **STATIC-ONLY** — read and reasoned about; NOT executed. All Linux/macOS/Docker
-  claims are STATIC-ONLY — there is no Linux or macOS host in this environment.
-- **PENDING** — not done.
+- **STATIC-ONLY** - read and reasoned about; NOT executed. All Linux/macOS/Docker
+  claims are STATIC-ONLY - there is no Linux or macOS host in this environment.
+- **PENDING** - not done.
 
 ### A. What shipped this session (all on `main`, commits `ecc2f75`…`4e53e3b`)
 
@@ -257,7 +257,7 @@ docs) against the current design. Verified defects fixed this session:
    evidence-model code and must be validated against a real split image, which I
    do not have here. (A memory+disk *pair* is handled correctly; a disk-zip
    alongside a memory-zip is set aside because archives are intentionally not
-   unpacked — that is by design, not this bug.)
+   unpacked - that is by design, not this bug.)
 2. **No Linux dependency lock.** Only `constraints.windows-amd64-cp311.txt` exists
    (it even pins `pywin32`, unusable on Linux). Linux installs float transitive
    deps and `capture_environment` emits null lock-hash fields on Linux → weaker,
@@ -279,13 +279,13 @@ docs) against the current design. Verified defects fixed this session:
    differ across scripts (`[x/4]` vs `[x/5]` vs `[x/6]`); "tools" vs "calls"
    wording drift on the card.
 
-### E. Next steps to WIN — prioritized and honest
+### E. Next steps to WIN - prioritized and honest
 
 > **Correction (rules-grounded, 2026-07-20):** a full honest scoring against the
 > official rules is in [docs/HONEST-WIN-ASSESSMENT.md](docs/HONEST-WIN-ASSESSMENT.md).
 > It corrects an earlier overstatement in our own notes: per the rules, the
 > **mandatory** gate is the **demo video (< 3 min, audio, shows Codex + GPT-5.6)**
-> plus the testable no-key path, the Codex Session ID, and install instructions —
+> plus the testable no-key path, the Codex Session ID, and install instructions - 
 > **NOT** an authentic COMPLETE run. The demo video is the true blocker; the
 > COMPLETE Sol bundle raises the ceiling but is optional. Honest win estimate:
 > **~12–18%** for a 1st/2nd in Developer Tools *if* a strong video ships and the
@@ -302,7 +302,7 @@ The COMPLETE run below is high-value but, per the rules, secondary to the video.
      billing verification to raise TPM before the run.
    - **Token headroom.** The full lifecycle can exceed the 400k HEAVY cap during
      serialization. Run HEAVY and, if needed, deliberately raise
-     `MAX_TOTAL_TOKENS` (documented) — this is an honest operator choice, not a
+     `MAX_TOTAL_TOKENS` (documented) - this is an honest operator choice, not a
      silent override.
    - **Real evidence.** Use the public DFIR Madness memory image (never committed).
    - Disclose the run; update section C to PROVEN and attach the bundle path.
@@ -311,7 +311,7 @@ The COMPLETE run below is high-value but, per the rules, secondary to the video.
    comparison harness and freeze gate already exist and are tested.
 3. **Record the demo video** of the one-command flow to a VALID bundle.
 4. **Assemble the DevPost submission**: writeup, the Codex session ID
-   (`019f61e5-5755-7a02-adb4-618d32baab27` — re-confirm the final one), the repo
+   (`019f61e5-5755-7a02-adb4-618d32baab27` - re-confirm the final one), the repo
    link, and the proof bundle.
 5. **Optional hardening if time allows** (in value order): run the Linux/Docker
    lane on a real host to lift it from STATIC-ONLY; implement the EWF-segment
@@ -328,7 +328,7 @@ flow: open a fresh terminal and run `sentinel`. If you use the one-liner,
 
 A top-to-bottom review of this document against the repo at `4e53e3b` found and
 fixed the following in the CURRENT-state sections (historical checkpoint tables
-below are deliberately unchanged — they describe their named timestamps):
+below are deliberately unchanged - they describe their named timestamps):
 
 1. Document control refreshed: rules re-verified 2026-07-20 (not 07-14), repo
    at `4e53e3b`, time remaining ~42 hours at 2026-07-20 05:36 UTC.
@@ -365,9 +365,9 @@ below are deliberately unchanged — they describe their named timestamps):
 | Selected track | Developer Tools |
 | Current decision | **GO, video-first: execute the WINNER ACTION PLAN (section A2 at top). COMPLETE run is optional ceiling with a hard abandon gate Mon 16:00 ET; registry alternative parked** |
 | Flagship-run readiness | **OPTIONAL CEILING per winner plan: authentic capped-PARTIAL Sol bundle `ede6c445` exists and verifies VALID; a COMPLETE run still needs credentials + TPM headroom (W3-W5) and is cut list item 4, not a submission gate** |
-| Submission readiness | **NOT READY — video (W7/W8) and Devpost form (W11) outstanding; every other required material is READY or PARTIAL per the 2026-07-20 readiness audit** |
+| Submission readiness | **NOT READY - video (W7/W8) and Devpost form (W11) outstanding; every other required material is READY or PARTIAL per the 2026-07-20 readiness audit** |
 | Retained successful `/feedback` Session ID | `019f61e5-5755-7a02-adb4-618d32baab27` |
-| Current Docker/README follow-up thread ID | `019f76f3-a19f-71d1-81b2-eed6305857f6` — not yet a successful `/feedback` receipt |
+| Current Docker/README follow-up thread ID | `019f76f3-a19f-71d1-81b2-eed6305857f6` - not yet a successful `/feedback` receipt |
 
 The local screenshot supporting that ID is outside this repository in the
 workspace parent under the filename
@@ -412,7 +412,7 @@ evidence-bound receipts, lifecycle-complete verification, deterministic reports,
 a static proof viewer, and a user-facing CLI. The winner story and experiment are now
 governed by the Winner Roadmap and corrected master plan: a trust-measurement
 harness for model-directed investigators, not a generic autonomous analyst and
-not a clean causal Qwen-versus-GPT-5.6 ablation.
+not a clean causal Sentinel-Ensemble-versus-GPT-5.6 ablation.
 
 This is nevertheless a hard-scope sprint. The project is not submission-ready
 until it has one authentic post-freeze GPT-5.6 investigation, a complete
@@ -611,7 +611,7 @@ Unchained is a complementary controlled-autonomy case study, not a repudiation
 of Ensemble's “code gets the final word” philosophy. It omits the deterministic
 **semantic** validator and measures what happens in a reproducible model-directed
 case. Because the model, prompts, orchestration, tool policy, and review system
-also differ from Qwen, this is not presented as a one-variable causal ablation.
+also differ from Sentinel-Ensemble, this is not presented as a one-variable causal ablation.
 It does not remove deterministic operational controls, and neither the
 investigator nor its fresh reviewer is treated as ground truth. Published
 support metrics come from a frozen evidence-observable rubric whose
@@ -633,7 +633,7 @@ Pre-existing foundation reused:
 
 Not reused as Unchained proof or orchestration:
 
-- Qwen pipeline or coordinator.
+- Sentinel-Ensemble pipeline or coordinator.
 - Deterministic semantic validator.
 - Prior prompts.
 - Prior report layer.
@@ -798,7 +798,7 @@ Verified on July 14, 2026 unless otherwise stated.
 | Git provenance | VERIFIED PUBLICLY | Public `origin/main` matches local HEAD `3506d29`; GitHub metadata reports `visibility=public`; server-side commit record retained | Preserve unchanged history and bind the freeze digest |
 | Build provenance document | IMPLEMENTED | `BUILD_PROVENANCE.md` records prior/new/Codex boundaries and local-timestamp limitation | Record baseline hash and public/freeze URLs when they exist |
 | Public experiment preregistration | NOT STARTED | Protocol/rubric/scorer digest is not frozen or remotely timestamped | Complete after deterministic native smoke and before any GPT-5.6 DC01 call |
-| Judge quickstart | IMPLEMENTED FOR CURRENT FLAGSHIP | `JUDGE-QUICKSTART.md` documents fresh Windows install, no-key verification, authentic run, host/evidence capability truth, architecture mapping, troubleshooting, and Qwen boundary review | Revalidate commands after the authentic bundle and add viewer URL |
+| Judge quickstart | IMPLEMENTED FOR CURRENT FLAGSHIP | `JUDGE-QUICKSTART.md` documents fresh Windows install, no-key verification, authentic run, host/evidence capability truth, architecture mapping, troubleshooting, and Sentinel-Ensemble boundary review | Revalidate commands after the authentic bundle and add viewer URL |
 | Demo video | NOT STARTED | No current-project video | Record only after genuine run |
 | Devpost submission | NOT STARTED | No confirmation artifact | Draft early; submit July 20 |
 | `/feedback` proof | VERIFIED + RETAINED LOCALLY | Current ID `019f61e5-5755-7a02-adb4-618d32baab27` is in project docs and screenshot | Final successful `/feedback` must come from the true majority-core thread after final core work |
@@ -830,10 +830,10 @@ integration coverage rather than chasing an arbitrary percentage.
 | Primary proof Python | CPython 3.11.9 at `%LOCALAPPDATA%\venvs\sentinel-unchained-py311\Scripts\python.exe` |
 | Independent lockcheck Python | CPython 3.11.9 at `%LOCALAPPDATA%\venvs\sentinel-unchained-py311-lockcheck\Scripts\python.exe` |
 | Dependency integrity | `pip check` clean in both environments; exact constraints plus hash-bearing platform `pylock.toml` committed |
-| Key pinned runtime versions | `openai==2.31.0`, `tiktoken==0.12.0`, `volatility3==2.28.0`, pinned Qwen dependency commit |
+| Key pinned runtime versions | `openai==2.31.0`, `tiktoken==0.12.0`, `volatility3==2.28.0`, pinned Sentinel-Ensemble dependency commit |
 | API credential in current process | `OPENAI_API_KEY` absent; value was never printed |
 | Native Windows memory console | `vol.exe -h` passes; fixed console adapter is the preferred flagship path |
-| Qwen catalog smoke | 25 direct functions and 5 allowlisted dynamic functions when the primary venv Scripts directory is on `PATH` |
+| Sentinel-Ensemble catalog smoke | 25 direct functions and 5 allowlisted dynamic functions when the primary venv Scripts directory is on `PATH` |
 | Real native plugin proof | VERIFIED LOCALLY: `windows.info` resolves symbols; authoritative `gate-a-final-20260715T015251Z` returns pstree 40 and psscan 72 records; repaired `gate-a-netscan-20260715T014947Z` returns 19,685 records and 3,961,843 accepted-output bytes |
 | Public evidence archive outside repo | 561,424,278 bytes; official MD5 match `64A4E2CB47138084A5C2878066B2D7B1`; archive SHA-256 `86658D85D8254E8D30DCCC4F50D9C2A8B550A101D2E78A6D932316849E37AD80` |
 | Extracted DC01 memory outside repo | 2,147,483,648 bytes; SHA-256 `8079A7459B1739CAF7D4FBF6DDE5EB0AE7A9D24DBDE657DEBF4D5202C8DC6B62`; never commit or redistribute |
@@ -1008,7 +1008,7 @@ No forensic tool runs until a final accepted model response supplies the call.
 The repository commits exact Windows AMD64 CPython 3.11 constraints and a
 hash-bearing `pylock.toml`. The primary and independently created lockcheck
 environments both run CPython 3.11.9 and pass `pip check`. The full tests, Ruff,
-format, wheel build/install path, Volatility help, and Qwen catalog smoke pass.
+format, wheel build/install path, Volatility help, and Sentinel-Ensemble catalog smoke pass.
 This lock is platform-specific and is not claimed as an Ubuntu lock.
 
 ### P0-8 - RESOLVED offline: requested and returned model identities are separate
@@ -1407,7 +1407,7 @@ status changes, and measured outcomes.
 | Native environment incomplete | RESOLVED FOR WINDOWS MEMORY FLAGSHIP | CPython 3.11.9, clean locks, Volatility help, catalog, profile/symbols, 14 tools, and real rows | Preserve exact proof under committed frozen environment |
 | Fake replay mistaken for proof | High | Visible replay labeling | Authentic manifest + replay banner |
 | Exact quote mistaken for semantic truth | High | State that exact resolution proves receipt integrity only; score correctness separately | Frozen two-axis scorer output |
-| Prior Qwen work mistaken as new | High | Positive disclosure and dated boundary | `BUILD_PROVENANCE.md` + commits |
+| Prior Sentinel-Ensemble work mistaken as new | High | Positive disclosure and dated boundary | `BUILD_PROVENANCE.md` + commits |
 | Same-model judge overstated | Medium | Call it fresh-context monotonic review | Honest README/video language |
 | Evidence privacy exposure | High | Public case only; no secrets/raw private case | Data review + public manifest |
 | Stale 2025 rules reused | High | Direct-current-source policy | Retrieval date + correct track/dates |
@@ -1424,7 +1424,7 @@ Safe now, with the stated scope (superseding the July 14 count):
 - A wheel builds; primary and lockcheck environments pass `pip check`.
 - Exact Windows AMD64 CPython 3.11 constraints and a hash-bearing platform lock
   are committed.
-- Volatility help passes, and the pinned Qwen catalog exposes 25 direct and 5
+- Volatility help passes, and the pinned Sentinel-Ensemble catalog exposes 25 direct and 5
   allowlisted dynamic functions with the primary venv active.
 - Public DC01 memory evidence was acquired outside Git, its 561,424,278-byte
   archive matches official MD5 `64A4E2CB47138084A5C2878066B2D7B1`, and both
@@ -1474,7 +1474,7 @@ Not safe yet:
 - “The deterministic parallel smoke was an authentic opening-book/model run.”
 - “Evidence stays local.”
 - “Native Windows E01 support.”
-- Any Unchained runtime, cost, finding, or accuracy number borrowed from Qwen.
+- Any Unchained runtime, cost, finding, or accuracy number borrowed from Sentinel-Ensemble.
 
 ## Commands for the next session
 
@@ -1635,7 +1635,7 @@ At the end of every substantial future session:
 | 2026-07-14 19:05 | Completed all three pre-Prompt-3 documentation verification passes | Current uncached rules and FAQ; nine-constraint coverage scan; zero broken local links; 71 tests; Ruff; truthful dependency/Git/artifact red states | Begin the focused P0 correctness/proof implementation block |
 | 2026-07-14 19:30 | Saved the deeply corrected winner master plan and synchronized README, AGENTS, decisions, and handover; added provider-returned-model and partition-aware TSK proof requirements | Independent rules, repository, and experiment audits; official GPT-5.6 guidance; current tests/Ruff/pip/Git checks; DC01 source and answer-page verification | Execute the focused P0 correctness prompt saved in the master plan |
 | 2026-07-14 19:38 | Completed three verification passes over the corrected master-plan integration | 1,084-line/18-section coverage; link and heading scans; no em dash in master plan; 71 tests; Ruff; truthful dependency and Git failures retained | Execute the focused P0 correctness prompt saved in the master plan |
-| 2026-07-14 20:50 | Deeply red-teamed and saved the Winner Roadmap; corrected the C0-C7 order, forbade GPT-5.6 DC01 rehearsal before a public freeze, split factual correctness from receipt sufficiency, retained the existing Volatility path, and made hosted plus offline viewing the no-rebuild contract | Current Official Rules; official GPT-5.6 and Responses guidance; Qwen adapter/source inspection; independent strategy audit; 881-line roadmap | Finish C1 verification and honest local provenance, then start C2 |
+| 2026-07-14 20:50 | Deeply red-teamed and saved the Winner Roadmap; corrected the C0-C7 order, forbade GPT-5.6 DC01 rehearsal before a public freeze, split factual correctness from receipt sufficiency, retained the existing Volatility path, and made hosted plus offline viewing the no-rebuild contract | Current Official Rules; official GPT-5.6 and Responses guidance; Sentinel-Ensemble adapter/source inspection; independent strategy audit; 881-line roadmap | Finish C1 verification and honest local provenance, then start C2 |
 | 2026-07-14 20:50 | Implemented and root-verified all three reproduced C1 defects: rendered Markdown inertness, exact partition-offset propagation into sealed `fsstat`, and log-before-memory classification | 80 tests passed in 1.39s; six rendered report-safety tests; 34 focused evidence/tool tests; Ruff check and format check; wheel build | Commit the honest baseline, then implement C2 proof artifacts |
 | 2026-07-14 20:56 | Initialized local Git on `main`, added evidence/secret exclusions, created `BUILD_PROVENANCE.md`, passed high-confidence secret and evidence scans, and created the honest root commit | Commit `5b31b32e995d4d485bf512bb8600ca44b46e6f2c`; 32 reviewed files; no public remote | Publish without history rewriting, then start C2 |
 | 2026-07-14 21:31 | Completed C2 provider/evidence-grounding hardening | Commit `5309e5c`; bounded audited retries, requested/provider model separation, durable accepted outputs, and exact reviewer-quote validation | Complete the locked proof path and verify bundle finalization |
@@ -1689,7 +1689,7 @@ The verified tree was subsequently published as commit
 
 The detailed comparison and rationale are in
 [`docs/OPENAI_VNEXT_REVIEW.md`](docs/OPENAI_VNEXT_REVIEW.md). The decision is to
-evolve the smaller Unchained controller, not port Qwen's dual conductor. Qwen's
+evolve the smaller Unchained controller, not port Sentinel-Ensemble's dual conductor. Sentinel-Ensemble's
 deterministic onboarding, typed capability filtering, bounded adaptive work, and
 fact-provenance ideas remain useful. Its 20-to-35-tool floor, monolithic
 orchestration, early/nonfatal custody, fail-open validation, per-call MCP process
@@ -1741,7 +1741,7 @@ forward.
   prices a cache miss. Audited call cost and the final budget snapshot are
   recomputed from normalized token usage, the code-owned price table, and the
   frozen caps. This is local cap accounting, not provider billing. No live
-  latency or measured faster-than-Qwen claim is made.
+  latency or measured faster-than-Sentinel-Ensemble claim is made.
 - Findings bind to exact full-artifact UTF-8 byte ranges and stable span IDs. The
   fresh judge sees those spans, can preserve or downgrade only, and cannot add
   unknown findings.
@@ -1797,7 +1797,7 @@ remains **NOT DEMONSTRATED**.
 2. Offline verification validates recorded provider metadata but cannot
    independently authenticate OpenAI.
 3. No live latency benchmark exists, so the phase caps and parallel opening are
-   performance design choices, not evidence that vNext is faster than the Qwen
+   performance design choices, not evidence that vNext is faster than the Sentinel-Ensemble
    ensemble or a measured end-to-end baseline.
 4. Recomputed local inference cost enforces the frozen price table and caps but
    is not a provider bill; only provider billing records can establish billed
@@ -1905,7 +1905,7 @@ docker compose --profile live run --rm live-smoke
 4. Run one harmless synthetic Sol lifecycle through all five model phases,
    strict verification, custody, and viewer.
 5. Run the first valid frozen evidence primary once.
-6. Benchmark the same evidence fairly against Qwen and score semantic accuracy
+6. Benchmark the same evidence fairly against Sentinel-Ensemble and score semantic accuracy
    separately.
 7. Complete viewer visual QA, video, hosted artifact, and submission links.
 
@@ -1982,7 +1982,7 @@ establish provider billing, or prove semantic forensic correctness.
 
 | Gate | Current state |
 |---|---|
-| Luna connectivity and strict typed call | **DEMONSTRATED — second-reviewer-attested (project-affiliated) projection** |
+| Luna connectivity and strict typed call | **DEMONSTRATED - second-reviewer-attested (project-affiliated) projection** |
 | Luna raw/bundle-derived receipt | **NOT RETAINED** |
 | Sol provider-model metadata | **RECORDED twice as `gpt-5.6-sol`** |
 | Six-way Sol opening | **DEMONSTRATED on real memory** |
@@ -1993,7 +1993,7 @@ establish provider billing, or prove semantic forensic correctness.
 | Typed `DONE` v2 and forced findings serialization live | **PENDING** |
 | Fresh downgrade-only reviewer live | **PENDING** |
 | Authentic `COMPLETE` Sol bundle | **PENDING** |
-| Same-evidence Qwen benchmark and semantic score | **PENDING** |
+| Same-evidence competitive benchmark and semantic score | **PENDING** |
 | Human/cross-browser authentic viewer QA | **PENDING** |
 
 ### Terminal-protocol correction and v2 hardening
@@ -2031,7 +2031,7 @@ offline-verified; its authentic COMPLETE trace is still pending.
 4. Run a harmless Sol case through typed `DONE`, findings serialization,
    fresh review, deterministic report/viewer, custody, and strict verification.
 5. Run and retain the authentic frozen `COMPLETE` case.
-6. Run the same-evidence Qwen comparison and frozen semantic scorer.
+6. Run the same-evidence competitive comparison and frozen semantic scorer.
 7. Complete viewer QA, video, hosted artifact, and submission packaging.
 
 The winning claim is now stronger but remains bounded:

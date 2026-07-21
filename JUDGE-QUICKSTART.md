@@ -17,7 +17,7 @@
 
 ## Fastest no-key lane (zero spend)
 
-**If Python 3.11 is available, this is instant** — every command below returns
+**If Python 3.11 is available, this is instant** - every command below returns
 in well under a second and never contacts OpenAI:
 
 ```powershell
@@ -33,7 +33,7 @@ routing, public evidence IDs, and SHA-256 custody on the committed fixture,
 with zero OpenAI calls.
 
 **Prefer full isolation?** The same experience runs in a hardened container
-(no network, read-only root, all capabilities dropped) — note
+(no network, read-only root, all capabilities dropped) - note
 `docker compose build` takes several minutes on a cold cache:
 
 ```powershell
@@ -56,7 +56,7 @@ There are two separate judge paths:
 
 Never present a fake-model test or replay as an authentic GPT-5.6 run.
 
-## Judge's first screen — one word does everything
+## Judge's first screen - one word does everything
 
 After installation, `sentinel` is a one-word, self-driving command (setup adds a
 tiny shim folder to your user PATH; open a new terminal if it is not found).
@@ -67,10 +67,10 @@ sentinel
 ```
 
 It opens a zero-key welcome (reads nothing, zero OpenAI calls), asks **one
-thing** — where the evidence is — with a card that shows exactly what a good
+thing** - where the evidence is - with a card that shows exactly what a good
 case folder looks like (one memory image and/or one disk image from one host).
 No evidence handy? Type **`D`** there for a guided download of the public DC01
-case — the two direct links (`case001/DC01-memory.zip`, `case001/DC01-E01.zip`)
+case - the two direct links (`case001/DC01-memory.zip`, `case001/DC01-E01.zip`)
 open in your browser, publisher MD5s are verified, and the case folder is
 prepared. It then profiles content and rechecks SHA-256 custody locally to
 print a deterministic case card. `.zip` archives are offered for local extraction into
@@ -79,7 +79,7 @@ hashed/listed and set aside. The router accepts at
 most one ready memory image and one ready disk image per case; same-class
 multiples fail closed. It then stops at one launch card that owns model and
 depth (`1 = quick Terra test · 2 = full Terra run · 3 = qualifying Sol · Q = quit`), followed by the one
-final key step (Enter = saved key, or a hidden paste that never echoes) — no
+final key step (Enter = saved key, or a hidden paste that never echoes) - no
 flags, no environment variables.
 
 If PATH changes are restricted, the full form always works:
@@ -88,7 +88,7 @@ If PATH changes are restricted, the full form always works:
 & "$env:LOCALAPPDATA\venvs\sentinel-unchained-py311\Scripts\sentinel.exe"
 ```
 
-The depth prompt sets one of two stop-ceiling profiles — the same GPT-5.6 Sol
+The depth prompt sets one of two stop-ceiling profiles - the same GPT-5.6 Sol
 model either way:
 
 | Depth | Hard ceilings (not a price quote) |
@@ -104,7 +104,7 @@ JSON and noninteractive runs cannot launch.
 
 The full junior-analyst walkthrough is [Start Here](docs/START-HERE.md).
 
-**Hardware note:** no GPU is needed — GPT-5.6 runs on OpenAI's side. For the
+**Hardware note:** no GPU is needed - GPT-5.6 runs on OpenAI's side. For the
 real memory-image path, 4 cores / 8 threads and 16 GB RAM are comfortable (the
 opening can fan out up to twelve typed forensic tools concurrently); keep
 evidence on a local SSD path, not a OneDrive/cloud-synced folder.
@@ -139,7 +139,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\setup.ps1
 The script creates the validated Python 3.11 environment outside OneDrive,
 installs the pinned dependencies (a **non-editable** copy, so `sentinel` keeps
 working if this folder moves), runs `pip check`, and confirms the toolchain
-imports and the CLI responds — a fast health check in seconds, not the full test
+imports and the CLI responds - a fast health check in seconds, not the full test
 suite. Add `-FullTest` to also run pytest, Ruff, the format check, and the
 package build; `-Check` re-verifies an existing install without reinstalling.
 The individual commands below remain available when a junior analyst needs to
@@ -246,7 +246,7 @@ Create a funded project key at:
 
 <https://platform.openai.com/api-keys>
 
-**The one-step path — paste once with hidden input, done forever:**
+**The one-step path - paste once with hidden input, done forever:**
 
 ```powershell
 & "$venv\Scripts\sentinel.exe" key
@@ -254,7 +254,7 @@ Create a funded project key at:
 
 Input is masked; the key is written to a private per-user file
 (`%LOCALAPPDATA%\sentinel-unchained\openai_api_key`, owner-only) and **every
-later sentinel command finds it automatically** — no environment variables,
+later sentinel command finds it automatically** - no environment variables,
 no terminal restarts. Check or remove any time:
 
 ```powershell
@@ -308,7 +308,7 @@ path-free case card containing OS, shape, readiness, sizes, hashes, available
 tools, cloud boundary, and effective caps. It does not unpack an archive; any
 permitted extraction happens before onboarding.
 
-Profile and route it first — a `$0` local preview with no key and no spend (bare
+Profile and route it first - a `$0` local preview with no key and no spend (bare
 `sentinel` does the same profile before it ever asks to launch; this explicit CLI
 form stops at the card):
 
@@ -402,8 +402,8 @@ and retry timeouts must remain positive, within the run wall cap, and
 nonincreasing.
 
 The verifier reconstructs the exact opening, adaptive, finalizer, judge, and
-report inputs—including every adaptive ledger, receipt index, budget snapshot,
-latest observation, and full finalizer observation sequence—and binds accepted
+report inputs - including every adaptive ledger, receipt index, budget snapshot,
+latest observation, and full finalizer observation sequence - and binds accepted
 output usage to the paired request ceiling. It binds strict tool schemas/phase
 options, model function calls, tool receipts, visible case-ledger updates,
 typed-DONE-v2 (or historical literal-DONE-v1), forced
@@ -454,9 +454,9 @@ failed run and report its actual state.
 | Proof viewer | `viewer.py`, `viewer_policy.py` | Generated inert HTML plus independent positive-policy verification |
 | Proof and verification | `artifacts.py`, `verify.py`, CLI | Manifest, summary, lifecycle/span verification |
 
-## 11. Review of the Qwen and SANS examples
+## 11. Review of the prior-work and SANS examples
 
-The Qwen repository is the best sample for onboarding because it exposes a
+The prior-work forensic package is the best sample for onboarding because it exposes a
 three-step run path, a dedicated judge quickstart, setup scripts, architecture
 documents, public-case provenance, and explicit status tables:
 
@@ -476,8 +476,8 @@ Unchained adopts those communication strengths while tightening the experiment:
 - factual correctness separated from receipt support;
 - recorded provider metadata kept distinct from external authenticity.
 
-Only the reviewed typed forensic layer is reused from Qwen, pinned in
-`pyproject.toml`. The Qwen pipeline, validator, prompts, and report code are not
+Only the reviewed typed forensic layer is reused from that package, pinned in
+`pyproject.toml`. That package's pipeline, validator, prompts, and report code are not
 imported. The older Sentinel-Ensemble repository is contextual prior work, not
 the Unchained implementation.
 
@@ -534,7 +534,7 @@ docker compose --profile live run --rm live-smoke
 
 The output must say `NONQUALIFYING_CONNECTIVITY_SMOKE`. It reads no evidence,
 creates no proof bundle, and cannot satisfy `--require-live-gpt56`. Do not call
-it the hackathon primary or include it in the Qwen benchmark.
+it the hackathon primary or include it in a competitive benchmark.
 
 The safe container deliberately does not use `--privileged`, FUSE, loop
 devices, or `CAP_SYS_ADMIN`. Raw inspection remains available; mounted E01/NTFS

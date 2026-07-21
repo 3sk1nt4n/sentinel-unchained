@@ -411,7 +411,7 @@ Continue the case-level DFIR investigation. For every turn:
 3. OBSERVE only the returned data.
 4. UPDATE your running case notes before the next decision. CRITICAL: every
    nonterminal turn that calls a forensic tool MUST also emit visible message
-   text — the case-ledger update — in the SAME response as the tool call. A
+   text - the case-ledger update - in the SAME response as the tool call. A
    forensic tool call with empty message text is rejected and ends the run.
    Always write the ledger update text first, then make the one tool call. Keep
    it nonempty and no larger than {MAX_CASE_LEDGER_UPDATE_BYTES:,} UTF-8 bytes.

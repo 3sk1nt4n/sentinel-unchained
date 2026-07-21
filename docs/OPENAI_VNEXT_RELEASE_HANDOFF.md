@@ -20,7 +20,7 @@ living [hackathon handover](../HACKATHON_HANDOVER.md).
 | Publication behavior | Fast-forward only; no force-push, history rewrite, credential, evidence image, or generated case bundle |
 | Foundation diff | 35 files, 9,674 insertions, 904 deletions |
 | Retained successful `/feedback` ID | `019f61e5-5755-7a02-adb4-618d32baab27` |
-| Current Docker/README follow-up thread | `019f76f3-a19f-71d1-81b2-eed6305857f6` — not a successful `/feedback` receipt unless submitted from this thread |
+| Current Docker/README follow-up thread | `019f76f3-a19f-71d1-81b2-eed6305857f6` - not a successful `/feedback` receipt unless submitted from this thread |
 
 The exact foundation commit is visible at
 [`ed4d3f5`](https://github.com/3sk1nt4n/Unchained/commit/ed4d3f540a27171c04a7321f4f85efea23d905de).
@@ -119,7 +119,7 @@ cryptographically bound to a raw provider response.
 
 The retained Sol bundle is stronger evidence because its own summary, audit,
 profile, manifest, and detached checksum are available. Values below come from
-those artifacts—not rounded reviewer prose where they differ:
+those artifacts - not rounded reviewer prose where they differ:
 
 | Sol capped-run fact | Bundle-derived value |
 |---|---|
@@ -369,7 +369,7 @@ The result is a deterministic cap estimate, not an OpenAI invoice.
 Budget preflight may reduce a preferred maximum only to the phase minimum. If
 the remaining token or estimated-cost budget cannot preserve that allocation,
 the corresponding cap fires before provider dispatch. Because the API maximum
-includes both reasoning and visible output, this is an allocation guard—not a
+includes both reasoning and visible output, this is an allocation guard - not a
 promise of visible-token volume. Requests use `store=false`, no prior response
 ID, bounded current-turn inputs, implicit caching, and code-owned caps.
 
@@ -463,9 +463,9 @@ DETERMINISTIC REPORT + INERT VIEWER + PROOF MANIFEST
 FINAL SHA-256 CUSTODY + INDEPENDENT STRICT VERIFICATION
 ```
 
-## 5. Comparison: baseline, Qwen Ensemble, and vNext
+## 5. Comparison: baseline, Sentinel-Ensemble, and vNext
 
-| Area | Reviewed Unchained baseline | Qwen Ensemble direction | OpenAI-native vNext |
+| Area | Reviewed Unchained baseline | Sentinel-Ensemble direction | OpenAI-native vNext |
 |---|---|---|---|
 | Primary value | Strong deterministic/native substrate | Broad forensic catalog and ensemble reference | Bounded autonomy plus independently checkable proof |
 | Strategy | Adaptive model loop | Multiple model/ensemble roles | Parallel opening plus one-action stateless loop |
@@ -484,7 +484,7 @@ FINAL SHA-256 CUSTODY + INDEPENDENT STRICT VERIFICATION
 | Performance thesis | Growing context/sequential behavior | Extra ensemble calls/context | Six-way opening, stateless turns, phase budgets, implicit cache |
 | Honest limitation | Needed stronger boundaries | Breadth could outrun proof | Explicitly separates consistency, authenticity, and semantic truth |
 
-Qwen remains valuable as the commit-pinned typed forensic-tool reference and a
+Sentinel-Ensemble remains valuable as the commit-pinned typed forensic-tool reference and a
 demonstration of breadth. vNext wins on a thinner, more legible model layer,
 smaller proof surface, exact grounding, and a judge experience that can be
 explained in one breath.
@@ -526,7 +526,7 @@ It also highlights what the model is **not** allowed to do.
    construction consume no model tokens.
 8. Hard call/token/cost/wall caps prevent runaway work.
 
-This is a performance thesis, not a measured result. “Faster than Qwen” becomes
+This is a performance thesis, not a measured result. “Faster than Sentinel-Ensemble” becomes
 allowed language only after the frozen same-evidence benchmark.
 
 ### Why it is more defensible
@@ -557,7 +557,7 @@ whether the bundle is internally consistent.
 
 The project states that the first live Sol bundle is `PARTIAL`, not a completed
 case. It still does not prove provider authenticity, semantic truth, a measured
-Qwen win, full multi-image scheduling, privileged Docker mount parity, external
+Sentinel-Ensemble win, full multi-image scheduling, privileged Docker mount parity, external
 anchoring, or an authentic `COMPLETE` vNext case. That restraint makes the
 claims that **are** checkable more credible.
 
@@ -710,7 +710,7 @@ add `--privileged` merely to make a demo pass.
 | Authentic Luna connectivity result | Live, second-reviewer-attested (project-affiliated); raw JSON receipt not retained |
 | Authentic GPT-5.6 Sol capped opening/tool run | Green: retained `PARTIAL` bundle, offline `VALID` |
 | Authentic `COMPLETE` GPT-5.6 Sol vNext run | Pending |
-| Same-evidence Qwen benchmark | Pending |
+| Same-evidence competitive benchmark | Pending |
 | Frozen semantic accuracy score | Pending |
 | Human/cross-browser authentic viewer QA | Pending |
 | OS-enforced parser sandbox | Future production hardening |
@@ -725,7 +725,7 @@ Do not claim any of the following yet:
 - “The Luna projection is a raw or bundle-derived provider receipt.”
 - “The capped Sol run exercised findings serialization, fresh review, or a
   complete report lifecycle.”
-- “Unchained is faster/cheaper/more accurate than Qwen.”
+- “Unchained is faster/cheaper/more accurate than Sentinel-Ensemble.”
 - “The offline verifier authenticates OpenAI.”
 - “The reviewer is independent ground truth.”
 - “The local cost estimate is the provider invoice.”
@@ -759,7 +759,7 @@ Additional engineering limits:
 4. **Run and retain the authentic frozen `COMPLETE` case.** Preserve all audit entries,
    full tool outputs, provider metadata, usage, local estimates, report, viewer,
    manifest, checksum, verifier output, and post-run custody receipt.
-5. **Run the same-evidence Qwen comparison.** Match evidence, tool eligibility,
+5. **Run the same-evidence competitive comparison.** Match evidence, tool eligibility,
    caps, and scoring as closely as architectures allow; disclose differences.
 6. **Score semantics separately.** The proof verifier cannot establish factual
    correctness. Use a frozen, disclosed evaluator for precision/recall/F1,

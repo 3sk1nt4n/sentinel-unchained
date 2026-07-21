@@ -150,9 +150,7 @@ def test_bare_sentinel_self_drives_one_command_to_the_live_run(
     monkeypatch.setattr(cli_module, "_interactive_terminal", lambda: True)
     monkeypatch.setattr(cli_module, "_prompt_evidence_path", lambda: Path("operator-case"))
     calls: list[str] = []
-    monkeypatch.setattr(
-        cli_module, "_launch_menu", lambda: calls.append("menu") or "default"
-    )
+    monkeypatch.setattr(cli_module, "_launch_menu", lambda: calls.append("menu") or "default")
     # First gate answer is B (back to the launch card), second launches - the
     # guided loop must redraw the launch card in between.
     gate_answers = iter(["back", "launch"])

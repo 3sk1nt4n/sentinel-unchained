@@ -353,7 +353,7 @@ def _doctor(*, json_output: bool) -> int:
         "python_3_11": sys.version_info[:2] == (3, 11),
         "openai_sdk": importlib.util.find_spec("openai") is not None,
         "volatility3": importlib.util.find_spec("volatility3") is not None,
-        "qwen_tool_package": importlib.util.find_spec("sift_sentinel") is not None,
+        "forensic_tool_package": importlib.util.find_spec("sift_sentinel") is not None,
         model_check_name: model_ok,
         "openai_api_key_present": key_present,
     }
@@ -574,8 +574,7 @@ def _launch_menu() -> str | None:
             return None
         guard = Console(sys.stdout)
         message = (
-            "That was not an option: 1 = quick test, 2 = full run, "
-            "3 = qualifying Sol, Q = quit."
+            "That was not an option: 1 = quick test, 2 = full run, 3 = qualifying Sol, Q = quit."
         )
         guard.warn(message) if guard.enabled else print(f"     ! {message}")
 
@@ -1045,7 +1044,8 @@ def _guided(*, mount: bool = False, caps_profile: str = "strict", no_color: bool
     a single menu, and the key card is the ONE final step before the pipeline
     starts - Enter keeps a saved key, a hidden paste replaces a stale one right
     there. No question is ever asked twice, and nothing is spent before both
-    the explicit 1 = LAUNCH confirmation and the key step pass.
+    an explicit launch-card choice (1 = quick Terra test, 2 = full Terra run,
+    3 = qualifying Sol) and the key step pass.
     """
 
     caps = CapConfig.from_env(caps_profile)
@@ -1116,8 +1116,9 @@ def _guided(*, mount: bool = False, caps_profile: str = "strict", no_color: bool
             return EXIT_INVALID
 
     # Step 3: ONE launch card - model, depth, ceilings, and confirmation on the
-    # same menu (1 = LAUNCH, 2 = depth, 3 = model, Q = quit). The card owns the
-    # model choice, so no earlier step ever asks the same question.
+    # same menu (1 = quick Terra test, 2 = full Terra run, 3 = qualifying Sol,
+    # Q = quit). The card owns the model choice, so no earlier step ever asks
+    # the same question.
     # Step 4: the ONE final step before money is spent - the key card with the
     # hidden, shape-checked paste always offered. Enter keeps a saved key, a
     # paste replaces a stale or exhausted one right here, B goes back to the

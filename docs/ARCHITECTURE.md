@@ -8,7 +8,7 @@ deterministic boundary around an autonomous GPT-5.6 investigator.
 
 <p align="center">
   <img src="assets/architecture.png"
-       alt="Unchained pipeline — GPT-5.6 judgment stages in blue, deterministic code authority in amber, offline verification in green"
+       alt="Unchained pipeline - GPT-5.6 judgment stages in blue, deterministic code authority in amber, offline verification in green"
        width="1000">
 </p>
 
@@ -81,7 +81,7 @@ Every provider request site is fixed in code; there is no unbounded loop:
 | Structured report draft | exactly 1 | `agent.py` `_report` |
 
 A completed case therefore makes **4 + T** provider requests, where **T ≥ 1**
-is the number of adaptive turns — minimum five requests total. T is bounded by
+is the number of adaptive turns - minimum five requests total. T is bounded by
 the hard caps (tool calls, total tokens, wall time, estimated cost): every
 request is audited and charged before its response is used, and a cap firing
 before dispatch ends the run as `PARTIAL` rather than exceeding the budget.
@@ -89,8 +89,8 @@ Transient provider failures may add at most two audited retries per dispatch; a
 forensic action is never re-executed because a dispatch retried.
 
 Reference point: the retained capped live run recorded exactly two provider
-requests — the opening plus one adaptive turn whose tool reservation was
-cap-blocked — matching this formula at the point the cap fired.
+requests - the opening plus one adaptive turn whose tool reservation was
+cap-blocked - matching this formula at the point the cap fired.
 
 ## Authority boundary
 

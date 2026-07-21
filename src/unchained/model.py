@@ -128,7 +128,7 @@ def _read_bounded_secret_file(secret_path: str, label: str) -> str:
 
 def _load_openai_api_key(explicit_key: str | None = None) -> tuple[str | None, str | None]:
     """Load one credential from an explicit value, environment, secret file, or
-    the canonical ``sentinel key`` file — in that fixed precedence order."""
+    the canonical ``sentinel key`` file - in that fixed precedence order."""
 
     if explicit_key:
         return explicit_key, "explicit"

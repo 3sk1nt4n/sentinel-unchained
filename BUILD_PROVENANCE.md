@@ -189,7 +189,7 @@ The C2 commit snapshot is:
 - clean `pip check` in both environments;
 - exact Windows CPython 3.11 constraints and a pip 25.3 `pylock` source/hash
   record;
-- successful `vol -h` and a pinned Qwen catalog result of 25 direct tools plus
+- successful `vol -h` and a pinned Sentinel-Ensemble catalog result of 25 direct tools plus
   5 dynamic Volatility tools;
 - exact tool-output retention, bounded UTF-8 excerpts, structured
   exact reviewer quotes, provider-returned identity fields, response/request

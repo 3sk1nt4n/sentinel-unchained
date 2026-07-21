@@ -314,7 +314,7 @@ video are green:
 - Linux and macOS breadth;
 - Plaso;
 - new forensic tool families;
-- Qwen reruns;
+- Sentinel-Ensemble reruns;
 - generalized Docker host support;
 - a large interactive dashboard;
 - unrelated product pivots.
@@ -323,7 +323,7 @@ A single Linux/AMD64 synthetic container preflight and explicitly
 nonqualifying GPT-5.6 Luna protocol canary are the narrow exception. They test
 installation, the offline CLI/profile/custody path, and API-contract readiness
 only. They do not expand the scored evidence/host scope, prove the Windows DC01
-route, enable privileged E01/FUSE mounting, or enter the Qwen comparison.
+route, enable privileged E01/FUSE mounting, or enter the competitive comparison.
 
 ### Evidence-OS capability truth
 
@@ -403,7 +403,7 @@ The current 2026-07-18 working tree supersedes the historical checkpoints below:
 
 The implementation has no authentic completed GPT-5.6 vNext run and no live
 latency comparison. Parallel opening and phase-specific limits are performance
-design choices, not measured evidence that vNext is faster than the Qwen
+design choices, not measured evidence that vNext is faster than the Sentinel-Ensemble
 ensemble.
 
 The remaining limitations are explicit: offline metadata cannot independently
@@ -455,7 +455,7 @@ from the later Gate A hardening in commit `6e696a0`:
 - `requirements/constraints.windows-amd64-cp311.txt` and
   `requirements/pylock.windows-amd64-cp311.toml` retain exact dependency state,
   including source and wheel hashes where the lock format supplies them;
-- Volatility console help succeeds and the pinned Qwen catalog loads exactly
+- Volatility console help succeeds and the pinned Sentinel-Ensemble catalog loads exactly
   25 direct plus 5 dynamic entries through the existing fixed adapter;
 - commit `5309e5c` retains provider-returned model identity, response/request
   identifiers, validated usage, evidence-grounded quote structure, and bounded
@@ -561,20 +561,20 @@ identifiers before any authentic-model claim is published.
 This is a controlled comparative case study and instrumented autonomy
 experiment. It is not a clean causal ablation of Sentinel Ensemble.
 
-The original Qwen-versus-GPT-5.6 table changes the model, provider, prompts,
+The original Sentinel-Ensemble-versus-GPT-5.6 table changes the model, provider, prompts,
 orchestration, tool-selection policy, tool budget, report schema, and semantic
 review system at the same time. Differences cannot be attributed exactly to
 removing the deterministic validator.
 
-Use Qwen only as:
+Use Sentinel-Ensemble only as:
 
 - historical architecture context;
 - prior-work credibility;
 - a qualitative fixed-conductor versus adaptive-investigator diagram;
 - an optional separately labeled historical result.
 
-Never place raw Qwen finding counts beside Unchained finding counts as if they
-share a denominator. Never reuse Qwen tokens, costs, runtime, tool counts, or
+Never place raw Sentinel-Ensemble finding counts beside Unchained finding counts as if they
+share a denominator. Never reuse Sentinel-Ensemble tokens, costs, runtime, tool counts, or
 findings as Unchained results.
 
 ### Primary evaluation
@@ -1058,7 +1058,7 @@ flagship result.
 - [x] Complete C2 proof artifacts, bounded audited retries, verifier, and exact
       Python 3.11 dependency state.
 
-Do not begin Linux/macOS breadth, Plaso, Qwen reruns, viewer polish, or video.
+Do not begin Linux/macOS breadth, Plaso, Sentinel-Ensemble reruns, viewer polish, or video.
 
 ### Gate A: July 15 at 20:00 ET
 
@@ -1142,7 +1142,7 @@ replay cannot substitute for proof. Convene an explicit go/no-go review.
 - [ ] Finish README first screen, installation, support matrix, and disclosures.
 - [ ] Draft Devpost text.
 
-No Qwen rerun unless every item above is already green.
+No Sentinel-Ensemble rerun unless every item above is already green.
 
 ### July 19
 
@@ -1245,7 +1245,7 @@ without changing the investigator's semantic decisions.
 Add focused and adversarial tests, then run full pytest, Ruff, build, and pip
 check in the intended environment. Update the handover evidence ledger, gates,
 risks, change log, and single next action. Do not add Linux/macOS breadth,
-Plaso, a dashboard, or Qwen comparison work.
+Plaso, a dashboard, or competitive comparison work.
 ```
 
 ### Corrected C3 through C7 order
@@ -1382,9 +1382,9 @@ run bundle, and methodology are available at the public links shown here.
 ## 15. Zero-fake rails
 
 - Never invent or inherit a metric.
-- Never use Qwen output as Unchained proof.
+- Never use Sentinel-Ensemble output as Unchained proof.
 - Never compare raw finding counts without a shared atomic definition.
-- Never call the Qwen comparison a clean or exact causal ablation.
+- Never call the competitive comparison a clean or exact causal ablation.
 - Never call the fresh GPT-5.6 reviewer independent ground truth.
 - Never call the audit externally immutable.
 - Never say full outputs are inspectable until they are retained and rehashed.

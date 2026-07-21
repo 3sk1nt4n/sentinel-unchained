@@ -275,9 +275,10 @@ while (-not ($keyStatus -match "Key configured via")) {
 if ($keyStatus -match "Key configured via") { Write-Skip "key configured; every command finds it" }
 
 # 4/4 - the live run. onboard --launch shows the verified case card, then ONE
-# launch card that owns model AND depth (1 = LAUNCH, 2 = depth, 3 = model,
-# Q = quit), then the final key step (hidden paste). No model question here -
-# the card is the only model authority, so nothing is ever asked twice.
+# launch card that owns model AND depth (1 = quick Terra test, 2 = full Terra
+# run, 3 = qualifying Sol, Q = quit), then the final key step (hidden paste).
+# No model question here - the card is the only model authority, so nothing is
+# ever asked twice.
 Write-Step "4/4" "Launch - one card asks model, depth, and confirmation"
 # An older bootstrap persisted UNCHAINED_MODEL at User scope; clear it so a
 # stale variable can never silently preselect the expensive model.

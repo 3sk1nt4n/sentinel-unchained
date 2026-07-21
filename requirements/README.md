@@ -16,7 +16,7 @@ Two clean virtual environments were created outside OneDrive:
 
 Both report CPython 3.11.9 AMD64 and pass `pip check`. The C2 commit snapshot
 passed 123 tests. Gate A commit `6e696a0` passes 128 tests, Ruff check, Ruff
-format check, wheel build, `vol -h`, the exact pinned Qwen catalog smoke, and
+format check, wheel build, `vol -h`, the exact pinned Sentinel-Ensemble catalog smoke, and
 real `vol_pstree`, `vol_psscan`, and high-volume `vol_netscan` execution. These
 are local operational proofs. They are not a public timestamp, scored result,
 or authentic GPT-5.6 run.

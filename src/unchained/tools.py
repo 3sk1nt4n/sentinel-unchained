@@ -283,7 +283,7 @@ class ToolRegistry:
         audit: AuditLog,
         budget: RunBudget,
     ) -> ToolRegistry:
-        """Lazy-load only typed Qwen forensic callables through a sealed adapter."""
+        """Lazy-load only typed forensic callables through a sealed adapter."""
 
         definitions = load_reference_tools(profile, budget)
         return cls(definitions, audit, budget)
@@ -348,7 +348,7 @@ def load_reference_tools(
     profile: EvidenceProfile,
     budget: RunBudget | None = None,
 ) -> tuple[ToolDefinition, ...]:
-    """Load reviewed Qwen tool modules without importing its coordinator."""
+    """Load reviewed forensic tool modules without importing its coordinator."""
 
     if len(profile.memory_items) > 1:
         raise RuntimeError(
@@ -375,7 +375,7 @@ def load_reference_tools(
     for name, arg_type, family, operating_systems in _direct_specs():
         if profile.os not in operating_systems:
             continue
-        # Windows collectors are fixed, direct Qwen functions.  They do not
+        # Windows collectors are fixed, direct forensic functions.  They do not
         # appear in ``volatility_plugins`` because that catalog is deliberately
         # restricted to the dynamic Linux/macOS plugin allowlist.  Requiring a
         # Windows direct-tool name in that unrelated mapping silently removed
@@ -469,7 +469,7 @@ def load_reference_tools(
 
 
 def _load_qwen_catalog(budget: RunBudget | None) -> dict[str, dict[str, Any]]:
-    """Discover Qwen signatures/capabilities inside the same bounded worker."""
+    """Discover forensic signatures/capabilities inside the same bounded worker."""
 
     result = _run_qwen_worker({"action": "catalog"}, budget)
     if not isinstance(result, dict):
@@ -573,7 +573,7 @@ def _description(name: str, capability: dict[str, Any]) -> str:
     produces = ", ".join(str(value) for value in capability.get("produces", ()))
     runtime_class = str(capability.get("runtime_class") or "unknown")
     return (
-        f"Read-only pinned Qwen function {name}, producing {produces or 'records'} "
+        f"Read-only pinned forensic function {name}, producing {produces or 'records'} "
         f"(runtime class: {runtime_class})."
     )
 
@@ -589,7 +589,7 @@ def _direct_executor(
 ) -> ToolExecutor:
     target = DIRECT_TOOL_TARGETS.get(name)
     if target is None or target[2] != arg_type:
-        raise RuntimeError(f"Qwen worker allowlist is missing the typed tool {name}")
+        raise RuntimeError(f"forensic worker allowlist is missing the typed tool {name}")
 
     def execute(arguments: dict[str, JsonValue]) -> Any:
         spec: dict[str, JsonValue] = {
@@ -629,7 +629,7 @@ def _volatility_executor(
 
 
 def _run_qwen_worker(spec: dict[str, JsonValue], budget: RunBudget | None) -> Any:
-    """Execute a sealed Qwen invocation in a disposable, time-bounded process."""
+    """Execute a sealed forensic invocation in a disposable, time-bounded process."""
 
     timeout = 300.0 if budget is None else budget.remaining_wall_seconds()
     result = _run_isolated_worker(spec, timeout)
@@ -648,7 +648,7 @@ def _run_isolated_worker(spec: dict[str, JsonValue], timeout: float) -> Any:
         # is added only after launch and is itself always JSON-safe.
         json.dumps(spec, ensure_ascii=False, allow_nan=False)
     except (TypeError, ValueError) as exc:
-        return {"status": "error", "error": f"Qwen worker spec is not JSON-safe: {exc}"}
+        return {"status": "error", "error": f"forensic worker spec is not JSON-safe: {exc}"}
     command = [sys.executable, "-P", "-m", "unchained._tool_worker"]
     environment = _worker_environment()
     environment.pop("PYTHONHOME", None)
@@ -676,7 +676,7 @@ def _run_isolated_worker(spec: dict[str, JsonValue], timeout: float) -> Any:
     except OSError as exc:
         return {
             "status": "error",
-            "error": f"isolated Qwen worker could not start: {type(exc).__name__}: {exc}",
+            "error": f"isolated forensic worker could not start: {type(exc).__name__}: {exc}",
         }
 
     windows_job: int | None = None
@@ -684,14 +684,14 @@ def _run_isolated_worker(spec: dict[str, JsonValue], timeout: float) -> Any:
         try:
             windows_job = _assign_windows_kill_job(process)
         except OSError as exc:
-            # Fail closed: production Qwen code never runs if descendants cannot
+            # Fail closed: the production forensic code never runs if descendants cannot
             # be placed under a kill-on-close wall-time boundary.
             with contextlib.suppress(OSError):
                 process.kill()
             process.wait()
             return {
                 "status": "error",
-                "error": f"isolated Qwen worker could not enter a Job Object: {exc}",
+                "error": f"isolated forensic worker could not enter a Job Object: {exc}",
             }
 
     timed_out = False
@@ -757,25 +757,25 @@ def _run_isolated_worker(spec: dict[str, JsonValue], timeout: float) -> Any:
     if timed_out:
         return {
             "status": "timeout",
-            "error": f"isolated Qwen worker exceeded {timeout:.3f}s",
+            "error": f"isolated forensic worker exceeded {timeout:.3f}s",
         }
     if read_error is not None:
         return {
             "status": "error",
-            "error": f"isolated Qwen worker protocol failed: {type(read_error).__name__}: "
+            "error": f"isolated forensic worker protocol failed: {type(read_error).__name__}: "
             f"{read_error}",
         }
     if not output_line:
         return {
             "status": "error",
-            "error": f"isolated Qwen worker exited without a response ({process.returncode})",
+            "error": f"isolated forensic worker exited without a response ({process.returncode})",
         }
     encoded_output = output_line.encode("utf-8", errors="replace")
     if len(encoded_output) > _WORKER_MAX_RESPONSE_BYTES or not output_line.endswith("\n"):
         return {
             "status": "error",
             "error": (
-                "isolated Qwen worker response exceeded the fixed "
+                "isolated forensic worker response exceeded the fixed "
                 f"{_WORKER_MAX_RESPONSE_BYTES}-byte transport boundary"
             ),
         }
@@ -784,10 +784,10 @@ def _run_isolated_worker(spec: dict[str, JsonValue], timeout: float) -> Any:
     except json.JSONDecodeError as exc:
         return {
             "status": "error",
-            "error": f"isolated Qwen worker returned invalid JSON: {exc}",
+            "error": f"isolated forensic worker returned invalid JSON: {exc}",
         }
     if not isinstance(envelope, dict) or not isinstance(envelope.get("ok"), bool):
-        return {"status": "error", "error": "isolated Qwen worker returned a bad envelope"}
+        return {"status": "error", "error": "isolated forensic worker returned a bad envelope"}
     if envelope["ok"]:
         return envelope.get("result")
     error_type = str(envelope.get("error_type") or "WorkerError")

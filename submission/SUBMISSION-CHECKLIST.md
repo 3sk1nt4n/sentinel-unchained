@@ -1,4 +1,4 @@
-# Submission Checklist — Operational Runbook (W7-W11)
+# Submission Checklist - Operational Runbook (W7-W11)
 
 **Deadline: Tue 2026-07-21 17:00 PT** (Devpost). **Submit target: Tue ~11:00 ET. Hard floor: Tue 14:00 ET.** Judging runs 2026-07-22 → 2026-08-05. Rules: https://openai.devpost.com/rules
 
@@ -6,21 +6,21 @@ The video is the only mandatory gap. Everything below exists to get it recorded,
 
 ---
 
-## W7 — Video recording pre-flight
+## W7 - Video recording pre-flight
 
 - [ ] Script covers, in order: the pitch, the $0 no-key lane, the retained live Sol receipt, and the Codex workflow. Total runtime strictly under 3:00.
 - [ ] Foreground the Codex story on screen (Session ID visible, README "Built with Codex" section shown). This is the weakest-evidenced criterion until the video shows it.
-- [ ] Use the shipped bundle `examples/public-run-partial` for the live-GPT-5.6 segment (verify prints VALID on current code — proven 2026-07-20: 20 artifacts, 62 audit entries). The committed Sol receipt `docs/runs/sol-capped-dc01-opening.json` may be shown as a document. NEVER run a live verify on a `unchained-runs/20260719T*` bundle — those print INVALID on current code (renderer evolved after they were sealed). Zero new spend required: an honest video can show real GPT-5.6 work today.
-- [ ] Say "up to twelve" for the opening. Never say six as the current cap (the retained run's 6/6 was under the earlier cap — label it that way if shown).
-- [ ] No banned phrases anywhere in narration or slides: no unmeasured faster/better-than-Qwen claims, no "production-ready", no invented numbers.
+- [ ] Use the shipped COMPLETE bundle `examples/public-run-complete` for the live-GPT-5.6 segment with the strict flags (`sentinel verify examples\public-run-complete --require-complete --require-live-gpt56` prints VALID on current code - proven: 37 artifacts, 194 audit entries). The committed Sol receipt `docs/runs/sol-capped-dc01-opening.json` may be shown as a document. NEVER run a live verify on a `unchained-runs/20260719T*` bundle - those print INVALID on current code (renderer evolved after they were sealed). Zero new spend required: an honest video can show real GPT-5.6 work today.
+- [ ] Say "up to twelve" for the opening. Never say six as the current cap (the retained run's 6/6 was under the earlier cap - label it that way if shown).
+- [ ] No banned phrases anywhere in narration or slides: no unmeasured faster/better-than-competitor claims, no "production-ready", no invented numbers.
 - [ ] Clean desktop: notifications off, API key never on screen, terminal font legible at 1080p.
 - [ ] Rehearse the no-key commands once so they run first-try on camera.
 - [ ] Record. Watch the full playback: audio clear, text readable, runtime under 3:00.
 
-## W8 — YouTube upload
+## W8 - YouTube upload
 
 - [ ] Upload the final cut. Visibility: **Public** (not Unlisted, not Private).
-- [ ] Title: `Unchained — bounded GPT-5.6 DFIR investigator | OpenAI Build Week (Developer Tools)`
+- [ ] Title: `Unchained - bounded GPT-5.6 DFIR investigator | OpenAI Build Week (Developer Tools)`
 - [ ] Paste this description verbatim:
 
 ```
@@ -31,14 +31,14 @@ A bounded autonomous DFIR investigator built with Codex and GPT-5.6 for OpenAI B
 Repo (public, MIT): https://github.com/3sk1nt4n/Unchained
 Codex Session ID: 019f61e5-5755-7a02-adb4-618d32baab27
 Try it with no API key and $0 spend: see JUDGE-QUICKSTART.md in the repo.
-Public evidence case: The Stolen Szechuan Sauce (DC01) — https://dfirmadness.com/the-stolen-szechuan-sauce/
+Public evidence case: The Stolen Szechuan Sauce (DC01) - https://dfirmadness.com/the-stolen-szechuan-sauce/
 ```
 
 - [ ] Confirm the watch page shows runtime under 3:00.
 - [ ] Incognito playback check: full video plays start to finish while logged out.
 - [ ] Copy the final URL into `submission/DEVPOST-FORM.md` (video field) and replace `ADDED-ON-UPLOAD` in `submission/JUDGE-ONE-PAGER.md`.
 
-## W9 — Devpost form, field by field
+## W9 - Devpost form, field by field
 
 Open the Devpost submission form and `submission/DEVPOST-FORM.md` side by side. Paste block-for-block:
 
@@ -56,14 +56,14 @@ Open the Devpost submission form and `submission/DEVPOST-FORM.md` side by side. 
 - [ ] Run the "30-second reviewer sanity list" at the bottom of DEVPOST-FORM.md against the pasted form.
 - [ ] Save as draft. Do not submit yet.
 
-## W10 — /feedback refresh
+## W10 - /feedback refresh
 
 - [ ] In Codex, open the core-build session and run `/feedback`; confirm it submits successfully.
 - [ ] Primary Session ID (majority-core, core functionality build): `019f61e5-5755-7a02-adb4-618d32baab27`.
-- [ ] Fallback ID, only if the primary cannot be refreshed: `019f76f3-a19f-71d1-81b2-eed6305857f6` (Docker/README thread — thread provenance only, not a feedback receipt unless submitted successfully).
+- [ ] Fallback ID, only if the primary cannot be refreshed: `019f76f3-a19f-71d1-81b2-eed6305857f6` (Docker/README thread - thread provenance only, not a feedback receipt unless submitted successfully).
 - [ ] Confirm the ID pasted on Devpost matches the session whose /feedback went through.
 
-## W11 — Final QA and SUBMIT
+## W11 - Final QA and SUBMIT
 
 Fresh incognito browser, logged out of everything:
 

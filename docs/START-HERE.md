@@ -21,7 +21,7 @@ install once, then run one word that walks you through everything else.
 > **You can't break anything.** Everything is local and free until the very
 > last step, and even then nothing spends money until you pick a package on
 > the launch card AND pass the final key step. If a step ever errors, nothing
-> bad happened — read the message and try again.
+> bad happened - read the message and try again.
 
 ```text
 ╔════════════════════════════════════════════════════════════════════╗
@@ -40,7 +40,7 @@ git clone https://github.com/3sk1nt4n/Unchained.git; cd Unchained
 # 1) install + verify everything (one command)
 powershell -NoProfile -ExecutionPolicy Bypass -File .\setup.ps1
 
-# 2) start a whole case (one word — it walks you through the rest)
+# 2) start a whole case (one word - it walks you through the rest)
 sentinel
 ```
 
@@ -48,13 +48,13 @@ That second command does **all** of this for you, in order, asking one simple
 thing at a time:
 
 1. shows a full-color welcome;
-2. asks **one question** — where the evidence is;
+2. asks **one question** - where the evidence is;
 3. profiles and SHA-256-hashes the case **locally** and prints a verified
    **case card** (no key, no OpenAI, `$0`);
 4. stops at **one launch card** with three complete packages:
    `1 = quick Terra test (LIGHT)`, `2 = full Terra run (HEAVY, recommended)`,
    `3 = qualifying Sol (HEAVY)`, `Q = quit`;
-5. asks the **one final key step** before the pipeline starts — Enter uses the
+5. asks the **one final key step** before the pipeline starts - Enter uses the
    saved key, or paste a new one at a hidden prompt (never echoed);
 6. after the key step, runs the investigation live and verifies the sealed
    proof bundle.
@@ -64,7 +64,7 @@ does exactly the same thing.
 
 ---
 
-## Step 0 — Keep your OpenAI key safe (do this once, before the run)
+## Step 0 - Keep your OpenAI key safe (do this once, before the run)
 
 You'll need an OpenAI key for the paid run, but never paste a key into a chat,
 screenshot, or shared terminal.
@@ -80,7 +80,7 @@ screenshot, or shared terminal.
 
 ---
 
-## Step 1 — Install (one command)
+## Step 1 - Install (one command)
 
 Open **PowerShell** (Start → type "PowerShell" → Enter). Either paste the
 one-liner:
@@ -89,7 +89,7 @@ one-liner:
 irm https://raw.githubusercontent.com/3sk1nt4n/Unchained/main/get.ps1 | iex
 ```
 
-…or clone and run the installer directly — **same steps, same result**:
+…or clone and run the installer directly - **same steps, same result**:
 
 ```powershell
 git clone https://github.com/3sk1nt4n/Unchained.git
@@ -110,16 +110,16 @@ evidence and calls OpenAI zero times.** Re-running is safe.
 
 ---
 
-## Step 2 — Run one word (it walks you through the rest)
+## Step 2 - Run one word (it walks you through the rest)
 
 ```powershell
 sentinel
 ```
 
-That's the whole experience. It asks **one question — where is the case?** —
+That's the whole experience. It asks **one question - where is the case?** - 
 and there are two easy answers:
 
-- 🧪 **No evidence yet?** Type **`D`** at the case prompt — Unchained guides
+- 🧪 **No evidence yet?** Type **`D`** at the case prompt - Unchained guides
   the **public DC01 practice case**: it opens the two direct download links in
   your browser (`DC01-memory.zip` + `DC01-E01.zip` from
   <https://dfirmadness.com/case001/>), verifies the publisher MD5s, and
@@ -144,21 +144,21 @@ verified bundle at the end. The run prints the exact `verify` and `view`
 commands when it finishes.
 
 > **One folder = one case.** Put at most one ready memory image and one ready
-> disk image in a folder. Two of the same kind fail closed — split them into
-> separate folders. **`.zip` archives are welcome** — the guided flow offers to
+> disk image in a folder. Two of the same kind fail closed - split them into
+> separate folders. **`.zip` archives are welcome** - the guided flow offers to
 > extract them into a clean sibling folder and re-profiles automatically; other
 > archive types are flagged EXTRACT FIRST and must be unpacked manually.
 > Original evidence bytes stay local; OpenAI only receives the bounded public
 > profile and bounded typed-tool outputs.
 
-Each package pairs a model with a set of **hard stop ceilings** — ceilings
+Each package pairs a model with a set of **hard stop ceilings** - ceilings
 are budget stops, never a quality promise:
 
 | Package | Model | Hard ceilings (not a price quote) |
 |---|---|---|
-| **1 QUICK TEST** — fastest live check | gpt-5.6-terra | 20 tools · 100,000 tokens · 10 min · $2.50 max |
-| **2 FULL RUN** — recommended first | gpt-5.6-terra | 60 tools · 400,000 tokens · 30 min · $10 max |
-| **3 QUALIFYING** — the official seal | GPT-5.6 Sol | 60 tools · 400,000 tokens · 30 min · $10 max |
+| **1 QUICK TEST** - fastest live check | gpt-5.6-terra | 20 tools · 100,000 tokens · 10 min · $2.50 max |
+| **2 FULL RUN** - recommended first | gpt-5.6-terra | 60 tools · 400,000 tokens · 30 min · $10 max |
+| **3 QUALIFYING** - the official seal | GPT-5.6 Sol | 60 tools · 400,000 tokens · 30 min · $10 max |
 
 Package 1 hits its ceiling early on big cases (honest `PARTIAL`, few findings);
 package 2 runs all 13 steps with findings, judge, and report at cheap Terra
@@ -167,7 +167,7 @@ pricing; only package 3 produces the Sol bundle that passes
 
 ---
 
-## Step 3 — Verify and view the proof (free, no key)
+## Step 3 - Verify and view the proof (free, no key)
 
 The run prints the exact **bundle folder path** at the end. Use it:
 
@@ -176,10 +176,10 @@ sentinel verify "C:\path\to\bundle"
 sentinel view   "C:\path\to\bundle"
 ```
 
-- `verify` should say **VALID** — an independent, offline checker rebuilt the
+- `verify` should say **VALID** - an independent, offline checker rebuilt the
   report and confirmed nothing was tampered with.
 - `view` opens a self-contained **proof viewer** in your browser (findings,
-  citations, custody, receipts) — no server, no JavaScript, no internet.
+  citations, custody, receipts) - no server, no JavaScript, no internet.
 
 For the qualifying Sol bundle, verify strictly:
 
@@ -240,17 +240,17 @@ $env:UNCHAINED_MODEL = "gpt-5.6-terra"
 sentinel
 ```
 
-The banner will warn **"TEST MODEL MODE"** — that's correct. A rehearsal can
+The banner will warn **"TEST MODEL MODE"** - that's correct. A rehearsal can
 never masquerade as the official Sol result and cannot pass
 `--require-live-gpt56`. Open a **fresh PowerShell** (to clear those variables)
 for the real run. Without these variables, `sentinel` defaults to real GPT-5.6
-Sol automatically — no configuration needed.
+Sol automatically - no configuration needed.
 
 ---
 
 ## When a run stops early
 
-A run can end `PARTIAL` — that's honest, not a failure of you. Read
+A run can end `PARTIAL` - that's honest, not a failure of you. Read
 `summary.json` and the last audit lines. Common causes and fixes:
 
 | You see | What it means | What to do |
@@ -267,7 +267,7 @@ Exit codes, if you script this:
 | `0` | Completed within policy | Read the reported status; not an accuracy guarantee |
 | `1` | Fatal runtime/provider/verification/custody failure | Preserve output; don't rely on the result |
 | `2` | Invalid input/config or no ready route | Fix the case-card blocker; don't force a launch |
-| `3` | `PARTIAL` — a cap or phase stopped safely | Preserve the bundle; report it as partial, never as complete |
+| `3` | `PARTIAL` - a cap or phase stopped safely | Preserve the bundle; report it as partial, never as complete |
 
 ---
 
@@ -296,7 +296,7 @@ sentinel view   "C:\path\to\supplied-bundle"  # open its proof viewer
 | Check a bundle | `sentinel verify "<bundle>"` |
 | Open the viewer | `sentinel view "<bundle>"` |
 
-**If `sentinel` isn't found** (rare — usually just open a new terminal), the
+**If `sentinel` isn't found** (rare - usually just open a new terminal), the
 full path always works:
 
 ```powershell

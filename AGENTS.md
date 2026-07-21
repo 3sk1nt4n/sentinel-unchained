@@ -27,7 +27,7 @@ submission-status change:
 4. Update the applicable gate, daily checklist, risk, change log, and single
    next action.
 5. Preserve the verified prior-work versus Build Week boundary. Never backdate
-   provenance or reuse Qwen metrics/artifacts as Unchained proof.
+   provenance or reuse prior-work metrics/artifacts as Unchained proof.
 6. Verify current event rules by opening the live 2026 Official Rules directly;
    cached search results may contain the unrelated 2025 gpt-oss event.
 7. Update `docs/HACKATHON_MASTER_PLAN.md` whenever a verified rule, thesis,
@@ -78,7 +78,7 @@ submission-status change:
     no AI co-authorship trailers, in code, docs, commit messages, filenames, or
     metadata. Run a repo-wide scan before finishing and remove any that appear.
     Provider credential-scrub allowlists that redact API-key environment
-    prefixes are a security feature — leave them.
+    prefixes are a security feature - leave them.
 
 The current retained `/feedback` Session ID is
 `019f61e5-5755-7a02-adb4-618d32baab27`. Preserve it as current provenance, but

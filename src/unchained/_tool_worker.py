@@ -1,4 +1,4 @@
-"""Private subprocess entry point for pinned Qwen forensic functions.
+"""Private subprocess entry point for pinned forensic functions.
 
 The parent runner supplies a sealed JSON invocation on standard input.  No
 module, function, plugin, command, or evidence path in this protocol is ever
@@ -185,7 +185,7 @@ def _run_direct(spec: dict[str, Any]) -> Any:
     if arguments:
         raise WorkerProtocolError("disk tools do not accept model arguments")
 
-    # These exact Qwen functions have heterogeneous, trusted signatures.  The
+    # These exact forensic functions have heterogeneous, trusted signatures.  The
     # invocation strategy mirrors their typed adapter without accepting a
     # parameter name from the caller.
     try:
@@ -219,7 +219,7 @@ def _run_volatility(spec: dict[str, Any]) -> Any:
 
 
 def _run_catalog() -> dict[str, Any]:
-    """Discover trusted Qwen metadata without importing Qwen in the parent."""
+    """Discover trusted forensic metadata without importing the tool package in the parent."""
 
     from sift_sentinel.tools.capabilities import get_capability
     from sift_sentinel.tools.common import VOLATILITY_PLUGINS

@@ -1,4 +1,4 @@
-# submission/ — Devpost package for Unchained (OpenAI Build Week, Developer Tools)
+# submission/ - Devpost package for Unchained (OpenAI Build Week, Developer Tools)
 
 Deadline: Tue 2026-07-21 17:00 PT. Submit target Tue ~11:00 ET, hard floor Tue 14:00 ET.
 

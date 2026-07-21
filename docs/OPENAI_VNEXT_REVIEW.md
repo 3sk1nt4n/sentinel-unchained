@@ -27,7 +27,7 @@ The original Unchained baseline passed 129 tests, Ruff check, Ruff format check,
 
 ## Bottom line
 
-Do not port the Qwen conductor and do not restart Unchained. The right successor
+Do not port the Sentinel-Ensemble conductor and do not restart Unchained. The right successor
 is the existing Unchained state machine with a smaller context protocol, exact
 evidence spans, an honest proof verifier, deterministic reporting, and a usable
 offline front door.
@@ -77,9 +77,9 @@ deterministic Markdown + offline HTML viewer + content-addressed proof bundle
 offline lifecycle/artifact/span verification [deterministic]
 ```
 
-## What Qwen got right
+## What Sentinel-Ensemble got right
 
-The Qwen repository contains several patterns worth preserving:
+The Sentinel-Ensemble repository contains several patterns worth preserving:
 
 1. Content-first evidence onboarding and a clear case card.
 2. Typed, allowlisted forensic functions instead of model-authored shell commands.
@@ -88,9 +88,9 @@ The Qwen repository contains several patterns worth preserving:
 5. Bounded adaptive investigation and visibility into blocked or inconclusive work.
 
 Those strengths are substrate and product lessons, not a reason to keep the
-Qwen orchestration shape.
+Sentinel-Ensemble orchestration shape.
 
-## What must not be carried forward from Qwen
+## What must not be carried forward from Sentinel-Ensemble
 
 ### Monolithic and divergent orchestration
 
@@ -101,7 +101,7 @@ from tests and makes safety properties depend on several later repair layers.
 
 ### Tool-volume floor instead of information gain
 
-Qwen pads model choices into a 20-to-35-tool sweep. Its published heavy run used
+Sentinel-Ensemble pads model choices into a 20-to-35-tool sweep. Its published heavy run used
 33 tools and took about 14 minutes 39 seconds. Starting a new MCP process for
 many calls adds avoidable initialization and serialization overhead. The vNext
 opening remains a maximum of six, followed only by adaptive one-tool turns. This
@@ -110,21 +110,21 @@ until both systems are benchmarked on the same evidence and limits.
 
 ### Incorrect custody semantics
 
-The active Qwen post-hash begins before later investigative/report phases and a
+The active Sentinel-Ensemble post-hash begins before later investigative/report phases and a
 mismatch is not in the final hard-fail expression. A second conductor may reuse
 the initial digest when size and timestamp are unchanged. vNext performs a real
 final full read after tool work stops and treats mismatch as fatal.
 
 ### Fail-open validation and repair layers
 
-Qwen contains paths that turn validator exceptions into apparent passes, fall
+Sentinel-Ensemble contains paths that turn validator exceptions into apparent passes, fall
 back from a missing typed fact store, or silently change a requested live run
 into dry-run behavior. Trust-boundary failures must be explicit `INVALID`,
 `PARTIAL`, or `FATAL` states.
 
 ### Model and report provenance gaps
 
-The Qwen finalizer can promote findings, raw model-visible evidence is not
+The Sentinel-Ensemble finalizer can promote findings, raw model-visible evidence is not
 consistently isolated as hostile data, and generated HTML interpolates dynamic
 values without universal escaping. vNext starts a new downgrade-only judge,
 uses exact evidence spans, and renders HTML without scripts or unescaped dynamic

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Unchained — OpenAI Build Week 2026</title>
+<title>Unchained - OpenAI Build Week 2026</title>
 <style>
   :root{
     --bg:#07090c;
@@ -23,7 +23,7 @@
     font-family:var(--sans);color:var(--text);
     -webkit-font-smoothing:antialiased;user-select:none;cursor:default}
 
-  /* Fixed 1920x1080 stage scaled to fit the viewport — pixel sizes below are true 1080p sizes */
+  /* Fixed 1920x1080 stage scaled to fit the viewport - pixel sizes below are true 1080p sizes */
   #stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;
     transform:translate(-50%,-50%) scale(1);transform-origin:center center}
 
@@ -54,7 +54,7 @@
   .card h3{font-size:40px;font-weight:700;margin-bottom:28px}
   .card ul{list-style:none}
   .card li{font-size:32px;line-height:1.45;margin-bottom:18px;padding-left:36px;position:relative;color:var(--text)}
-  .card li::before{content:"—";position:absolute;left:0;color:var(--faint)}
+  .card li::before{content:" - ";position:absolute;left:0;color:var(--faint)}
   .card.hot li::before{color:var(--accent)}
 
   .code{font-family:var(--mono);background:#0a0e13;border:1px solid var(--line);
@@ -112,7 +112,7 @@
     <h2>A transcript is not an answer.</h2>
     <div class="rule"></div>
     <ul class="punch" style="max-width:1500px">
-      <li>Agents now touch real evidence — and DFIR conclusions go in front of regulators and opposing counsel.</li>
+      <li>Agents now touch real evidence - and DFIR conclusions go in front of regulators and opposing counsel.</li>
       <li>A chat log cannot prove which tools actually ran, what output was retained, or what exact text a claim cites.</li>
       <li>If the AI&rsquo;s work cannot be checked independently, it is not evidence. It is a story.</li>
     </ul>
@@ -214,28 +214,28 @@
     <div class="legend">
       <span><i class="sw code"></i> deterministic code authority</span>
       <span><i class="sw model"></i> GPT&#8209;5.6 judgment inside a bounded protocol</span>
-      <span class="faint" style="font-size:26px">4 fixed GPT&#8209;5.6 requests + one per adaptive action — never an unbounded loop</span>
+      <span class="faint" style="font-size:26px">4 fixed GPT&#8209;5.6 requests + one per adaptive action - never an unbounded loop</span>
     </div>
   </section>
 
   <!-- 5 · PROOF -->
   <section class="slide">
     <div class="kicker">Proof, not promises</div>
-    <h2 style="margin-bottom:36px">A real GPT&#8209;5.6 run — shipped in the repo.</h2>
+    <h2 style="margin-bottom:36px">A COMPLETE GPT&#8209;5.6 investigation - shipped in the repo.</h2>
     <div class="facts">
-      <div class="fact"><span class="k">Provider model recorded</span><span class="v hot">gpt-5.6-luna · 4 responses</span></div>
-      <div class="fact"><span class="k">Typed tool receipts</span><span class="v">14 executed · all success</span></div>
-      <div class="fact"><span class="k">Evidence</span><span class="v">Windows memory · 2,147,483,648 B</span></div>
+      <div class="fact"><span class="k">Provider model recorded</span><span class="v hot">gpt-5.6-sol · 24 responses</span></div>
+      <div class="fact"><span class="k">Typed tool receipts</span><span class="v">31/31 executed</span></div>
+      <div class="fact"><span class="k">Findings</span><span class="v">4 · 1 CONFIRMED · 2 NEEDS&#8209;REVIEW · 1 UNSUPPORTED</span></div>
       <div class="fact"><span class="k">Custody</span><span class="v hot">SHA-256 initial == final</span></div>
-      <div class="fact"><span class="k">Spend</span><span class="v">180,285 tokens · 55.5 s · ~$1.16 est.</span></div>
-      <div class="fact"><span class="k">Terminal status</span><span class="v">PARTIAL · hard cap fired · labeled as such</span></div>
-      <div class="fact"><span class="k">Offline verification</span><span class="v hot">VALID · 20 artifacts · 62 audit entries</span></div>
-      <div class="fact"><span class="k">Ships in the repo</span><span class="v">examples/public-run-partial</span></div>
+      <div class="fact"><span class="k">Spend</span><span class="v">~$2.92 est. · 9m39s wall</span></div>
+      <div class="fact"><span class="k">Terminal status</span><span class="v">COMPLETE · fresh judge review</span></div>
+      <div class="fact"><span class="k">Strict offline verify</span><span class="v hot">VALID · 37 artifacts · 194 audit entries</span></div>
+      <div class="fact"><span class="k">Ships in the repo</span><span class="v">examples/public-run-complete</span></div>
     </div>
-    <div class="code">sentinel verify examples\public-run-partial
-sentinel view   examples\public-run-partial   <span class="c"># inert, no-JS viewer</span></div>
-    <p class="foot-note">A second sanitized receipt — the earlier gpt&#8209;5.6&#8209;sol capped opening (6/6 tools, VALID recorded at creation) —
-    is committed at <span class="mono">docs/runs/sol-capped-dc01-opening.json</span>.</p>
+    <div class="code">sentinel verify examples\public-run-complete --require-complete --require-live-gpt56
+sentinel view   examples\public-run-complete   <span class="c"># inert, no-JS viewer</span></div>
+    <p class="foot-note">A secondary PARTIAL bundle also ships - <span class="mono">examples/public-run-partial</span>
+    (gpt&#8209;5.6&#8209;luna, 14/14 tools, VALID · 20 artifacts · 62 audit entries).</p>
   </section>
 
   <!-- 6 · CODEX -->
@@ -247,7 +247,7 @@ sentinel view   examples\public-run-partial   <span class="c"># inert, no-JS vie
       <li>Primary implementation and <b>adversarial-review</b> collaborator for the Build Week codebase.</li>
       <li>Evidence lifecycle, Responses API adapter, typed execution boundary, caps, typed&#8209;DONE&#8209;v2, forced serializer, exact evidence spans, downgrade&#8209;only review, renderers, offline verifier, CLI, Docker, tests.</li>
       <li>Wrote adversarial tests, reproduced defects, and verified live rules against the official API.</li>
-      <li>Result: <span class="accent">404/404 tests passing in 25.11 s</span> across 24 files, ruff clean.</li>
+      <li>Result: <span class="accent">436/436 tests passing</span> · ruff clean · 25 test files.</li>
     </ul>
     <p class="mono dim" style="font-size:28px;margin-top:34px">Codex Session ID&nbsp;&nbsp;019f61e5-5755-7a02-adb4-618d32baab27</p>
     <p class="foot-note">Human decisions stayed human: product thesis, track, DFIR testbed, authority split, scope cuts, claim language, final submission.</p>
@@ -259,9 +259,9 @@ sentinel view   examples\public-run-partial   <span class="c"># inert, no-JS vie
     <h2>Fail closed. Label everything.</h2>
     <div class="rule"></div>
     <ul class="punch" style="max-width:1520px">
-      <li>Caps fire <b>before</b> dispatch; a capped run ends <span class="mono accent">PARTIAL</span> — never relabeled COMPLETE.</li>
-      <li>Receipts prove what ran and what was cited — not forensic truth. A human owns interpretation.</li>
-      <li>No COMPLETE GPT&#8209;5.6 bundle published yet, and no same&#8209;evidence benchmark — so no unmeasured claims, anywhere.</li>
+      <li>Caps fire <b>before</b> dispatch; a capped run ends <span class="mono accent">PARTIAL</span> - never relabeled COMPLETE.</li>
+      <li>Receipts prove what ran and what was cited - not forensic truth. A human owns interpretation.</li>
+      <li>One case, one OS route; the same&#8209;evidence benchmark was deliberately cut - so no unmeasured claims, anywhere.</li>
     </ul>
   </section>
 
@@ -277,7 +277,7 @@ py -3.11 -m venv .judge; .judge\Scripts\python.exe -m pip install -q .
       The pip install is the only wait (~1&ndash;2 min). Every command after returns in well under a second
       and <b>never contacts OpenAI</b>. Full isolation instead:
       <span class="mono">docker compose run --rm offline profile /evidence --json</span></p>
-    <p class="foot-note">Paid runs are gated behind a saved key plus an explicit <span class="mono">LAUNCH</span> confirmation on a money screen showing hard cost ceilings.</p>
+    <p class="foot-note">Paid runs sit behind a saved key plus an explicit launch card - quick Terra test, full Terra run, or qualifying Sol.</p>
   </section>
 
   <!-- 9 · CLOSE -->

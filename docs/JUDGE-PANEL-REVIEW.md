@@ -1,4 +1,4 @@
-# Adversarial judge-panel review — 2026-07-19
+# Adversarial judge-panel review - 2026-07-19
 
 > **What this is:** an internal, adversarial self-review run two days before the
 > OpenAI Build Week deadline. Four independent reviewers scored the project
@@ -26,7 +26,7 @@
 - Per-phase GPT-5.6 Responses API policies exist in code exactly as documented:
   opening `tool_choice=required` + parallel + six-call ceiling; one required
   typed action per adaptive turn; pinned judge function with high reasoning
-  (`agent.py`, `model.py` — line-verified by the skeptic).
+  (`agent.py`, `model.py` - line-verified by the skeptic).
 - Typed-DONE-v2, all-or-none opening validation, the downgrade-only reviewer,
   and the 4,434-line offline verifier are enforced mechanisms, not
   documentation claims. The Idea skeptic **raised** the score for this.
@@ -58,9 +58,9 @@
 | New/extended work inside Jul 13–21 with a prior-work boundary | PASS |
 | Public repo with MIT LICENSE | PASS |
 | No third-party IP problems | PASS |
-| Working no-rebuild judge test path | **AT_RISK** — the headline lane is `docker compose build`; the instant native path works (re-tested) but is presented second, and no verifiable bundle is shipped |
-| Public YouTube video under 3 minutes | **PENDING — the only DQ-level gap** |
-| Devpost submission checklist | AT_RISK — all 13 boxes unchecked at review time |
+| Working no-rebuild judge test path | **AT_RISK** - the headline lane is `docker compose build`; the instant native path works (re-tested) but is presented second, and no verifiable bundle is shipped |
+| Public YouTube video under 3 minutes | **PENDING - the only DQ-level gap** |
+| Devpost submission checklist | AT_RISK - all 13 boxes unchecked at review time |
 
 ## Competitive field and realistic odds
 
@@ -71,9 +71,9 @@ submissions, of which perhaps 10–20 genuinely contend.
 
 | Scenario | Combined odds of 1st or 2nd (Developer Tools) |
 |---|---|
-| As submitted today (no video) | ~0% — non-compliant; can be screened out before human judging |
+| As submitted today (no video) | ~0% - non-compliant; can be screened out before human judging |
 | Video shipped, bundle still PARTIAL | ~2–4% |
-| Video + one authentic COMPLETE bundle | ~5–10% — a legitimate top-10% entry |
+| Video + one authentic COMPLETE bundle | ~5–10% - a legitimate top-10% entry |
 
 The ordering is robust even where the percentages are estimates: **the video is
 worth more than everything else combined, and the COMPLETE run roughly doubles
@@ -87,6 +87,6 @@ Gemini hackathons (full list in the retained panel output).
 
 Seven fresh Sol attempts from 2026-07-19 are retained and all ended `PARTIAL`;
 one failure reason reads "investigator without a tool call must output exactly
-DONE" — the literal-DONE-v1 failure mode that typed-DONE-v2 was built to fix.
+DONE" - the literal-DONE-v1 failure mode that typed-DONE-v2 was built to fix.
 Typed-DONE-v2 is verified offline but has **never succeeded live**. Budget two
 to three attempts for the COMPLETE run and dry-run a harmless case first.

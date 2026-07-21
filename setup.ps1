@@ -65,7 +65,7 @@ function Report-DockerStatus {
 Write-SetupBanner
 
 if ($Check) {
-    # Fast, non-mutating re-verify (mirrors the Qwen './setup.sh --check' habit):
+    # Fast, non-mutating re-verify:
     # confirm the isolated toolchain is healthy WITHOUT reinstalling or testing.
     Write-Host "[check] Verifying the existing isolated environment (no install, no tests)" -ForegroundColor Cyan
     $problems = @()

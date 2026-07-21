@@ -1,7 +1,7 @@
 <p align="center">
   <img
     src="docs/assets/readme-hero.png"
-    alt="Unchained — GPT-5.6 chooses where to look; code proves what happened"
+    alt="Unchained - GPT-5.6 chooses where to look; code proves what happened"
     width="1000"
   >
 </p>
@@ -19,7 +19,7 @@
   <img src="https://img.shields.io/badge/Evidence-read--only-dc2626.svg" alt="Read-only evidence">
   <img src="https://img.shields.io/badge/Proof-offline--verifiable-f59e0b.svg" alt="Offline-verifiable proof">
   <img src="https://img.shields.io/badge/OpenAI-GPT--5.6-111827.svg?logo=openai&logoColor=white" alt="OpenAI GPT-5.6">
-  <img src="https://img.shields.io/badge/tests-432%20passing-22c55e.svg" alt="432 tests passing">
+  <img src="https://img.shields.io/badge/tests-378%20passing-22c55e.svg" alt="378 tests passing">
   <img src="https://img.shields.io/badge/proof%20bundle-ships%20in%20this%20repo-8b5cf6.svg" alt="Proof bundle ships in this repo">
 </p>
 
@@ -45,22 +45,22 @@
 
 **The whole idea in one breath:**
 
-- 🔍 **Deterministic code goes first** — before any model call, the evidence is
+- 🔍 **Deterministic code goes first** - before any model call, the evidence is
   enumerated, content-probed, routed, and SHA-256-hashed into custody, locally
   and read-only. Zero OpenAI calls until this front door is green.
-- 🧠 **Then GPT-5.6 runs the investigation** — it opens with up to twelve
+- 🧠 **Then GPT-5.6 runs the investigation** - it opens with up to twelve
   high-value typed forensic tools (memory and disk) fired in parallel, reads
   the retained results, chooses the next tool one audited action at a time, and
   finally proposes structured findings that a fresh-context reviewer may only
   preserve or downgrade.
-- 🔒 **Code owns the evidence the whole way** — read-only access, hard caps,
+- 🔒 **Code owns the evidence the whole way** - read-only access, hard caps,
   all-or-none validation, exact byte-span citations. The model is never
   allowed to *be* the evidence.
-- 🧾 **Every case seals into a proof bundle** — a hash-chained audit log and an
+- 🧾 **Every case seals into a proof bundle** - a hash-chained audit log and an
   offline verifier that rebuilds the report and viewer byte-for-byte. If one
   byte changes, verification fails.
 
-**The real first screen is one word** — just `sentinel`: no key, no evidence,
+**The real first screen is one word** - just `sentinel`: no key, no evidence,
 zero OpenAI calls. It welcomes you, asks where the evidence is, and prints a
 local SHA-256 case card before any model is involved.
 
@@ -80,19 +80,19 @@ local SHA-256 case card before any model is involved.
 > spend. No flags, no environment variables. Follow the card-by-card
 > [first-case guide](docs/START-HERE.md).
 
-## For judges — the submission at a glance
+## For judges - the submission at a glance
 
 | Field | Value |
 |---|---|
-| Track | **Developer Tools** — OpenAI Build Week |
+| Track | **Developer Tools** - OpenAI Build Week |
 | Built with | **Codex** (implementation + adversarial review) and **GPT-5.6** (Sol investigator/reviewer, Terra rehearsal/smoke) |
-| Codex Session ID | `019f61e5-5755-7a02-adb4-618d32baab27` — see [Built with Codex](#built-with-codex) |
+| Codex Session ID | `019f61e5-5755-7a02-adb4-618d32baab27` - see [Built with Codex](#built-with-codex) |
 | Fastest no-key test | Two-command install, then `sentinel verify examples/public-run-complete` → **VALID**. A real GPT-5.6 Sol `COMPLETE` run, zero spend ([judge quickstart](JUDGE-QUICKSTART.md)) |
-| Shipped `COMPLETE` proof | [`examples/public-run-complete`](examples/public-run-complete) — an authentic GPT-5.6 **Sol** `COMPLETE` bundle **inside this repo**: **4 findings** (1 CONFIRMED, 2 NEEDS-REVIEW, 1 UNSUPPORTED), fresh-judge verdicts, and a sealed report on the public DC01 domain-controller case — a full live investigation for **~$2.92 in 9m39s**; passes strict `--require-complete --require-live-gpt56` (37 artifacts, 194 audit entries) |
-| Also shipped | [`examples/public-run-partial`](examples/public-run-partial) — a `gpt-5.6-luna` bundle: 14/14 typed tools on real memory, honest `PARTIAL` at the hard cap |
+| Shipped `COMPLETE` proof | [`examples/public-run-complete`](examples/public-run-complete) - an authentic GPT-5.6 **Sol** `COMPLETE` bundle **inside this repo**: **4 findings** (1 CONFIRMED, 2 NEEDS-REVIEW, 1 UNSUPPORTED), fresh-judge verdicts, and a sealed report on the public DC01 domain-controller case - a full live investigation for **~$2.92 in 9m39s**; passes strict `--require-complete --require-live-gpt56` (37 artifacts, 194 audit entries) |
+| Also shipped | [`examples/public-run-partial`](examples/public-run-partial) - a `gpt-5.6-luna` bundle: 14/14 typed tools on real memory, honest `PARTIAL` at the hard cap |
 | Live receipts | [Sol capped opening receipt](docs/runs/sol-capped-dc01-opening.json) · [Luna canary](docs/runs/luna-canary-receipt.json) |
 | One-page judge brief | [submission/JUDGE-ONE-PAGER.md](submission/JUDGE-ONE-PAGER.md) |
-| Honest gaps | The frozen benchmark comparison and the demo video are still pending; the [proof status](#proof-status) table never overstates |
+| Honest gaps | The demo video is still pending; the [proof status](#proof-status) table never overstates |
 
 **Where each judging criterion lives:**
 
@@ -100,33 +100,33 @@ local SHA-256 case card before any model is involved.
 |---|---|
 | Technological Implementation | [How it works](#how-it-works) · typed opening book, stateless loop, typed `DONE` v2, byte-exact offline verifier |
 | Design | one-word `sentinel` self-driving front door · live investigation narration · static inert proof viewer |
-| Potential Impact | [Why Unchained is different](#why-unchained-is-different) — inspectable autonomy for any high-consequence agent, not just DFIR |
+| Potential Impact | [Why Unchained is different](#why-unchained-is-different) - inspectable autonomy for any high-consequence agent, not just DFIR |
 | Quality of the Idea | The authority split: the model chooses strategy; code owns evidence, execution, citations, custody, and the report |
 
-**🚦 Submission readiness — live and honest:**
+**🚦 Submission readiness - live and honest:**
 
 | Item | Status |
 |---|---|
 | 🟢 Public MIT repo, Codex Session ID, provenance boundary | **Done** |
-| 🟢 436-test offline gate, ruff clean, hardened Docker | **Done** |
-| 🟢 Live GPT-5.6 Sol opening on real 2 GiB Windows memory | **Done** — retained, capped `PARTIAL` by design |
-| 🟢 Authentic GPT-5.6 bundle **ships in the repo** and verifies `VALID` offline | **Done** — [`examples/public-run-partial`](examples/public-run-partial): 14/14 typed tools, honest `PARTIAL` at the hard cap |
-| 🟢 Zero-key guided onboarding + colorful live run experience | **Done** — see the screen above |
-| 🟢 Authentic `COMPLETE` proof bundle **ships in the repo** and passes strict verify | **Done** — [`examples/public-run-complete`](examples/public-run-complete): Sol, real findings + judge + report, `--require-complete --require-live-gpt56` VALID (37 artifacts, 194 audit entries) |
-| 🟡 Public sub-3-minute video | **In progress** — recorded against the real bundle |
-| ⚪ Same-evidence Qwen benchmark | **Deliberately cut** — no unmeasured claims |
+| 🟢 378-test offline gate, ruff clean, hardened Docker | **Done** |
+| 🟢 Live GPT-5.6 Sol opening on real 2 GiB Windows memory | **Done** - retained, capped `PARTIAL` by design |
+| 🟢 Authentic GPT-5.6 bundle **ships in the repo** and verifies `VALID` offline | **Done** - [`examples/public-run-partial`](examples/public-run-partial): 14/14 typed tools, honest `PARTIAL` at the hard cap |
+| 🟢 Zero-key guided onboarding + colorful live run experience | **Done** - see the screen above |
+| 🟢 Authentic `COMPLETE` proof bundle **ships in the repo** and passes strict verify | **Done** - [`examples/public-run-complete`](examples/public-run-complete): Sol, real findings + judge + report, `--require-complete --require-live-gpt56` VALID (37 artifacts, 194 audit entries) |
+| 🟡 Public sub-3-minute video | **In progress** - recorded against the real bundle |
+| ⚪ Same-evidence competitive benchmark | **Deliberately cut** - no unmeasured claims |
 
 ## Quickstart
 
 ### ⏱️ 60 seconds, any OS, zero keys, zero spend
 
 ```powershell
-# 🪟 Windows (one line — installs, walks you in, never spends)
+# 🪟 Windows (one line - installs, walks you in, never spends)
 irm https://raw.githubusercontent.com/3sk1nt4n/Unchained/main/get.ps1 | iex
 ```
 
 ```bash
-# 🐧 Linux / 🍎 macOS (one line — hardened container, never spends)
+# 🐧 Linux / 🍎 macOS (one line - hardened container, never spends)
 curl -fsSL https://raw.githubusercontent.com/3sk1nt4n/Unchained/main/get.sh | bash
 ```
 
@@ -136,7 +136,7 @@ instant, free `$0` preview), and the installer walks you to the public
 **DFIR Madness 001** practice case (official download page plus the publisher's
 checksums; Unchained never fetches evidence for you).
 
-Point it at a folder and you get a local, cryptographic case card — every file
+Point it at a folder and you get a local, cryptographic case card - every file
 SHA-256-hashed, classified, and routed **before any model is allowed near it**.
 The tool refuses to overstate: a synthetic logs-only fixture honestly gets an
 amber `ACTION NEEDED` card, not a fake green light.
@@ -163,8 +163,8 @@ key and no network.
 
 | Your machine | Lane | First result in | Spend | Verified state |
 |---|---|---|---|---|
-| 🪟 **Windows 10/11** | Native CPython 3.11 — the flagship forensic lane | ~5 min | $0 until you pick a package on the launch card and pass the key step | ✅ Tested; the live Sol `COMPLETE` run happened here |
-| 🐧 **Linux (AMD64)** | Hardened Docker offline lane | ~3 min | $0 | ✅ Same 436-test suite in-container (a few Windows-only tests skip) |
+| 🪟 **Windows 10/11** | Native CPython 3.11 - the flagship forensic lane | ~5 min | $0 until you pick a package on the launch card and pass the key step | ✅ Tested; the live Sol `COMPLETE` run happened here |
+| 🐧 **Linux (AMD64)** | Hardened Docker offline lane | ~3 min | $0 | ✅ Same 378-test suite in-container (a few Windows-only tests skip) |
 | 🍎 **macOS** | Same Docker lane via Docker Desktop | ~3 min | $0 | ⚠️ Expected via Docker's `linux/amd64` emulation; not yet verified on Mac hardware |
 
 Every lane converges on the same experience: a colorful guided onboarding, a
@@ -180,14 +180,14 @@ case. Pick your line:
 # 🪟 Windows (Git + CPython 3.11)
 git clone https://github.com/3sk1nt4n/Unchained.git; cd Unchained
 .\setup.ps1          # install + verify everything (one command)
-.\unchained.ps1      # start a whole case — it walks you through the rest
+.\unchained.ps1      # start a whole case - it walks you through the rest
 ```
 
 ```bash
-# 🐧 Linux (Git + Python 3.11) — macOS: use the Docker lane below (tested route)
+# 🐧 Linux (Git + Python 3.11) - macOS: use the Docker lane below (tested route)
 git clone https://github.com/3sk1nt4n/Unchained.git && cd Unchained
 ./setup.sh           # install + verify everything (one command)
-./unchained.sh       # start a whole case — it walks you through the rest
+./unchained.sh       # start a whole case - it walks you through the rest
 ```
 
 > Prefer a one-liner install? `irm …/get.ps1 | iex` (Windows) or
@@ -210,10 +210,10 @@ replaces it right there.
   ([DC01-memory.zip](https://dfirmadness.com/case001/DC01-memory.zip) +
   [DC01-E01.zip](https://dfirmadness.com/case001/DC01-E01.zip)), the publisher
   MD5s are verified, and the case folder is prepared for you.
-- 📁 **Your own case?** ONE folder = ONE case = ONE host — at most one ready
+- 📁 **Your own case?** ONE folder = ONE case = ONE host - at most one ready
   memory image (`.raw`/`.mem`/`.vmem`/`.dmp`) plus at most one disk image
   (`.E01`/`.dd`/raw); two of the same kind fail closed. `.zip` archives are
-  welcome — the flow offers to extract them locally and re-profiles
+  welcome - the flow offers to extract them locally and re-profiles
   automatically. Original evidence bytes never leave the machine
 before it runs live and verifies the sealed bundle. No flags, no environment
 variables. Depth (option 2) sets only hard stop ceilings; the same GPT-5.6 Sol
@@ -221,14 +221,14 @@ investigator runs either way:
 
 | Depth | Hard ceilings (not a price quote) |
 |---|---|
-| **LIGHT** — first case | 20 tools · 100,000 tokens · 10 min · $2.50 estimated cost |
-| **HEAVY** — deeper run | 60 tools · 400,000 tokens · 30 min · $10 estimated cost |
+| **LIGHT** - first case | 20 tools · 100,000 tokens · 10 min · $2.50 estimated cost |
+| **HEAVY** - deeper run | 60 tools · 400,000 tokens · 30 min · $10 estimated cost |
 
 Read the concise [Start Here guide](docs/START-HERE.md) for evidence formats,
 mount outcomes, cloud boundaries, and the post-run verify/view steps.
 
 **Zero-install, fully isolated** (any OS with Docker): the hardened container
-reads no evidence, takes no key, and has **no network** —
+reads no evidence, takes no key, and has **no network** - 
 
 ```bash
 docker compose run --rm offline
@@ -241,7 +241,7 @@ Linux capability dropped, and honestly reports `logs-only`.
 > [!NOTE]
 > **Honest macOS label:** the container is the same hardened `linux/amd64` image
 > running under Docker Desktop through emulation. It has not been verified on
-> Mac hardware, and emulation makes large-image work slower — same container,
+> Mac hardware, and emulation makes large-image work slower - same container,
 > same commands, not yet a tested macOS forensic route.
 
 ### 💡 Cheap live check: one GPT-5.6 Terra request
@@ -268,7 +268,7 @@ request, low reasoning, low verbosity, a 128-output-token ceiling, `store=false`
 and no retry layer.
 
 > The result is labeled `NONQUALIFYING_CONNECTIVITY_SMOKE`. It cannot satisfy
-> `--require-live-gpt56`, enter the Qwen benchmark, or stand in for a forensic
+> `--require-live-gpt56`, enter a competitive benchmark, or stand in for a forensic
 > run. Terra is used here as this project's cheaper GPT-5.6 rehearsal tier;
 > the proof-compatible investigation remains Sol-specific. See OpenAI's [latest-model guide](https://developers.openai.com/api/docs/guides/latest-model)
 > and [current pricing](https://developers.openai.com/api/docs/pricing).
@@ -277,7 +277,7 @@ The first live canary has now been independently reported as one valid Luna
 request with 186 input and 27 output tokens. Because its raw JSON receipt was
 not retained with the supplied artifacts, the committed
 [Luna receipt](docs/runs/luna-canary-receipt.json) is explicitly an attested
-sanitized projection—not bundle-derived cryptographic proof.
+sanitized projection - not bundle-derived cryptographic proof.
 
 <details>
 <summary>Linux/macOS secret-file command</summary>
@@ -292,7 +292,7 @@ docker compose --profile live run --rm live-smoke
 ### 🔬 Real investigation: the GPT-5.6 Sol proof path
 
 The flagship path is native Windows + CPython 3.11 for Windows memory evidence.
-After `setup.ps1`, it is the **same one command** — `sentinel` defaults to the
+After `setup.ps1`, it is the **same one command** - `sentinel` defaults to the
 public `gpt-5.6` alias (Sol) automatically, so there is nothing to configure:
 
 ```powershell
@@ -315,22 +315,22 @@ cheaply first, run a harmless case on the rehearsal model before spending on Sol
 
 ## What you will see
 
-1. **Case card** — evidence is classified by bounded content probes, assigned
+1. **Case card** - evidence is classified by bounded content probes, assigned
    public IDs, routed by OS/shape, and SHA-256 hashed before any model call.
-2. **Opening book** — GPT-5.6 chooses up to twelve eligible typed tools. Code
+2. **Opening book** - GPT-5.6 chooses up to twelve eligible typed tools. Code
    validates the complete decision and runs them concurrently; the terminal
    narrates each tool with its retained bytes and execution time.
-3. **Visible investigation** — each adaptive turn is
+3. **Visible investigation** - each adaptive turn is
    `PLAN → one ACT → OBSERVE → UPDATE`. The run shows GPT-5.6's per-turn
    reasoning (its visible case-ledger update), the one typed action it chose,
    and per-response token counts with a running cost estimate; growing provider
    transcripts are never replayed.
-4. **Grounded review** — exact quotes become content-addressed UTF-8 byte spans;
+4. **Grounded review** - exact quotes become content-addressed UTF-8 byte spans;
    a fresh-context reviewer may preserve or downgrade, never upgrade, and each
    verdict prints as a green *preserved* or amber *downgraded* line with its
    rationale.
-5. **Result tables and proof handoff** — the closing panel prints the
-   authoritative findings table (ID, severity, final judge status, title —
+5. **Result tables and proof handoff** - the closing panel prints the
+   authoritative findings table (ID, severity, final judge status, title - 
    the same deterministic rows the sealed report renders), then direct paths
    to every promised artifact (`viewer.html`, `audit.jsonl`, `tool-outputs/`
    with its count, `summary.json`), the terminal status badge, the strict
@@ -366,7 +366,7 @@ automatically receives strict lifecycle verification first.
 ## Who needs this
 
 An incident-response consultancy wants AI triage on a compromised host image,
-but must show the client — and possibly a regulator or opposing counsel —
+but must show the client - and possibly a regulator or opposing counsel - 
 exactly what the AI did to the evidence. A transcript is not an answer.
 Unchained gives them a sealed bundle: which tools ran, on which evidence, with
 which SHA-256 identities, what exact bytes each finding cites, and a verifier
@@ -384,7 +384,7 @@ Each existing trust family solves a different problem, and none closes this one:
   bytes, and nothing re-checks the transcript afterward.
 - **Evals and LLM-as-judge** measure quality offline or ask a second model for
   an opinion. Unchained's reviewer is deliberately weaker and therefore
-  stronger: it can only **preserve or downgrade** existing findings — a
+  stronger: it can only **preserve or downgrade** existing findings - a
   monotonic review lattice, not a second opinion that can invent support.
 - **Supply-chain attestation (in-toto/SLSA-style)** proves how software was
   built. Unchained applies the same content-addressed discipline to what an
@@ -414,7 +414,7 @@ cited.**
 
 <p align="center">
   <img src="docs/assets/architecture.png"
-       alt="Unchained pipeline — GPT-5.6 judgment stages in blue, deterministic code authority in amber, offline verification in green"
+       alt="Unchained pipeline - GPT-5.6 judgment stages in blue, deterministic code authority in amber, offline verification in green"
        width="1000">
 </p>
 
@@ -442,7 +442,7 @@ flowchart TD
 
 **Invocation budget:** a completed case makes exactly **4 fixed GPT-5.6
 requests** (opening book, findings serialization, fresh review, report draft)
-**plus one per adaptive action** — minimum five, never an unbounded loop. Every
+**plus one per adaptive action** - minimum five, never an unbounded loop. Every
 request is audited and charged before use, and the hard caps fire *before*
 dispatch, ending the run as honest `PARTIAL` instead of overspending. Details:
 [Model invocation budget](docs/ARCHITECTURE.md#model-invocation-budget).
@@ -455,34 +455,34 @@ Read the full [architecture](docs/ARCHITECTURE.md) or the detailed
 | Capability | State |
 |---|---|
 | OpenAI-native controller and independent offline verifier | ✅ Verified offline |
-| Linux/AMD64 Docker build, 436-test suite, CLI, profile, and custody | ✅ Verified locally |
+| Linux/AMD64 Docker build, 378-test suite, CLI, profile, and custody | ✅ Verified locally |
 | Cheap GPT-5.6 typed-tool canary (run live on Luna; the smoke lane now defaults to Terra) | ✅ Demonstrated live; second-reviewer-attested (project-affiliated) sanitized receipt |
 | Authentic GPT-5.6 Sol capped opening on real Windows memory | ✅ Sanitized receipt committed; `VALID` recorded at creation; terminal state intentionally `PARTIAL` |
 | Shipped verifiable GPT-5.6 bundle in this repo | ✅ [`examples/public-run-partial`](examples/public-run-partial): `gpt-5.6-luna`, 14/14 typed tools, custody match, verifies `VALID` on current code |
 | Authentic `COMPLETE` GPT-5.6 Sol evidence bundle | ✅ Shipped at [`examples/public-run-complete`](examples/public-run-complete): real findings, fresh judge, sealed report; strict `--require-complete --require-live-gpt56` VALID (37 artifacts, 194 audit entries) |
-| Same-evidence speed/cost/accuracy comparison with Qwen | ⏳ Fail-closed comparison scaffold ready; fact set, freeze lock, and measurements pending |
+| Same-evidence speed/cost/accuracy comparison | ⚪ Out of scope for Build Week - no comparative claims are made |
 
-**Live milestones — two authentic GPT-5.6 runs on the same public 2 GiB Windows
+**Live milestones - two authentic GPT-5.6 runs on the same public 2 GiB Windows
 memory image are retained.** The newest **ships in this repository** at
 [`examples/public-run-partial`](examples/public-run-partial): `gpt-5.6-luna`
 across 4 responses chose and ran **14 typed Volatility tools** (all success),
 custody matched, and the run stopped honestly at its hard tool budget
 (`MAX_TOOL_CALLS: reservation would reach 14 > 13`) after 55.5 seconds and
 180,285 provider-reported tokens (~$1.16 local estimate).
-`sentinel verify examples/public-run-partial` returns **VALID** — 20 artifacts,
-62 hash-chained audit entries — on any fresh clone, no key required. The
+`sentinel verify examples/public-run-partial` returns **VALID** - 20 artifacts,
+62 hash-chained audit entries - on any fresh clone, no key required. The
 earlier run recorded `gpt-5.6-sol` on both responses and executed all six
 model-selected opening tools under the then six-tool cap in 43.702 seconds
 (59,254 tokens, $0.38789875 local estimate); its sanitized receipt is committed
 at [docs/runs/sol-capped-dc01-opening.json](docs/runs/sol-capped-dc01-opening.json)
 with `VALID` recorded at creation. These prove the live opening, typed
-execution, cap, custody, and bundle path — not a completed investigation. See
+execution, cap, custody, and bundle path - not a completed investigation. See
 the [release handoff](docs/OPENAI_VNEXT_RELEASE_HANDOFF.md) for the full
 scorecard and fastest submission path.
 
 **Post-rehearsal hardening:** four later unscored attempts exposed a real
 terminal-contract problem. Their retained audits show completed responses with
-395–1,750 characters of visible ledger text but no typed action—not empty
+395–1,750 characters of visible ledger text but no typed action - not empty
 responses. The v2 controller therefore does not normalize blank text,
 punctuation, Markdown, or prose into completion. Every adaptive response must
 choose exactly one typed action: one eligible forensic tool or the closed
@@ -504,12 +504,12 @@ verification.
 | Downgrade-only fresh review | Finding-ID, status-lattice, span, and receipt tests |
 | Deterministic report and inert viewer | Independent rerender + exact-byte and positive HTML/CSP policy tests |
 | Independent strict verifier | Re-chained adversarial mutations across lifecycle, usage, retry, cost, and custody |
-| Linux Docker packaging | CPython 3.11 test target: the same 436-test suite (a few Windows-only tests skip on Linux), Ruff, format, and `pip check`; non-root runtime/profile gate |
+| Linux Docker packaging | CPython 3.11 test target: the same 378-test suite (a few Windows-only tests skip on Linux), Ruff, format, and `pip check`; non-root runtime/profile gate |
 | Live GPT-5.6 canary (Luna at the time; the smoke lane now runs Terra) | Independently demonstrated; [attested sanitized projection](docs/runs/luna-canary-receipt.json), with no raw receipt available for bundle proof |
 | Authentic GPT-5.6 Sol opening on real memory | [Bundle-derived sanitized receipt](docs/runs/sol-capped-dc01-opening.json): 2 model responses, 6 successful opening tools, recorded custody match, `VALID` recorded at creation |
 | Shipped GPT-5.6 bundle in this repo | [`examples/public-run-partial`](examples/public-run-partial): 4 responses, 14 successful typed tools, custody match, verifies `VALID` on current code (20 artifacts, 62 audit entries) |
 | Authentic complete GPT-5.6 Sol case | ✅ [`examples/public-run-complete`](examples/public-run-complete): Sol + HEAVY `COMPLETE`, 4 findings, judge verdicts, sealed report, strict-VALID (~$2.92, 9m39s, 20 turns, 31 tools, 395,555 tokens) |
-| Faster/better than Qwen | Architectural thesis only until the frozen benchmark is run |
+| Faster/better than a competitor baseline | Architectural thesis only until the frozen benchmark is run |
 
 The verifier establishes local protocol and bundle consistency. It does not
 cryptographically authenticate OpenAI, replace semantic accuracy scoring, or
@@ -596,7 +596,7 @@ above remain for `$0` previews, scripting, and advanced non-interactive runs.
 
 ## Performance and recommended hardware
 
-All GPT-5.6 compute runs on OpenAI's side — **no local GPU is used or
+All GPT-5.6 compute runs on OpenAI's side - **no local GPU is used or
 required**. Local performance is decided by CPU, RAM, and the disk path:
 
 | Component | Minimum | Recommended | Why it matters |
@@ -605,7 +605,7 @@ required**. Local performance is decided by CPU, RAM, and the disk path:
 | RAM | 8 GB | **16 GB** | Several Volatility processes read the same multi-GiB memory image at once; 16 GB keeps the opening out of swap (the OS page cache shares the image bytes) |
 | Disk | SSD, local path | NVMe, non-synced folder | Full SHA-256 custody hashing plus parallel image reads; a OneDrive/cloud-synced or network path can dominate total runtime |
 | GPU | none | none | Model inference is an OpenAI API call, not local |
-| Network | stable HTTPS egress | — | Used only for GPT-5.6 requests; evidence bytes never leave the machine |
+| Network | stable HTTPS egress | - | Used only for GPT-5.6 requests; evidence bytes never leave the machine |
 
 **Measured reference point** (retained live run, Windows 11): a 2 GiB Windows
 memory image, six-tool concurrent opening, 43.7 seconds end to end. Rows above
@@ -615,7 +615,7 @@ For the Docker Desktop lane with multi-gigabyte evidence, give WSL2 enough
 headroom and keep evidence on WSL2 ext4 (not a Windows OneDrive bind):
 
 ```ini
-# %UserProfile%\.wslconfig  — then run: wsl --shutdown
+# %UserProfile%\.wslconfig - then run: wsl --shutdown
 [wsl2]
 memory=12GB
 processors=6
@@ -633,16 +633,23 @@ processors=6
 | `view` cannot open from Docker | Verify in the container, then open the bind-mounted `viewer.html` on the host |
 | A run is `PARTIAL` | Read `summary.json`, `report.md`, and the last audit events; do not relabel it complete |
 | `PARTIAL` with a `429 Request too large ... TPM` audit error | The findings-serializer re-sends every retained observation in one request, which can exceed a low tokens-per-minute limit. New OpenAI accounts cap at ~200k TPM; a rich 12-tool investigation's serializer can be ~270k. Use an account whose TPM exceeds your serializer size (add credit / verify to tier up), or run a smaller opening. |
-| `PARTIAL` with `MAX_TOTAL_TOKENS` before the report | The full lifecycle (opening + adaptive turns + serializer + judge + report) on a real memory image can exceed the default 400k token cap. Raise it for the complete run, e.g. `MAX_TOTAL_TOKENS=3000000 MAX_COST_USD=30`. |
+| `PARTIAL` with `MAX_TOTAL_TOKENS` before the report | The shipped COMPLETE run finished within the stock HEAVY ceilings ($2.92 of $10, ~395,555 of 400,000 tokens), so the defaults can carry a full lifecycle. A richer or longer run can still hit the cap; optional headroom overrides exist, e.g. `MAX_TOTAL_TOKENS=3000000 MAX_COST_USD=30`. |
 
 ## Honest limits
 
 - A real Sol + HEAVY `COMPLETE` bundle now ships and passes strict verification
   ([`examples/public-run-complete`](examples/public-run-complete)). It is one
   case (the public DC01 image), not a benchmark.
+- The sealed flagship viewer has known cosmetic rendering defects (an empty
+  exit-code card, a "Literal DONE" timeline label, raw escaped Markdown in the
+  embedded report). They are deliberately not fixed post-seal: changing one byte
+  would break the bundle's byte-exact verification - the seal working as designed.
+- The string "isolated Sentinel-Ensemble worker" in one error span comes from the pinned
+  prior-work tool harness (commit `9f309c6134e857f7b86f3e6b9c6709ce954944a5`),
+  disclosed in [`BUILD_PROVENANCE.md`](BUILD_PROVENANCE.md).
 - The Luna receipt is a second-reviewer attestation (project-affiliated) because
   its raw JSON response was not retained; it is not bundle-derived proof.
-- No frozen same-evidence Qwen latency/cost/accuracy benchmark is published yet.
+- No frozen same-evidence competitive latency/cost/accuracy benchmark is published yet.
 - Exact receipts establish execution and citation support, not forensic truth.
 - The fresh reviewer is a same-family model call, not independent ground truth.
 - Private worker containment and process-tree cleanup are not a complete OS sandbox.
@@ -687,7 +694,7 @@ docker build --target runtime -t sentinel-unchained:local .
 docker compose run --rm offline profile /evidence --json
 ```
 
-The package requires CPython `>=3.11,<3.12`. The Qwen reference-tool dependency
+The package requires CPython `>=3.11,<3.12`. The forensic reference-tool dependency
 is pinned to commit
 `9f309c6134e857f7b86f3e6b9c6709ce954944a5`; Docker resolves it only in the
 builder and installs the final image from prebuilt wheels.
@@ -717,7 +724,7 @@ A later Docker/README follow-up thread
 Unchained is an MIT-licensed OpenAI Build Week project by Adil Eskintan.
 It was built from the reviewed Unchained baseline while retaining
 selected, commit-pinned typed forensic tooling from
-[Sentinel Qwen Ensemble](https://github.com/3sk1nt4n/Sentinel-Ensemble-Qwen).
+[the Sentinel-Ensemble forensic package](https://github.com/3sk1nt4n/Sentinel-Ensemble-Qwen).
 
 The contribution boundary and preserved pre-event Git provenance are documented
 in [BUILD_PROVENANCE.md](BUILD_PROVENANCE.md). Detailed current work, validation,

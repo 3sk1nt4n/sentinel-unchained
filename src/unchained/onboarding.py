@@ -391,7 +391,7 @@ def _budget_choice_lines(selected: str, effective: CapConfig, guided: bool = Fal
     light_how = "press 2" if guided else "--caps strict"
 
     return [
-        (f"1) HEAVY — FLAGSHIP {marker('default')} · {heavy_how} · deepest bounded investigation"),
+        (f"1) HEAVY - FLAGSHIP {marker('default')} · {heavy_how} · deepest bounded investigation"),
         (
             f"ceilings: {flagship.max_tool_calls} tools / "
             f"{flagship.max_total_tokens:,} tokens / "
@@ -399,7 +399,7 @@ def _budget_choice_lines(selected: str, effective: CapConfig, guided: bool = Fal
             "estimated cost"
         ),
         (
-            f"2) LIGHT — CAUTIOUS {marker('strict')} · {light_how} · "
+            f"2) LIGHT - CAUTIOUS {marker('strict')} · {light_how} · "
             "same investigator, tighter stop ceilings"
         ),
         (
@@ -418,7 +418,7 @@ def _budget_choice_lines(selected: str, effective: CapConfig, guided: bool = Fal
         "These are stop ceilings, not price quotes or promises of result quality.",
         (
             "Model invocations per completed case: 4 fixed (opening book, findings "
-            "serialization, fresh review, report draft) + one per adaptive action — "
+            "serialization, fresh review, report draft) + one per adaptive action - "
             "every one inside the ceilings above."
         ),
     ]
@@ -568,7 +568,7 @@ def render_welcome(
     line(
         _GREEN,
         "PREVIEW",
-        "enumerate, classify, public IDs, SHA-256 every file — no mount, no OpenAI, no spend.",
+        "enumerate, classify, public IDs, SHA-256 every file - no mount, no OpenAI, no spend.",
     )
     line(
         _CYAN,
@@ -579,7 +579,7 @@ def render_welcome(
         _VIOLET,
         "DEPTH",
         f"LIGHT {strict.max_tool_calls} tools/${strict.max_cost_usd:.2f}  ·  "
-        f"HEAVY {flagship.max_tool_calls} tools/${flagship.max_cost_usd:.0f}  — "
+        f"HEAVY {flagship.max_tool_calls} tools/${flagship.max_cost_usd:.0f} - "
         "same model either way, hard ceilings only.",
     )
     line(
@@ -636,7 +636,7 @@ def render_profile(
         )
     print(
         _paint(
-            "◆ PROFILE COMPLETE — deterministic, local, zero OpenAI calls",
+            "◆ PROFILE COMPLETE - deterministic, local, zero OpenAI calls",
             _GREEN + _BOLD,
             color,
         ),
@@ -645,7 +645,7 @@ def render_profile(
     print(file=stream)
     print(
         _paint(
-            "◆ Looking at what you gave me — classified by bounded content probes, "
+            "◆ Looking at what you gave me - classified by bounded content probes, "
             "never by file name:",
             _VIOLET + _BOLD,
             color,
@@ -670,7 +670,7 @@ def render_profile(
     if assessment.set_aside_items:
         print(
             _paint("  ○ ", _DIM, color)
-            + f"{assessment.set_aside_items} unsupported item(s) set aside — "
+            + f"{assessment.set_aside_items} unsupported item(s) set aside - "
             "hashed, not forensically analyzed",
             file=stream,
         )
@@ -726,7 +726,7 @@ def render_profile(
         # card; showing a full options box here too made it read like the same
         # question asked twice.
         _boxed(
-            "CHOOSE ANALYSIS DEPTH — HEAVY OR LIGHT",
+            "CHOOSE ANALYSIS DEPTH - HEAVY OR LIGHT",
             _budget_choice_lines(caps_profile, caps, guided=guided),
             stream=stream,
             color=color,
