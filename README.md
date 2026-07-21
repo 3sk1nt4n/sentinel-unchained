@@ -692,7 +692,6 @@ processors=6
 | [Architecture](docs/ARCHITECTURE.md) | Trust boundary and lifecycle design |
 | [Sanitized Sol live receipt](docs/runs/sol-capped-dc01-opening.json) | Bundle-bound `PARTIAL` opening, tool, cap, usage, custody, and verification facts |
 | [Attested Luna receipt](docs/runs/luna-canary-receipt.json) | Nonqualifying connectivity result and explicit retention limitation |
-| [Winner roadmap](docs/WINNER_ROADMAP.md) | Scoring strategy and benchmark plan |
 
 ## Development
 
