@@ -50,6 +50,73 @@ def test_evidence_prompt_discards_a_pasted_key_then_honors_quit(
     assert "sk0proj0AbCd1234EfGh5678IjKl" not in out
 
 
+def test_case_prompt_d_routes_to_the_guided_sample_download(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    prepared = tmp_path / "dc01-pair"
+    prepared.mkdir()
+    outcomes = iter([None, prepared])
+    monkeypatch.setattr(cli_module, "_guided_dc01_download", lambda: next(outcomes))
+    _script_input(monkeypatch, ["d", "D"])
+
+    # First D returns nothing (downloads unfinished) -> re-prompt; the second
+    # returns the prepared case folder straight into the normal flow.
+    assert cli_module._prompt_evidence_path() == prepared
+
+
+def test_prepare_dc01_pair_verifies_md5_and_ignores_unrelated_zips(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    import hashlib
+    import zipfile
+
+    downloads = tmp_path / "Downloads"
+    downloads.mkdir()
+    good = downloads / "DC01-memory.zip"
+    with zipfile.ZipFile(good, "w") as archive:
+        archive.writestr("dc01-memory.raw", "MEM")
+    tampered = downloads / "DC01-E01.zip"
+    with zipfile.ZipFile(tampered, "w") as archive:
+        archive.writestr("dc01-disk.E01", "DISK")
+    with zipfile.ZipFile(downloads / "unrelated.zip", "w") as archive:
+        archive.writestr("do-not-touch.txt", "x")
+
+    good_md5 = hashlib.md5(good.read_bytes()).hexdigest().upper()
+    monkeypatch.setattr(
+        cli_module,
+        "_DC01_FILES",
+        {
+            "DC01-memory.zip": ("https://example.invalid/mem", good_md5),
+            "DC01-E01.zip": ("https://example.invalid/disk", "0" * 32),
+        },
+    )
+    destination = tmp_path / "case"
+
+    assert cli_module._prepare_dc01_pair(downloads, destination) == destination
+    # Only the MD5-verified zip is extracted; the tampered one fails closed
+    # and the unrelated archive is never touched.
+    assert (destination / "dc01-memory.raw").read_text() == "MEM"
+    assert not (destination / "dc01-disk.E01").exists()
+    assert not (destination / "do-not-touch.txt").exists()
+    out = capsys.readouterr().out
+    assert "MD5 VERIFIED for DC01-memory.zip" in out
+    assert "MD5 MISMATCH for DC01-E01.zip" in out
+
+
+def test_prepare_dc01_pair_reports_when_nothing_is_downloaded_yet(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    empty = tmp_path / "Downloads"
+    empty.mkdir()
+
+    assert cli_module._prepare_dc01_pair(empty, tmp_path / "case") is None
+    assert "is in that folder yet" in capsys.readouterr().out
+
+
 def test_evidence_prompt_strips_quotes_and_returns_existing_path(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

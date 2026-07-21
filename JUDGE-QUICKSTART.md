@@ -68,9 +68,12 @@ sentinel
 
 It opens a zero-key welcome (reads nothing, zero OpenAI calls), asks **one
 thing** — where the evidence is — with a card that shows exactly what a good
-case folder looks like (one memory image and/or one disk image from one host),
-then profiles content and rechecks SHA-256 custody locally to print a
-deterministic case card. `.zip` archives are offered for local extraction into
+case folder looks like (one memory image and/or one disk image from one host).
+No evidence handy? Type **`D`** there for a guided download of the public DC01
+case — the two direct links (`case001/DC01-memory.zip`, `case001/DC01-E01.zip`)
+open in your browser, publisher MD5s are verified, and the case folder is
+prepared. It then profiles content and rechecks SHA-256 custody locally to
+print a deterministic case card. `.zip` archives are offered for local extraction into
 a clean sibling folder; other archives and unsupported documents are
 hashed/listed and set aside. The router accepts at
 most one ready memory image and one ready disk image per case; same-class

@@ -204,9 +204,12 @@ replaces it right there.
 
 **Answering the one question** is a card with two easy routes:
 
-- 🧪 **No evidence yet?** The `get.ps1` one-liner's guided menu offers the
-  **public DC01 practice case** — MD5-verified download, auto-extracted into a
-  clean case folder.
+- 🧪 **No evidence yet?** Type **`D`** at the case prompt (or pick option 1
+  in the `get.ps1` menu) for the guided **public DC01 practice case**: the two
+  direct download links open in your browser
+  ([DC01-memory.zip](https://dfirmadness.com/case001/DC01-memory.zip) +
+  [DC01-E01.zip](https://dfirmadness.com/case001/DC01-E01.zip)), the publisher
+  MD5s are verified, and the case folder is prepared for you.
 - 📁 **Your own case?** ONE folder = ONE case = ONE host — at most one ready
   memory image (`.raw`/`.mem`/`.vmem`/`.dmp`) plus at most one disk image
   (`.E01`/`.dd`/raw); two of the same kind fail closed. `.zip` archives are

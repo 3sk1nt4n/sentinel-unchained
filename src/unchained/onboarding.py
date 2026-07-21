@@ -322,8 +322,9 @@ def render_case_prompt_card(*, stream: TextIO, no_color: bool = False) -> None:
         "",
         "ZIPs are welcome - I offer to extract them locally, for free.",
         "Two images of the SAME kind fail closed - use separate folders.",
-        "No evidence yet? The one-line installer (get.ps1) offers the",
-        "public DC01 practice case: MD5-verified download, auto-extracted.",
+        "",
+        "No evidence yet? Type D and I will guide the public DC01 sample:",
+        "direct download links, publisher MD5 check, auto-extraction.",
         "Original evidence bytes never leave this machine.",
     ]
     _boxed("YOUR CASE - PASTE ONE FOLDER", lines, stream=stream, color=color, accent=_CYAN)

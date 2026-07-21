@@ -119,9 +119,11 @@ sentinel
 That's the whole experience. It asks **one question — where is the case?** —
 and there are two easy answers:
 
-- 🧪 **No evidence yet?** Use the Windows one-liner (`get.ps1`): its guided
-  menu offers the **public DC01 practice case** — MD5-verified download,
-  auto-extracted into a clean case folder, ready to investigate.
+- 🧪 **No evidence yet?** Type **`D`** at the case prompt — Unchained guides
+  the **public DC01 practice case**: it opens the two direct download links in
+  your browser (`DC01-memory.zip` + `DC01-E01.zip` from
+  <https://dfirmadness.com/case001/>), verifies the publisher MD5s, and
+  prepares the case folder. (The `get.ps1` menu offers the same as option 1.)
 - 📁 **Your own case?** Paste the path to ONE folder holding ONE host's
   evidence:
 

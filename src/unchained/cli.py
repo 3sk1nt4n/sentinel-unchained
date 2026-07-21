@@ -730,14 +730,19 @@ def _prompt_evidence_path() -> Path | None:
     render_case_prompt_card(stream=sys.stdout)
     while True:
         try:
-            raw = input("  > Evidence folder path (q = quit): ")
+            raw = input("  > Evidence folder path (D = get the DC01 sample - q = quit): ")
         except (EOFError, OSError):
             return None
         answer = (raw or "").strip().strip('"').strip("'").strip()
         if answer.lower() in ("q", "quit", "exit"):
             return None
         if not answer:
-            print("  Type the path to one case folder (or q to quit).")
+            print("  Type the path to one case folder, D for the sample, or q to quit.")
+            continue
+        if answer.lower() in ("d", "dc01", "sample", "download"):
+            case = _guided_dc01_download()
+            if case is not None:
+                return case
             continue
         if _looks_like_pasted_secret(answer):
             print(
@@ -751,6 +756,108 @@ def _prompt_evidence_path() -> Path | None:
             print(f"  Not found: {answer}. Check the path and try again (or q to quit).")
             continue
         return candidate
+
+
+_DC01_PAGE = "https://dfirmadness.com/the-stolen-szechuan-sauce/"
+# The publisher's page buries these under a heading called "The Artifacts";
+# the two direct links plus the publisher-stated MD5s are the whole story.
+_DC01_FILES: dict[str, tuple[str, str]] = {
+    "DC01-memory.zip": (
+        "https://dfirmadness.com/case001/DC01-memory.zip",
+        "64A4E2CB47138084A5C2878066B2D7B1",
+    ),
+    "DC01-E01.zip": (
+        "https://dfirmadness.com/case001/DC01-E01.zip",
+        "E57FC636E833C5F1AB58DFACE873BBDE",
+    ),
+}
+
+
+def _guided_dc01_download() -> Path | None:
+    """In-flow guided download of the public DC01 practice case.
+
+    Prints the two DIRECT download links, offers to open both in the user's
+    browser - the browser downloads; Unchained never fetches evidence itself -
+    then finds the two zips BY NAME in the chosen folder, verifies the
+    publisher MD5s, and extracts them into one clean case folder."""
+
+    print()
+    print("  The public DC01 case needs EXACTLY these two files (skip the rest):")
+    for name, (url, digest) in _DC01_FILES.items():
+        print(f"    {name}")
+        print(f"      {url}")
+        print(f"      publisher MD5 {digest}")
+    print(f"  Full case page ('The Artifacts' section): {_DC01_PAGE}")
+    try:
+        answer = input("  Open BOTH downloads in your browser now? [Enter = yes - n = no]: ")
+    except (EOFError, OSError):
+        return None
+    if answer.strip().lower() not in ("n", "no"):
+        import webbrowser
+
+        for _name, (url, _digest) in _DC01_FILES.items():
+            webbrowser.open(url)
+        print("  Two downloads started in your browser. Large files - a few minutes.")
+    downloads = Path.home() / "Downloads"
+    try:
+        raw = input(f"  Folder where they landed [Enter = {downloads}]: ")
+    except (EOFError, OSError):
+        return None
+    stripped = raw.strip().strip('"').strip("'")
+    folder = Path(stripped).expanduser() if stripped else downloads
+    if not folder.is_dir():
+        print(f"  Not found: {folder}. Finish the downloads, then press D again.")
+        return None
+    return _prepare_dc01_pair(folder)
+
+
+def _prepare_dc01_pair(folder: Path, destination: Path | None = None) -> Path | None:
+    """Find ONLY the two named DC01 zips in *folder*, verify their publisher
+    MD5s, and extract the verified ones into one clean case folder. A wrong
+    hash fails closed - a tampered download must never become evidence."""
+
+    import hashlib
+    import zipfile
+
+    found: dict[str, Path] = {}
+    for name in _DC01_FILES:
+        for candidate in sorted(folder.rglob(name)):
+            found[name] = candidate
+            break
+    if not found:
+        print("  Neither DC01-memory.zip nor DC01-E01.zip is in that folder yet.")
+        print("  If the browser is still downloading, wait for it, then press D again.")
+        return None
+    if destination is None:
+        destination = Path.home() / "Evidence" / "dc01-pair"
+    destination.mkdir(parents=True, exist_ok=True)
+    prepared = 0
+    for name, zip_path in sorted(found.items()):
+        _url, expected = _DC01_FILES[name]
+        print(f"  Verifying MD5 of {name} (large file - please wait)...")
+        digest = hashlib.md5()
+        with zip_path.open("rb") as handle:
+            for chunk in iter(lambda: handle.read(1 << 20), b""):
+                digest.update(chunk)
+        actual = digest.hexdigest().upper()
+        if actual != expected.upper():
+            print(f"  MD5 MISMATCH for {name}: expected {expected}, got {actual}.")
+            print("  Do not use this download - re-fetch it from the official page.")
+            continue
+        print(f"  MD5 VERIFIED for {name} - extracting...")
+        try:
+            _safe_extract_zip(zip_path, destination)
+        except (ValueError, OSError, zipfile.BadZipFile) as exc:
+            print(f"  Could not extract {name}: {exc}")
+            continue
+        prepared += 1
+    if prepared == 0:
+        return None
+    if len(found) < len(_DC01_FILES):
+        missing = ", ".join(sorted(set(_DC01_FILES) - set(found)))
+        print(f"  Note: {missing} not found - the case will run with what is verified.")
+    print(f"  Case prepared: {destination}")
+    return destination
 
 
 def _safe_extract_zip(zip_path: Path, destination: Path) -> int:
