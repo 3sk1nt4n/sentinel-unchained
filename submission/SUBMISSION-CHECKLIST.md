@@ -19,7 +19,7 @@ The video is the only mandatory gap. Everything below exists to get it recorded,
 
 ## W8 - YouTube upload
 
-- [ ] Upload the final cut. Visibility: **Public** (not Unlisted, not Private).
+- [ ] Upload the final cut (`submission/video/unchained-demo-final.mp4`, 2:55, British female AI narration). Visibility: **Public** preferred — the organizer email confirms **Unlisted is OK**; never Private. Wait for YouTube processing to FINISH before copying the link.
 - [ ] Title: `Unchained - bounded GPT-5.6 DFIR investigator | OpenAI Build Week (Developer Tools)`
 - [ ] Paste this description verbatim:
 
@@ -77,3 +77,12 @@ Fresh incognito browser, logged out of everything:
 - [ ] Freeze the final commit/tag (currently PENDING_FINAL_FREEZE) and record it in DEVPOST-FORM.md before submitting.
 - [ ] **SUBMIT.** Target Tue 11:00 ET; hard floor Tue 14:00 ET; Devpost closes Tue 17:00 PT.
 - [ ] Screenshot the confirmation page and save it into `submission/`.
+
+## Organizer-email intel (received Mon night — fold into W8/W11)
+
+- [ ] Video voiceover explicitly covers what was built, how **Codex** was used, and how **GPT-5.6** was used — not just "we used AI". (Our narration does all three by name; confirm in playback.)
+- [ ] Read the Devpost description OUT LOUD; if it sounds AI-written, personalize it. Judges read these.
+- [ ] Team members added to the submission AND invitations accepted.
+- [ ] Submission shows **Submitted** (green) on the My Projects page — not a saved draft.
+- [ ] Target: in ~3 hours before the deadline. Nothing may change after Tue 17:00 PT — edits after lock risk eligibility.
+- Note: "built with Codex and GPT-5.6" does not require API credits per the organizers — our authentic API runs exceed the bar.
