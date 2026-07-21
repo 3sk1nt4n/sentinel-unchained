@@ -8,7 +8,7 @@
 > Deadline: **2026-07-21, 17:00 PT**.
 >
 > This is the one-glance scoreboard. The exhaustive ledger is
-> [`HACKATHON_HANDOVER.md`](HACKATHON_HANDOVER.md); the sequencing rules are
+> the internal status ledger; the sequencing rules are
 > [`docs/WINNER_ROADMAP.md`](docs/WINNER_ROADMAP.md); the adversarial
 > self-review and scored gaps are
 > [`docs/JUDGE-PANEL-REVIEW.md`](docs/JUDGE-PANEL-REVIEW.md); the hour-by-hour
@@ -42,7 +42,7 @@
 - [x] **Luna** connectivity canary - live, attested, explicitly non-qualifying.
 - [x] **Sol** capped opening on the real 2 GiB DC01 Windows memory image - 
       6 opening tools, 0 rejected; terminal `PARTIAL` (cap fired on purpose);
-      bundle verifies **`VALID`** offline. (`docs/OPENAI_VNEXT_RELEASE_HANDOFF.md`)
+      bundle verifies **`VALID`** offline.
 
 ### Product & provenance
 - [x] Rebrand to **Unchained** across all docs, banners, and visible strings
@@ -70,7 +70,7 @@
    Luna receipt kind, `README.md`, `docs/SUBMISSION.md`, the release handoff,
    and the hackathon handover.
 4. **[ ] Confirm the prior-vs-new-work boundary + Codex Session ID.**
-   Judges score **only** work added Jul 13–21; keep `BUILD_PROVENANCE.md`
+   Judges score **only** work added Jul 13–21; keep the prior-work provenance boundary
    crisp and pick the Codex thread that truly holds the majority of core work.
 
 ### B. Keystone - the one artifact that unlocks the most points

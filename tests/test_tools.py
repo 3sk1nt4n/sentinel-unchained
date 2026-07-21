@@ -293,7 +293,7 @@ def test_tsk_executor_routes_a_sealed_spec_through_the_worker(
         captured.append((spec, received_budget))
         return {"status": "ok"}
 
-    monkeypatch.setattr("unchained.tools._run_qwen_worker", fake_worker)
+    monkeypatch.setattr("unchained.tools._run_forensic_worker", fake_worker)
     executor = _tsk_executor(
         "fsstat",
         "C:/evidence/disk.E01",
@@ -328,7 +328,7 @@ def test_tsk_fsstat_receives_the_exact_classified_partition_offset(
         captured.append(spec)
         return {"status": "ok"}
 
-    monkeypatch.setattr(tools_module, "_run_qwen_worker", fake_worker)
+    monkeypatch.setattr(tools_module, "_run_forensic_worker", fake_worker)
     executor = _tsk_executor(
         "fsstat",
         "C:/evidence/disk.E01",
@@ -409,7 +409,7 @@ def test_fsstat_is_withheld_when_no_matched_filesystem_offset_is_known(
     )
     monkeypatch.setattr(
         tools_module,
-        "_load_qwen_catalog",
+        "_load_forensic_catalog",
         lambda _budget: {"direct": {}, "volatility_plugins": {}},
     )
     monkeypatch.setattr(tools_module.shutil, "which", lambda _name: "/usr/bin/tool")
@@ -454,7 +454,7 @@ def test_windows_direct_memory_tools_do_not_depend_on_dynamic_plugin_catalog(
     )
     monkeypatch.setattr(
         tools_module,
-        "_load_qwen_catalog",
+        "_load_forensic_catalog",
         lambda _budget: {
             "direct": {
                 "vol_pstree": {
@@ -514,7 +514,7 @@ def test_multiple_ready_memory_images_fail_closed_before_tool_loading(
         catalog_loaded = True
         return {}
 
-    monkeypatch.setattr(tools_module, "_load_qwen_catalog", unexpected_catalog)
+    monkeypatch.setattr(tools_module, "_load_forensic_catalog", unexpected_catalog)
 
     with pytest.raises(RuntimeError, match="multiple ready memory images"):
         tools_module.load_reference_tools(profile)

@@ -1,8 +1,8 @@
 # Unchained: Final Video Script and Shot List
 
 > **Status: RECORD NOW.** This script supersedes the gate in `docs/DEMO-SCRIPT.md`
-> that required a COMPLETE bundle before recording. Per `HACKATHON_HANDOVER.md`
-> (2026-07-20, W2/W7), the controlling plan can now record the strict COMPLETE
+> that required a COMPLETE bundle before recording. The controlling plan now
+> records the strict COMPLETE
 > segment: an authentic COMPLETE Sol + HEAVY bundle ships at
 > `examples/public-run-complete` (W5 landed). The PARTIAL segment remains a valid
 > honest alternative; the splice slot below is now the recommended main path.

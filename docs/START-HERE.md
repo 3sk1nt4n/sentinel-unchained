@@ -306,4 +306,4 @@ full path always works:
 ```
 
 Next: [judge quickstart](../JUDGE-QUICKSTART.md) ·
-[architecture](ARCHITECTURE.md) · [release handoff](OPENAI_VNEXT_RELEASE_HANDOFF.md)
+[architecture](ARCHITECTURE.md) · release handoff

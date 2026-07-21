@@ -179,7 +179,7 @@ verifier, CLI, Docker isolation, tests, benchmark design, and documentation.
 The human owner chose the product thesis, Developer Tools track, DFIR testbed,
 evidence case, authority split, benchmark, scope cuts, claim language, and final
 submission decisions. The dated boundary between prior MIT-licensed Sentinel-Ensemble tool
-substrate and new Build Week work is in `BUILD_PROVENANCE.md`.
+substrate and new Build Week work is the commit-pinned dependency in `pyproject.toml`.
 
 ## Judge test path without rebuilding
 

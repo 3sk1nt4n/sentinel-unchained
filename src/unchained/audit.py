@@ -119,7 +119,7 @@ class AuditLog:
 
     The hash chain detects accidental or post-run local changes. It is not an
     external immutability guarantee against an administrator able to rewrite the
-    complete run directory; that boundary is stated explicitly in DECISIONS.md.
+    complete run directory; that boundary is stated explicitly in the project documentation.
     """
 
     def __init__(self, path: Path, run_id: str, *, fsync: bool = True) -> None:

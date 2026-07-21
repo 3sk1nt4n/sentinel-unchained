@@ -1,2 +1,1 @@
-include DECISIONS.md
 recursive-include tests *.py

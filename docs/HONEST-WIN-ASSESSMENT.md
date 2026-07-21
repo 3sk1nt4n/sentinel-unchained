@@ -5,7 +5,7 @@
 **Track:** Developer Tools · **Project:** Unchained
 
 This is a brutally honest, no-hype read. Every optimistic claim is paired with
-its caveat. Verification levels match the [handover](../HACKATHON_HANDOVER.md):
+its caveat. Verification levels match the handover:
 PROVEN / CODE-FIXED / STATIC-ONLY / PENDING.
 
 > **The single most important correction to our own prior notes:** per the actual

@@ -169,7 +169,7 @@ The Codex collaboration story. Cite the Session ID verbatim.
 
 Codex was the primary implementation and adversarial-review collaborator for the Build Week work in this repository: the evidence lifecycle, Responses API adapter, typed execution boundary, caps, retry/usage accounting, typed-DONE-v2 protocol, forced serializer, exact evidence spans, fresh-context downgrade-only review, report/viewer renderers, independent verifier, CLI, Docker isolation, tests, benchmark design, and documentation.
 
-**What Codex accelerated** (recorded in BUILD_PROVENANCE.md):
+**What Codex accelerated**:
 - Repository inspection and architecture implementation.
 - Typed controller, evidence, tool, audit, cap, and report-safety code.
 - Adversarial tests and defect reproduction.
@@ -178,7 +178,7 @@ Codex was the primary implementation and adversarial-review collaborator for the
 - Documentation, handover, and prompt construction.
 - Proof-bundle, provider-proof, verifier, reproducible-environment, and dependency-lock implementation recorded by later commits.
 
-**Concrete Build Week code built with Codex** (BUILD_PROVENANCE.md section 4): src/unchained/evidence.py, tools.py + _tool_worker.py, model.py (Responses API integration), agent.py (opening selection, adaptive loop, forced finalization, fresh review), audit.py, artifacts.py, verify.py, caps.py, models.py, prompts.py, cli.py, __main__.py, all tests under tests/, plus the README, decision record, roadmap, and handover docs.
+**Concrete Build Week code built with Codex** (all in this repo's Git history): src/unchained/evidence.py, tools.py + _tool_worker.py, model.py (Responses API integration), agent.py (opening selection, adaptive loop, forced finalization, fresh review), audit.py, artifacts.py, verify.py, caps.py, models.py, prompts.py, cli.py, __main__.py, all tests under tests/, plus the README and submission docs.
 
 **What the human owned.** The human owner chose the product thesis, Developer Tools track, DFIR testbed, evidence case, authority split, benchmark, scope cuts, claim language, and final submission decisions. Specifically: choosing the controlled-autonomy versus deterministic-trust comparison; choosing Developer Tools and the trust-measurement framing; selecting DFIR as the demonstration domain; choosing DC01 as the known-answer public benchmark; accepting the single-case and possible training-contamination limitations; requiring truthful scope labels and a no-fake-evidence policy; approving scope cuts, public claims, the frozen rubric, and final submission.
 

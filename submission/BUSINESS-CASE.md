@@ -138,4 +138,4 @@ The wedge revenue is the consultancy that needs to attach a verifiable AI work-p
 - Unchained repository (MIT): https://github.com/3sk1nt4n/Unchained
 - Retained live-run receipt: `docs/runs/sol-capped-dc01-opening.json` (repository commit 51662cfb809212af3b58a680c0d9265d91692302)
 - Public evidence source (DC01, The Stolen Szechuan Sauce): https://dfirmadness.com/the-stolen-szechuan-sauce/
-- Repository documents quoted: `README.md`, `JUDGE-QUICKSTART.md`, `docs/SUBMISSION.md`, `docs/HONEST-WIN-ASSESSMENT.md`, `HACKATHON_HANDOVER.md`
+- Repository documents quoted: `README.md`, `JUDGE-QUICKSTART.md`, `docs/SUBMISSION.md`, `docs/HONEST-WIN-ASSESSMENT.md`

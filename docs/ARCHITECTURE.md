@@ -247,5 +247,4 @@ guarantee.
 
 The implementation is concentrated in `unchained.evidence`, `unchained.tools`, `unchained.agent`,
 `unchained.model`, `unchained.reporting`, `unchained.viewer`, `unchained.viewer_policy`,
-`unchained.audit`, `unchained.caps`, `unchained.artifacts`, and `unchained.verify`. The full
-repository comparison and release gates are in [`OPENAI_VNEXT_REVIEW.md`](OPENAI_VNEXT_REVIEW.md).
+`unchained.audit`, `unchained.caps`, `unchained.artifacts`, and `unchained.verify`.

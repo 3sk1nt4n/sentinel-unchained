@@ -16,7 +16,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /src
-COPY pyproject.toml README.md LICENSE MANIFEST.in DECISIONS.md compose.yaml ./
+COPY pyproject.toml README.md LICENSE MANIFEST.in compose.yaml ./
 COPY src ./src
 COPY tests ./tests
 

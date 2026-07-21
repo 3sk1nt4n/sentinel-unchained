@@ -361,7 +361,7 @@ def load_reference_tools(
             "until evidence-id-selectable disk routing is enabled"
         )
 
-    catalog = _load_qwen_catalog(budget)
+    catalog = _load_forensic_catalog(budget)
     direct_catalog = catalog["direct"]
     volatility_plugins = catalog["volatility_plugins"]
     memory_item = profile.memory_items[0] if profile.memory_items else None
@@ -468,10 +468,10 @@ def load_reference_tools(
     return tuple(unique[name] for name in sorted(unique))
 
 
-def _load_qwen_catalog(budget: RunBudget | None) -> dict[str, dict[str, Any]]:
+def _load_forensic_catalog(budget: RunBudget | None) -> dict[str, dict[str, Any]]:
     """Discover forensic signatures/capabilities inside the same bounded worker."""
 
-    result = _run_qwen_worker({"action": "catalog"}, budget)
+    result = _run_forensic_worker({"action": "catalog"}, budget)
     if not isinstance(result, dict):
         raise RuntimeError("the pinned sift-sentinel typed-tool catalog is malformed")
     direct = result.get("direct")
@@ -602,7 +602,7 @@ def _direct_executor(
             spec["evidence_path"] = memory_path
         else:
             spec["mount_path"] = mount_path
-        return _run_qwen_worker(spec, budget)
+        return _run_forensic_worker(spec, budget)
 
     return execute
 
@@ -614,7 +614,7 @@ def _volatility_executor(
     budget: RunBudget | None,
 ) -> ToolExecutor:
     def execute(arguments: dict[str, JsonValue]) -> Any:
-        return _run_qwen_worker(
+        return _run_forensic_worker(
             {
                 "action": "volatility",
                 "tool": name,
@@ -628,7 +628,7 @@ def _volatility_executor(
     return execute
 
 
-def _run_qwen_worker(spec: dict[str, JsonValue], budget: RunBudget | None) -> Any:
+def _run_forensic_worker(spec: dict[str, JsonValue], budget: RunBudget | None) -> Any:
     """Execute a sealed forensic invocation in a disposable, time-bounded process."""
 
     timeout = 300.0 if budget is None else budget.remaining_wall_seconds()
@@ -978,7 +978,7 @@ def _tsk_executor(
         }
         if sector_offset is not None:
             spec["sector_offset"] = sector_offset
-        return _run_qwen_worker(
+        return _run_forensic_worker(
             spec,
             budget,
         )

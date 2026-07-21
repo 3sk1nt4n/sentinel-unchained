@@ -8,12 +8,12 @@
 > **Hard deadline:** 2026-07-21 17:00 PT / 20:00 ET
 
 This roadmap sits on top of
-[HACKATHON_MASTER_PLAN.md](HACKATHON_MASTER_PLAN.md). It does not authorize a
+the master plan. It does not authorize a
 re-scaffold. The master plan owns the detailed architecture, experiment, proof
 bundle, judge experience, and submission contracts. This roadmap controls the
 order in which the remaining work is attempted and the claims that may be made
-about that work. [HACKATHON_HANDOVER.md](../HACKATHON_HANDOVER.md) remains the
-live evidence-backed status ledger. [DECISIONS.md](../DECISIONS.md) remains the
+about that work. The Git history remains the
+live evidence-backed status ledger. The project docs remain the
 durable architecture record.
 
 If these files conflict, apply this precedence:
@@ -231,7 +231,7 @@ disclosure.
 
 The local provenance baseline is complete. Commits `5309e5c` and `7b05d6a`
 retain the current C1/C2 work after the honest root history and
-`BUILD_PROVENANCE.md`. The successful `/feedback` ID and screenshot are
+the commit-pinned dependency. The successful `/feedback` ID and screenshot are
 preserved.
 
 Remaining C0 work before the public experiment freeze:

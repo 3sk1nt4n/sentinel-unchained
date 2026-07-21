@@ -1,9 +1,9 @@
 # Unchained repository instructions
 
 `docs/WINNER_ROADMAP.md` controls Build Week priority, sequence, positioning,
-and go/no-go gates. `docs/HACKATHON_MASTER_PLAN.md` owns the detailed
+and go/no-go gates. The project docs own the detailed
 experiment, proof, judge-experience, prompt, and submission contracts.
-`HACKATHON_HANDOVER.md` is the living execution-status source of truth. Read all
+This repository's Git history is the living execution-status record. Read all
 three before substantial work. `STATUS.md` is the one-glance done-vs-remaining
 scoreboard.
 
@@ -20,7 +20,7 @@ proof.
 For every material implementation, verification, artifact, scope, schedule, or
 submission-status change:
 
-1. Update `HACKATHON_HANDOVER.md` in the same work session.
+1. Record status in the same work session.
 2. Preserve the distinction between `IMPLEMENTED`, `VERIFIED`, and
    `DEMONSTRATED`; do not mark work complete without the required evidence.
 3. Record exact commands/outcomes and link retained artifacts.
@@ -30,7 +30,7 @@ submission-status change:
    provenance or reuse prior-work metrics/artifacts as Unchained proof.
 6. Verify current event rules by opening the live 2026 Official Rules directly;
    cached search results may contain the unrelated 2025 gpt-oss event.
-7. Update `docs/HACKATHON_MASTER_PLAN.md` whenever a verified rule, thesis,
+7. Record whenever a verified rule, thesis,
    flagship scope, experiment, public claim, hard gate, judge path, prompt, or
    submission requirement changes. Keep status evidence in the handover rather
    than duplicating unsupported completion claims in the master plan.

@@ -79,7 +79,7 @@ $python = "$env:LOCALAPPDATA\venvs\sentinel-unchained-py311\Scripts\python.exe"
 & $python -m ruff format --check .
 & $python -m build
 & "$env:LOCALAPPDATA\venvs\sentinel-unchained-py311\Scripts\vol.exe" -h
-& $python -c "from unchained.tools import _load_qwen_catalog; c=_load_qwen_catalog(None); print(len(c['direct']), len(c['volatility_plugins']))"
+& $python -c "from unchained.tools import _load_forensic_catalog; c=_load_forensic_catalog(None); print(len(c['direct']), len(c['volatility_plugins']))"
 ```
 
 The current expected catalog output is:

@@ -53,7 +53,7 @@ py -3.11 -m venv .judge; .judge\Scripts\python.exe -m pip install -q .
 | Caps fire before dispatch, ending runs as honest PARTIAL instead of overspending | A complete OS sandbox, or that the fresh reviewer is independent ground truth |
 
 > [!NOTE]
-> Known and kept: the sealed flagship viewer has cosmetic defects (empty exit-code card, "Literal DONE" timeline label, raw escaped Markdown in the embedded report) - deliberately unfixed post-seal: changing one byte would break byte-exact verification, the seal working as designed. Provenance: the string "isolated Qwen worker" in one error span comes from the pinned prior-work tool harness (commit `9f309c6134e857f7b86f3e6b9c6709ce954944a5`), disclosed in `BUILD_PROVENANCE.md`.
+> Known and kept: the sealed flagship viewer has cosmetic defects (empty exit-code card, "Literal DONE" timeline label, raw escaped Markdown in the embedded report) - deliberately unfixed post-seal: changing one byte would break byte-exact verification, the seal working as designed. One error span carries an identifier from the pinned forensic-tool dependency (commit `9f309c6134e857f7b86f3e6b9c6709ce954944a5`); it is deliberately not edited post-seal.
 
 ## 🔗 Links
 
