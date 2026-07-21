@@ -644,7 +644,7 @@ processors=6
   exit-code card, a "Literal DONE" timeline label, raw escaped Markdown in the
   embedded report). They are deliberately not fixed post-seal: changing one byte
   would break the bundle's byte-exact verification - the seal working as designed.
-- The string "isolated Sentinel-Ensemble worker" in one error span comes from the pinned
+- The string "isolated Qwen worker" in one error span comes from the pinned
   prior-work tool harness (commit `9f309c6134e857f7b86f3e6b9c6709ce954944a5`),
   disclosed in [`BUILD_PROVENANCE.md`](BUILD_PROVENANCE.md).
 - The Luna receipt is a second-reviewer attestation (project-affiliated) because

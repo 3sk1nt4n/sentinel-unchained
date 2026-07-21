@@ -42,7 +42,7 @@ docker compose run --rm offline profile /evidence --json
 | 378 passing offline tests; byte-exact offline re-verification of the bundle | Any measured competitive comparison (deliberately cut - no unmeasured claims) |
 | Caps fire before dispatch, ending runs as honest PARTIAL instead of overspending | A complete OS sandbox, or that the fresh reviewer is independent ground truth |
 
-Known and kept: the sealed flagship viewer has cosmetic rendering defects (an empty exit-code card, a "Literal DONE" timeline label, raw escaped Markdown in the embedded report). They are deliberately not fixed post-seal - changing one byte would break the bundle's byte-exact verification, which is the seal working as designed. Provenance note: the string "isolated Sentinel-Ensemble worker" in one error span comes from the pinned prior-work tool harness (commit `9f309c6134e857f7b86f3e6b9c6709ce954944a5`), disclosed in `BUILD_PROVENANCE.md`.
+Known and kept: the sealed flagship viewer has cosmetic rendering defects (an empty exit-code card, a "Literal DONE" timeline label, raw escaped Markdown in the embedded report). They are deliberately not fixed post-seal - changing one byte would break the bundle's byte-exact verification, which is the seal working as designed. Provenance note: the string "isolated Qwen worker" in one error span comes from the pinned prior-work tool harness (commit `9f309c6134e857f7b86f3e6b9c6709ce954944a5`), disclosed in `BUILD_PROVENANCE.md`.
 
 ## Links
 
