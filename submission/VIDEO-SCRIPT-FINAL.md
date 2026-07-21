@@ -17,45 +17,47 @@ provided verbatim below either way.
 
 ## The pitch
 
-> GPT-5.6 chooses where to look; deterministic code controls what may run and
-> verifies exactly what was executed and cited.
+> Every security team has the same bottleneck: when an incident hits, a human
+> has to reconstruct what happened before the damage spreads. GPT-5.6 can do
+> that triage in minutes - but no SOC ships a conclusion it can't audit.
+> Unchained fixes the trust problem, not just the speed problem.
+
+## The slides
+
+Slides 1-3 are the published showcase page (dark, scrolling): the hero, the
+business case, the authority split, the real findings table, the timeline, and
+the verify-it-yourself proof. Screen-record it scrolling as the visual backbone
+and cut to the live terminal for the verify. Every number on it comes from the
+shipped run `20260721T001718Z-f0cd5641`.
 
 ## What a judge can run in 60 seconds for $0
 
-Every command below returns in well under a second and never contacts OpenAI.
-The pip install is the only wait (~1-2 minutes).
+Returns in under a second, no key, no network. The pip install is the only wait.
 
 ```powershell
 git clone https://github.com/3sk1nt4n/Unchained.git; cd Unchained
 py -3.11 -m venv .judge; .judge\Scripts\python.exe -m pip install -q .
-.judge\Scripts\python.exe -m unchained onboard
-.judge\Scripts\python.exe -m unchained profile docker/fixtures --json
+.judge\Scripts\python.exe -m unchained verify examples\public-run-complete --require-complete --require-live-gpt56
 ```
 
-Full-isolation alternative (build takes several minutes cold):
-
-```powershell
-docker compose build
-docker compose run --rm offline profile /evidence --json
-```
-
-The video demonstrates exactly this lane, plus the retained authentic GPT-5.6
-bundle that ships in the repository.
+That prints **VALID** on the authentic GPT-5.6 Sol COMPLETE bundle: 37 artifacts,
+194 audit entries, exit 0. The video shows exactly this, plus the sealed run it verifies.
 
 ---
 
 ## Scene table
 
-| Time | Screen content | Command / slide | Narration (read aloud) |
-|---|---|---|---|
-| 0:00-0:15 | **Slide 1** (hero + pitch) | Slide 1 | Autonomous forensic agents are easy to demo and hard to trust. Unchained splits the job: GPT-5.6 chooses where to look; deterministic code controls what may run and verifies exactly what was executed and cited. |
-| 0:15-0:38 | Terminal. Type the one word `sentinel`. Guided flow appears: onboarding, evidence checks, the launch card. Quit it with Q on camera - the hidden key step sits BEHIND the launch card (it appears only after 1 = LAUNCH) and must never be filmed. | `sentinel` | One word starts a case. Typing sentinel opens the guided flow: onboarding, evidence checks, and a clearly gated launch step. Nothing here spends money. A paid GPT-5.6 run starts only after an explicit launch confirmation on a money screen that shows the model and its hard cost ceilings. Everything before that gate is free and offline. |
-| 0:38-0:58 | The $0 case card: `E001 · Windows memory · 2,147,483,648 bytes · SHA-256 8079a7459b1739caf7d4fbf6dde5eb0ae7a9d24dbde657debf4d5202c8dc6b62` and `openai_called: false` highlighted. | `sentinel profile <EVIDENCE_FOLDER> --json` (see Scene 3 note) | Before any model call, deterministic code profiles the evidence: public ID E001, Windows memory, two gigabytes, and its SHA-256 custody hash. Note openai underscore called: false. This step costs zero dollars. Local paths never become model authority. |
-| 0:58-1:23 | Run verify on the shipped authentic bundle. As output prints, highlight fourteen typed tool receipts, all status success, and `gpt-5.6-luna` on the model line. On-screen caption: "Committed copy of run 20260720T013927Z-9f12ec6f — clone the repo and run this yourself." | `sentinel verify examples\public-run-partial` | Now the real thing. This bundle ships in the repository: an authentic GPT-5.6 run on that two-gigabyte memory image, provider-recorded gpt-5.6-luna across four responses. GPT-5.6 opened with a parallel batch of typed Volatility tools and kept investigating: fourteen tool receipts, every one successful, every byte of output retained. |
-| 1:23-1:43 | Same terminal. Highlight: terminal cap reason `MAX_TOOL_CALLS: reservation would reach 14 > 13`; result **VALID**; terminal status PARTIAL; 20 artifacts and 62 audit entries verified. **[SPLICE SLOT eligible, see below]** | (same command, output already on screen) | Then the hard tool budget ended the run as an honest PARTIAL before any overspend: about fifty-six seconds, one hundred eighty thousand provider tokens, a local cost estimate near a dollar sixteen. The offline verifier reconstructs 20 artifacts and 62 hash-chained audit entries and returns VALID. No network, no key. |
-| 1:43-2:06 | The inert viewer. Scroll: custody row (initial SHA-256 equals final), typed tool receipts, the honest hard-budget stop labeled plainly. | `sentinel view examples\public-run-partial` | The bundle ships an inert, no-JavaScript viewer. A judge needs no Python, no key, and no server. Custody intact: initial and final SHA-256 match. A receipt for every tool, and the cap stop labeled plainly. Receipts prove what ran and what was cited. Interpretation stays human. |
-| 2:06-2:26 | **Slide 2** (Built with Codex, Session ID on screen) | Slide 2 | Codex was the primary implementation and adversarial-review collaborator: the evidence lifecycle, the Responses API adapter, the typed execution boundary, caps, the forced serializer, exact evidence spans, the downgrade-only review, the renderers, the verifier, and the 432-test offline gate. The Codex session ID is on screen and committed in the repo. |
-| 2:26-2:45 | **Slide 3** (track, repo URL, verify-it-yourself commands) | Slide 3 | Unchained is not an LLM pretending to be evidence. It is GPT-5.6 directing a bounded investigation whose actions, citations, custody, and final report can be checked independently. Clone the repo and verify it yourself, for zero dollars. |
+**Runtime target 2:45. All numbers are from the shipped run 20260721T001718Z-f0cd5641.**
+
+| Time | Screen content | Narration (read aloud) |
+|---|---|---|
+| 0:00-0:18 | **Showcase hero** (scroll slowly) | Every security team has the same bottleneck. When an incident hits, a human has to reconstruct what happened before the blast radius grows - and that person is a scarce, expensive analyst. AI can do that triage in minutes. But no security team will ship a conclusion it cannot audit. |
+| 0:18-0:36 | **Showcase: authority split** | Unchained is built for exactly that gap. It points GPT-5.6 at one case. The model chooses where to look; deterministic code controls what may run, binds every finding to exact evidence bytes, and re-verifies the entire run offline. It does not ask for trust. It ships proof. |
+| 0:36-0:54 | Terminal: type `sentinel`; the guided flow, the $0 case card (`openai_called: false`), then quit the launch card with Q | One word starts a case. Everything before the money screen is free and offline: the evidence is classified and SHA-256 hashed locally before any model call. A paid GPT-5.6 run starts only after an explicit launch choice and a hidden key step. |
+| 0:54-1:28 | **Showcase: findings table** (hold on it) | I pointed it at a compromised Windows domain controller - the public DFIR Madness case. GPT-5.6 Sol ran a bounded twenty-turn investigation: thirty-one typed Volatility tools, four findings. Watch the discipline. A fresh-context reviewer confirmed one critical finding - private executable payloads inside the SYSTEM print-spooler process - sent two back for review, and withdrew one as unsupported. It does not inflate. The whole investigation cost two dollars and ninety-two cents and finished in nine minutes thirty-nine seconds. |
+| 1:28-1:58 | Terminal: `sentinel verify examples\public-run-complete --require-complete --require-live-gpt56` -> highlight **VALID**, 37 artifacts, 194 audit entries | This exact bundle ships in the repository. Anyone can verify it offline, with no key and no network. An independent checker reconstructs every audited request, re-hashes every artifact, and walks the hash-chained audit log. It returns VALID. Change a single byte of the report and it fails. |
+| 1:58-2:18 | `sentinel view examples\public-run-complete`; scroll the inert viewer: custody MATCH, the 31 receipts | The proof viewer is inert - no JavaScript - so it cannot fake its own result. Custody matches: the initial and final SHA-256 are identical. Verification proves the recorded pipeline is consistent and untampered. A human still owns the forensic judgment. That honesty is the point. |
+| 2:18-2:45 | **Showcase: close slide** (Codex + GPT-5.6, repo URL) | Codex built this: the evidence lifecycle, the Responses adapter, the typed execution boundary, the downgrade-only reviewer, and the verifier behind a four-hundred-plus-test offline gate - the session ID is committed in the repo. At runtime, GPT-5.6 Sol is both the investigator and the reviewer. Unchained: reasoning you can follow, evidence you can check. Clone it and verify it yourself. |
 
 Do not shorten the closing line to "code proves the incident."
 

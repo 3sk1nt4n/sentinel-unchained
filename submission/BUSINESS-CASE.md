@@ -15,9 +15,16 @@ Before reading a single market claim below, you can run the product. No API key,
 ```powershell
 git clone https://github.com/3sk1nt4n/Unchained.git; cd Unchained
 py -3.11 -m venv .judge; .judge\Scripts\python.exe -m pip install -q .
-.judge\Scripts\python.exe -m unchained onboard
-.judge\Scripts\python.exe -m unchained profile docker/fixtures --json
+.judge\Scripts\python.exe -m unchained verify examples\public-run-complete --require-complete --require-live-gpt56
 ```
+
+That last command prints **VALID** on an authentic GPT-5.6 **Sol** `COMPLETE`
+investigation that ships in the repo (run `20260721T001718Z-f0cd5641`): a
+compromised Windows **domain controller**, **4 findings** independently
+judge-reviewed (1 CONFIRMED, 2 NEEDS-REVIEW, 1 UNSUPPORTED), **37 artifacts /
+194 audit entries**, sealed for a total run cost of **~$2.92 in 9m39s**. The
+entire conclusion is checkable offline, byte-for-byte, by someone who trusts
+neither the agent nor the vendor. That is the product.
 
 Full-isolation alternative (Docker; the build takes several minutes cold):
 
