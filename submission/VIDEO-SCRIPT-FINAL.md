@@ -95,7 +95,7 @@ above and change nothing.
 |---|---|---|---|
 | 1:23-1:43 | Strict verify on the COMPLETE bundle: result VALID, terminal status COMPLETE. | `sentinel verify examples/public-run-complete --require-complete --require-live-gpt56` | This time the case ran to a typed DONE: forced structured findings, a fresh-context reviewer that can only preserve or downgrade, and a sealed COMPLETE bundle. The strict verifier, require-complete and require-live-GPT-5.6, reconstructs the whole lifecycle and returns VALID. |
 
-`examples/public-run-complete`: Sol + HEAVY, 3 findings, judge verdicts, sealed report, 27 artifacts / 124 audit entries.
+`examples/public-run-complete`: Sol + HEAVY, 3 findings, judge verdicts, sealed report, 37 artifacts / 194 audit entries.
 
 ---
 

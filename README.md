@@ -88,7 +88,7 @@ local SHA-256 case card before any model is involved.
 | Built with | **Codex** (implementation + adversarial review) and **GPT-5.6** (Sol investigator/reviewer, Terra rehearsal/smoke) |
 | Codex Session ID | `019f61e5-5755-7a02-adb4-618d32baab27` — see [Built with Codex](#built-with-codex) |
 | Fastest no-key test | Two-command install, then `sentinel verify examples/public-run-complete` → **VALID**. A real GPT-5.6 Sol `COMPLETE` run, zero spend ([judge quickstart](JUDGE-QUICKSTART.md)) |
-| Shipped `COMPLETE` proof | [`examples/public-run-complete`](examples/public-run-complete) — an authentic GPT-5.6 **Sol** `COMPLETE` bundle **inside this repo**: real findings, judge verdicts, and a sealed report on the public DC01 case; passes strict `--require-complete --require-live-gpt56` (27 artifacts, 124 audit entries) |
+| Shipped `COMPLETE` proof | [`examples/public-run-complete`](examples/public-run-complete) — an authentic GPT-5.6 **Sol** `COMPLETE` bundle **inside this repo**: **4 findings** (1 CONFIRMED, 2 NEEDS-REVIEW, 1 UNSUPPORTED), fresh-judge verdicts, and a sealed report on the public DC01 domain-controller case — a full live investigation for **~$2.92 in 9m39s**; passes strict `--require-complete --require-live-gpt56` (37 artifacts, 194 audit entries) |
 | Also shipped | [`examples/public-run-partial`](examples/public-run-partial) — a `gpt-5.6-luna` bundle: 14/14 typed tools on real memory, honest `PARTIAL` at the hard cap |
 | Live receipts | [Sol capped opening receipt](docs/runs/sol-capped-dc01-opening.json) · [Luna canary](docs/runs/luna-canary-receipt.json) |
 | One-page judge brief | [submission/JUDGE-ONE-PAGER.md](submission/JUDGE-ONE-PAGER.md) |
@@ -112,7 +112,7 @@ local SHA-256 case card before any model is involved.
 | 🟢 Live GPT-5.6 Sol opening on real 2 GiB Windows memory | **Done** — retained, capped `PARTIAL` by design |
 | 🟢 Authentic GPT-5.6 bundle **ships in the repo** and verifies `VALID` offline | **Done** — [`examples/public-run-partial`](examples/public-run-partial): 14/14 typed tools, honest `PARTIAL` at the hard cap |
 | 🟢 Zero-key guided onboarding + colorful live run experience | **Done** — see the screen above |
-| 🟢 Authentic `COMPLETE` proof bundle **ships in the repo** and passes strict verify | **Done** — [`examples/public-run-complete`](examples/public-run-complete): Sol, real findings + judge + report, `--require-complete --require-live-gpt56` VALID (27 artifacts, 124 audit entries) |
+| 🟢 Authentic `COMPLETE` proof bundle **ships in the repo** and passes strict verify | **Done** — [`examples/public-run-complete`](examples/public-run-complete): Sol, real findings + judge + report, `--require-complete --require-live-gpt56` VALID (37 artifacts, 194 audit entries) |
 | 🟡 Public sub-3-minute video | **In progress** — recorded against the real bundle |
 | ⚪ Same-evidence Qwen benchmark | **Deliberately cut** — no unmeasured claims |
 
@@ -147,7 +147,7 @@ Two authentic retained GPT-5.6 bundles **ship in this repository**. After
 either install above, run:
 
 ```powershell
-sentinel verify examples\public-run-complete   # → VALID · 27 artifacts · 124 audit entries (COMPLETE)
+sentinel verify examples\public-run-complete   # → VALID · 37 artifacts · 194 audit entries (COMPLETE)
 sentinel view   examples\public-run-complete   # inert, no-JS proof viewer
 sentinel verify examples\public-run-partial    # → VALID · 20 artifacts · 62 audit entries (PARTIAL)
 ```
@@ -459,7 +459,7 @@ Read the full [architecture](docs/ARCHITECTURE.md) or the detailed
 | Cheap GPT-5.6 typed-tool canary (run live on Luna; the smoke lane now defaults to Terra) | ✅ Demonstrated live; second-reviewer-attested (project-affiliated) sanitized receipt |
 | Authentic GPT-5.6 Sol capped opening on real Windows memory | ✅ Sanitized receipt committed; `VALID` recorded at creation; terminal state intentionally `PARTIAL` |
 | Shipped verifiable GPT-5.6 bundle in this repo | ✅ [`examples/public-run-partial`](examples/public-run-partial): `gpt-5.6-luna`, 14/14 typed tools, custody match, verifies `VALID` on current code |
-| Authentic `COMPLETE` GPT-5.6 Sol evidence bundle | ✅ Shipped at [`examples/public-run-complete`](examples/public-run-complete): real findings, fresh judge, sealed report; strict `--require-complete --require-live-gpt56` VALID (27 artifacts, 124 audit entries) |
+| Authentic `COMPLETE` GPT-5.6 Sol evidence bundle | ✅ Shipped at [`examples/public-run-complete`](examples/public-run-complete): real findings, fresh judge, sealed report; strict `--require-complete --require-live-gpt56` VALID (37 artifacts, 194 audit entries) |
 | Same-evidence speed/cost/accuracy comparison with Qwen | ⏳ Fail-closed comparison scaffold ready; fact set, freeze lock, and measurements pending |
 
 **Live milestones — two authentic GPT-5.6 runs on the same public 2 GiB Windows
@@ -508,7 +508,7 @@ verification.
 | Live GPT-5.6 canary (Luna at the time; the smoke lane now runs Terra) | Independently demonstrated; [attested sanitized projection](docs/runs/luna-canary-receipt.json), with no raw receipt available for bundle proof |
 | Authentic GPT-5.6 Sol opening on real memory | [Bundle-derived sanitized receipt](docs/runs/sol-capped-dc01-opening.json): 2 model responses, 6 successful opening tools, recorded custody match, `VALID` recorded at creation |
 | Shipped GPT-5.6 bundle in this repo | [`examples/public-run-partial`](examples/public-run-partial): 4 responses, 14 successful typed tools, custody match, verifies `VALID` on current code (20 artifacts, 62 audit entries) |
-| Authentic complete GPT-5.6 Sol case | ✅ [`examples/public-run-complete`](examples/public-run-complete): Sol + HEAVY `COMPLETE`, 3 findings, judge verdicts, sealed report, strict-VALID |
+| Authentic complete GPT-5.6 Sol case | ✅ [`examples/public-run-complete`](examples/public-run-complete): Sol + HEAVY `COMPLETE`, 4 findings, judge verdicts, sealed report, strict-VALID (~$2.92, 9m39s, 20 turns, 31 tools, 395,555 tokens) |
 | Faster/better than Qwen | Architectural thesis only until the frozen benchmark is run |
 
 The verifier establishes local protocol and bundle consistency. It does not
