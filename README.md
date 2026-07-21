@@ -35,7 +35,7 @@
 
 <p align="center">
   <a href="docs/START-HERE.md"><strong>🚀 Start here</strong></a> ·
-  <a href="#for-judges--the-submission-at-a-glance">🏆 For judges</a> ·
+  <a href="#for-judges---the-submission-at-a-glance">🏆 For judges</a> ·
   <a href="#quickstart">⏱️ Quickstart</a> ·
   <a href="#what-you-will-see">🎬 Run experience</a> ·
   <a href="#how-it-works">🧠 Architecture</a> ·
@@ -92,7 +92,7 @@ local SHA-256 case card before any model is involved.
 | Also shipped | [`examples/public-run-partial`](examples/public-run-partial) - a `gpt-5.6-luna` bundle: 14/14 typed tools on real memory, honest `PARTIAL` at the hard cap |
 | Live receipts | [Sol capped opening receipt](docs/runs/sol-capped-dc01-opening.json) · [Luna canary](docs/runs/luna-canary-receipt.json) |
 | One-page judge brief | [submission/JUDGE-ONE-PAGER.md](submission/JUDGE-ONE-PAGER.md) |
-| Honest gaps | The demo video is still pending; the [proof status](#proof-status) table never overstates |
+| Honest gaps | The demo video's public YouTube link is pending upload (final cut ships at `submission/video/unchained-demo-final.mp4`, 2:52.97); the [proof status](#proof-status) table never overstates |
 
 **Where each judging criterion lives:**
 
@@ -113,7 +113,7 @@ local SHA-256 case card before any model is involved.
 | 🟢 Authentic GPT-5.6 bundle **ships in the repo** and verifies `VALID` offline | **Done** - [`examples/public-run-partial`](examples/public-run-partial): 14/14 typed tools, honest `PARTIAL` at the hard cap |
 | 🟢 Zero-key guided onboarding + colorful live run experience | **Done** - see the screen above |
 | 🟢 Authentic `COMPLETE` proof bundle **ships in the repo** and passes strict verify | **Done** - [`examples/public-run-complete`](examples/public-run-complete): Sol, real findings + judge + report, `--require-complete --require-live-gpt56` VALID (37 artifacts, 194 audit entries) |
-| 🟡 Public sub-3-minute video | **In progress** - recorded against the real bundle |
+| 🟢 Sub-3-minute demo video | **Done** - final cut at `submission/video/unchained-demo-final.mp4` (2:52.97, AI-narrated, real run numbers); YouTube link added on upload |
 | ⚪ Same-evidence competitive benchmark | **Deliberately cut** - no unmeasured claims |
 
 ## Quickstart
@@ -214,10 +214,12 @@ replaces it right there.
   memory image (`.raw`/`.mem`/`.vmem`/`.dmp`) plus at most one disk image
   (`.E01`/`.dd`/raw); two of the same kind fail closed. `.zip` archives are
   welcome - the flow offers to extract them locally and re-profiles
-  automatically. Original evidence bytes never leave the machine
-before it runs live and verifies the sealed bundle. No flags, no environment
-variables. Depth (option 2) sets only hard stop ceilings; the same GPT-5.6 Sol
-investigator runs either way:
+  automatically. Original evidence bytes never leave the machine.
+
+The launch card owns both model and depth in one pick: `1 = quick Terra test`
+runs under the LIGHT ceilings, while `2 = full Terra run` and `3 = qualifying
+Sol` run under the HEAVY ceilings. Depth sets only hard stop ceilings, never
+reasoning quality:
 
 | Depth | Hard ceilings (not a price quote) |
 |---|---|
@@ -462,22 +464,33 @@ Read the full [architecture](docs/ARCHITECTURE.md) or the detailed
 | Authentic `COMPLETE` GPT-5.6 Sol evidence bundle | ✅ Shipped at [`examples/public-run-complete`](examples/public-run-complete): real findings, fresh judge, sealed report; strict `--require-complete --require-live-gpt56` VALID (37 artifacts, 194 audit entries) |
 | Same-evidence speed/cost/accuracy comparison | ⚪ Out of scope for Build Week - no comparative claims are made |
 
-**Live milestones - two authentic GPT-5.6 runs on the same public 2 GiB Windows
-memory image are retained.** The newest **ships in this repository** at
+**Live milestones - authentic GPT-5.6 runs on the same public 2 GiB Windows
+memory image are retained.** The newest and flagship **ships in this
+repository** at
+[`examples/public-run-complete`](examples/public-run-complete): `gpt-5.6-sol`
+(run `20260721T001718Z-f0cd5641`) drove the full lifecycle to `COMPLETE` - 24
+responses, 31/31 typed Volatility tools across 20 adaptive turns, 4 findings
+(1 CONFIRMED / 2 NEEDS-REVIEW / 1 UNSUPPORTED), fresh-judge verdicts, and a
+sealed report in 9m39s for ~$2.92 estimated; strict
+`sentinel verify examples/public-run-complete --require-complete
+--require-live-gpt56` returns **VALID** - 37 artifacts, 194 hash-chained audit
+entries - on any fresh clone, no key required. Also shipped:
 [`examples/public-run-partial`](examples/public-run-partial): `gpt-5.6-luna`
 across 4 responses chose and ran **14 typed Volatility tools** (all success),
-custody matched, and the run stopped honestly at its hard tool budget
+custody matched, and stopped honestly at its hard tool budget
 (`MAX_TOOL_CALLS: reservation would reach 14 > 13`) after 55.5 seconds and
-180,285 provider-reported tokens (~$1.16 local estimate).
+180,285 provider-reported tokens (~$1.16 local estimate); plain
 `sentinel verify examples/public-run-partial` returns **VALID** - 20 artifacts,
-62 hash-chained audit entries - on any fresh clone, no key required. The
-earlier run recorded `gpt-5.6-sol` on both responses and executed all six
-model-selected opening tools under the then six-tool cap in 43.702 seconds
-(59,254 tokens, $0.38789875 local estimate); its sanitized receipt is committed
-at [docs/runs/sol-capped-dc01-opening.json](docs/runs/sol-capped-dc01-opening.json)
-with `VALID` recorded at creation. These prove the live opening, typed
-execution, cap, custody, and bundle path - not a completed investigation. See
-the [release handoff](docs/OPENAI_VNEXT_RELEASE_HANDOFF.md) for the full
+62 hash-chained audit entries. An earlier capped opening recorded `gpt-5.6-sol`
+on both responses and executed all six model-selected opening tools under the
+then six-tool cap in 43.702 seconds (59,254 tokens, $0.38789875 local
+estimate); its sanitized receipt is committed at
+[docs/runs/sol-capped-dc01-opening.json](docs/runs/sol-capped-dc01-opening.json)
+with `VALID` recorded at creation. The partial bundle and the capped receipt
+prove the live opening, typed execution, cap, custody, and bundle path; the
+flagship `COMPLETE` bundle proves the full lifecycle through judge review and
+the sealed report. See the
+[release handoff](docs/OPENAI_VNEXT_RELEASE_HANDOFF.md) for the full
 scorecard and fastest submission path.
 
 **Post-rehearsal hardening:** four later unscored attempts exposed a real

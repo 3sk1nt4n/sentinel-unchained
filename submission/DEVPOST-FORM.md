@@ -1,7 +1,8 @@
 # Devpost Submission Form - OpenAI Build Week (Developer Tools)
 
-Paste-ready blocks for every field. Every number traces to the repo's retained receipt
-(`docs/runs/sol-capped-dc01-opening.json`), the 2026-07-20 test run, or the committed docs.
+Paste-ready blocks for every field. Every number traces to the shipped bundles
+(`examples/public-run-complete`, `examples/public-run-partial`), the repo's retained receipt
+(`docs/runs/sol-capped-dc01-opening.json`), the 2026-07-21 test run, or the committed docs.
 Pending items are labeled plainly. Deadline: 2026-07-21 17:00 PT (internal hard floor: Tue 14:00 ET).
 
 Judge-first rule used throughout: the pitch and the $0 no-key lane lead; honest caveats follow below the fold, never deleted.
@@ -210,9 +211,9 @@ Honest, framed as engineering maturity: the failures are recorded, capped, and l
 
 ```
 - **378/378 tests pass in 22.5s** across 23 test files, ruff check + format clean, verified 2026-07-21 on CPython 3.11.9.
-- **Two authentic, retained GPT-5.6 runs on real evidence**: a judge-verifiable bundle shipped in the repo (`examples/public-run-partial`: `gpt-5.6-luna`, 14/14 model-selected typed Volatility tools on a 2 GiB DC01 Windows memory image, custody hash match) and a committed sanitized `gpt-5.6-sol` receipt (6 of 6 opening tools with provider request/response IDs, docs/runs/sol-capped-dc01-opening.json).
-- **Byte-exact offline verification**: the shipped bundle verifies VALID on current code - 20 artifacts and 62 hash-chained audit entries reconstructed and checked with no network and no key (proven 2026-07-20).
-- **Measured, capped spend**: shipped run 180,285 provider-reported tokens, 55.5 s, ~$1.16 local estimate; Sol opening 59,254 tokens, 43.702 s, $0.38789875 under a $1.00 cap.
+- **Three authentic, retained GPT-5.6 runs on real evidence**: the flagship COMPLETE bundle shipped in the repo (`examples/public-run-complete`: `gpt-5.6-sol`, 31/31 typed Volatility tools across 20 adaptive turns on a 2 GiB DC01 Windows memory image, 4 adjudicated findings, custody hash match), a clearly labeled PARTIAL bundle also shipped (`examples/public-run-partial`: `gpt-5.6-luna`, 14/14 typed tools, honest stop at the hard tool budget), and a committed sanitized `gpt-5.6-sol` receipt (6 of 6 opening tools with provider request/response IDs, docs/runs/sol-capped-dc01-opening.json).
+- **Byte-exact offline verification**: the flagship bundle strict-verifies VALID on current code - `sentinel verify examples/public-run-complete --require-complete --require-live-gpt56`, 37 artifacts and 194 hash-chained audit entries reconstructed and checked with no network and no key (proven 2026-07-21); the PARTIAL bundle verifies VALID with 20 artifacts and 62 audit entries (proven 2026-07-20).
+- **Measured, capped spend**: flagship COMPLETE run ~395,555 provider-reported tokens, 9m39s, ~$2.92 local estimate within the stock HEAVY caps; PARTIAL run 180,285 tokens, 55.5 s, ~$1.16; Sol opening 59,254 tokens, 43.702 s, $0.38789875 under a $1.00 cap.
 - **A $0 judge lane**: onboarding, fixture profiling, bundle verify/view, an offline Docker container, and a no-key demo script - none of which contact OpenAI.
 - **An explicit spend gate**: a paid run starts only after a launch-card choice (1 = quick Terra test, 2 = full Terra run, 3 = qualifying Sol, Q = quit) plus a saved-key step showing hard cost ceilings. No accidental spend.
 - **A bounded invocation budget**: exactly 4 fixed GPT-5.6 requests plus one per adaptive action - minimum five, never an unbounded loop.
@@ -268,7 +269,7 @@ Public repo, MIT license. Live receipts in-repo: `docs/runs/sol-capped-dc01-open
 
 ## Video URL
 
-PENDING - video link: added on upload. This is the only mandatory gap; do not submit without it.
+PENDING - video link: added on upload. This is the only mandatory gap; do not submit without it. The final cut is ready at `submission/video/unchained-demo-final.mp4` (2:52.97); only the public YouTube URL is missing.
 
 ```
 ADDED-ON-UPLOAD
@@ -365,7 +366,7 @@ Expected final lines: DEMO_BUNDLE_VERIFIED_INVALID_INPUT / BUNDLE=...
 
 Exit codes: 0 complete, 1 fatal, 2 invalid input/config, 3 PARTIAL (cap or safe mandatory-phase failure).
 
-**If a judge chooses to spend** (optional, never required): depth ceilings are hard stops, not price quotes, reasoning-depth modes, or promises of finding quality - LIGHT: 20 tools / 100,000 tokens / 10 min / $2.50 estimated; HEAVY: 60 tools / 400,000 tokens / 30 min / $10 estimated. Same GPT-5.6 Sol investigator either way; caps fire before dispatch and end the run as an honest PARTIAL instead of overspending. Real measured spend of retained runs: shipped bundle ~$1.16 local estimate, 180,285 tokens, 55.5 s; Sol opening $0.38789875, 59,254 tokens, 43.702 s.
+**If a judge chooses to spend** (optional, never required): the launch card owns both model and depth in one pick (1 = quick Terra test under the LIGHT ceilings, 2 = full Terra run and 3 = qualifying Sol under the HEAVY ceilings). Ceilings are hard stops, not price quotes, reasoning-depth modes, or promises of finding quality - LIGHT: 20 tools / 100,000 tokens / 10 min / $2.50 estimated; HEAVY: 60 tools / 400,000 tokens / 30 min / $10 estimated. Caps fire before dispatch and end the run as an honest PARTIAL instead of overspending. Real measured spend of retained runs: shipped COMPLETE bundle ~$2.92 local estimate, ~395,555 tokens, 9m39s; shipped PARTIAL bundle ~$1.16, 180,285 tokens, 55.5 s; Sol opening $0.38789875, 59,254 tokens, 43.702 s.
 ```
 
 ---

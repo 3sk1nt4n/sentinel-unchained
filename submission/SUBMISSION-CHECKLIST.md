@@ -2,7 +2,7 @@
 
 **Deadline: Tue 2026-07-21 17:00 PT** (Devpost). **Submit target: Tue ~11:00 ET. Hard floor: Tue 14:00 ET.** Judging runs 2026-07-22 → 2026-08-05. Rules: https://openai.devpost.com/rules
 
-The video is the only mandatory gap. Everything below exists to get it recorded, uploaded, linked, and submitted with zero broken links.
+The public video link is the only mandatory gap. The final cut exists at `submission/video/unchained-demo-final.mp4` (2:52.97). Everything below exists to get it uploaded, linked, and submitted with zero broken links.
 
 ---
 
@@ -19,7 +19,7 @@ The video is the only mandatory gap. Everything below exists to get it recorded,
 
 ## W8 - YouTube upload
 
-- [ ] Upload the final cut (`submission/video/unchained-demo-final.mp4`, 2:55, British female AI narration). Visibility: **Public** preferred — the organizer email confirms **Unlisted is OK**; never Private. Wait for YouTube processing to FINISH before copying the link.
+- [ ] Upload the final cut (`submission/video/unchained-demo-final.mp4`, 2:52.97, British female AI narration). Visibility: **Public** preferred — the organizer email confirms **Unlisted is OK**; never Private. Wait for YouTube processing to FINISH before copying the link.
 - [ ] Title: `Unchained - bounded GPT-5.6 DFIR investigator | OpenAI Build Week (Developer Tools)`
 - [ ] Paste this description verbatim:
 
@@ -36,7 +36,7 @@ Public evidence case: The Stolen Szechuan Sauce (DC01) - https://dfirmadness.com
 
 - [ ] Confirm the watch page shows runtime under 3:00.
 - [ ] Incognito playback check: full video plays start to finish while logged out.
-- [ ] Copy the final URL into `submission/DEVPOST-FORM.md` (video field) and replace `ADDED-ON-UPLOAD` in `submission/JUDGE-ONE-PAGER.md`.
+- [ ] Copy the final URL into `submission/DEVPOST-FORM.md` (video field, replacing `ADDED-ON-UPLOAD`) and replace the `[YOUTUBE LINK PENDING - replace on upload]` placeholder in `submission/JUDGE-ONE-PAGER.md`.
 
 ## W9 - Devpost form, field by field
 
