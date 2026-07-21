@@ -1,9 +1,11 @@
 # Unchained one-line bootstrap for Windows (native lane - no Docker needed).
 #   irm https://raw.githubusercontent.com/3sk1nt4n/Unchained/main/get.ps1 | iex
-# Guided, Qwen-style flow: install -> pick a case -> see the verified card ->
-# pick a depth -> paste your key (hidden, last) -> optionally launch. Every
-# step is idempotent and safe to re-run. It never echoes, logs, or uploads the
-# key, and never fetches evidence for you.
+# Guided flow: install -> pick a case -> see the verified card -> pick ONE
+# package -> paste your key (hidden, last) -> optionally launch. Every step is
+# idempotent and safe to re-run. It never echoes, logs, or uploads the key.
+# For the public DC01 case it opens the two DIRECT download links in YOUR
+# browser and verifies their publisher MD5s - the browser downloads, this
+# script never fetches evidence itself.
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
@@ -167,6 +169,31 @@ function Resolve-EvidenceFolder {
     return $null
 }
 
+function Resolve-Dc01Pair {
+    # DC01-specific: pull ONLY the two known DC01 zips by name out of a folder
+    # (typically Downloads, which also holds unrelated zips) and prep just those
+    # into one clean case. Never grabs an unrelated archive.
+    param([string]$Path)
+    $Path = $Path.Trim().Trim('"').Trim()
+    if (-not $Path -or -not (Test-Path -LiteralPath $Path)) {
+        Write-Host "      Folder not found: $Path" -ForegroundColor Yellow; return $null
+    }
+    $wanted = @("DC01-memory.zip", "DC01-E01.zip")
+    $found = @(Get-ChildItem -LiteralPath $Path -File -Recurse -ErrorAction SilentlyContinue |
+        Where-Object { $wanted -contains $_.Name } |
+        Sort-Object Name -Unique)
+    if ($found.Count -eq 0) {
+        Write-Host "      Neither DC01-memory.zip nor DC01-E01.zip is in that folder yet." -ForegroundColor Yellow
+        Write-Host "      If the browser is still downloading, wait for it to finish, then press 1 again." -ForegroundColor Gray
+        return $null
+    }
+    $dest = Join-Path $env:USERPROFILE "Evidence\dc01-pair"
+    Write-Host "      Found $($found.Count) DC01 file(s) - MD5-verifying and preparing the case." -ForegroundColor Cyan
+    $ok = $true
+    foreach ($z in $found) { if (-not (Expand-EvidenceZip $z.FullName $dest)) { $ok = $false } }
+    if ($ok) { return $dest } else { return $null }
+}
+
 function Get-CaseFolder {
     # One menu turn; return a resolved evidence folder, "" (re-loop), or "Q".
     Write-Host "        1) DC01 public practice case - guided download + MD5 verify" -ForegroundColor Cyan
@@ -180,16 +207,30 @@ function Get-CaseFolder {
         if ($c) { return $c } else { return "" }
     }
     if ($pick -match '^1$') {
-        Write-Info "Public DFIR Madness 001. You download it; I verify the MD5 and prep it."
-        Write-Host "        https://dfirmadness.com/the-stolen-szechuan-sauce/" -ForegroundColor White
-        Write-Host "      Publisher MD5s:  DC01-memory.zip = $($knownMd5['DC01-memory.zip'])" -ForegroundColor DarkGray
-        Write-Host "                       DC01-E01.zip    = $($knownMd5['DC01-E01.zip'])" -ForegroundColor DarkGray
-        if ((Read-Host "      Open the official download page now? (y/N)") -match '^[yY]') {
-            Start-Process "https://dfirmadness.com/the-stolen-szechuan-sauce/"
+        Write-Info "Public DFIR Madness 001 (Stolen Szechuan Sauce). You download it in"
+        Write-Info "your browser; I verify the publisher MD5 and prep it. You need EXACTLY"
+        Write-Info "these two files - skip pagefile, pcap, and the DESKTOP files:"
+        Write-Host "        DC01-memory.zip  (~2 GB memory image)" -ForegroundColor White
+        Write-Host "          https://dfirmadness.com/case001/DC01-memory.zip" -ForegroundColor Cyan
+        Write-Host "        DC01-E01.zip     (~3 GB disk image)" -ForegroundColor White
+        Write-Host "          https://dfirmadness.com/case001/DC01-E01.zip" -ForegroundColor Cyan
+        Write-Host "      Publisher MD5s (I re-check these before anything runs):" -ForegroundColor DarkGray
+        Write-Host "        DC01-memory.zip = $($knownMd5['DC01-memory.zip'])" -ForegroundColor DarkGray
+        Write-Host "        DC01-E01.zip    = $($knownMd5['DC01-E01.zip'])" -ForegroundColor DarkGray
+        Write-Host "      Full case page ('The Artifacts' section): https://dfirmadness.com/the-stolen-szechuan-sauce/" -ForegroundColor DarkGray
+        if ((Read-Host "      Open BOTH downloads in your browser now? (Y/n)") -notmatch '^[nN]$') {
+            # The user's browser performs the download (with its own save dialog);
+            # this script never fetches evidence itself. A short pause avoids two
+            # tabs racing the same window.
+            Start-Process "https://dfirmadness.com/case001/DC01-memory.zip"
+            Start-Sleep -Seconds 2
+            Start-Process "https://dfirmadness.com/case001/DC01-E01.zip"
+            Write-Info "Two downloads started. Large files take a few minutes."
         }
-        $p = (Read-Host "      Path to the folder holding the DC01 zips - memory + disk pair; a single zip works too (Enter to skip)")
-        if (-not $p.Trim()) { return "" }
-        $c = Resolve-EvidenceFolder $p
+        $downloads = Join-Path $env:USERPROFILE "Downloads"
+        $p = (Read-Host "      Folder holding the two zips (Enter = your Downloads folder)").Trim().Trim('"')
+        if (-not $p) { $p = $downloads; Write-Info "Looking for the DC01 zips in $downloads ..." }
+        $c = Resolve-Dc01Pair $p
         if ($c) { return $c } else { return "" }
     }
     if ($pick -match '^2$') {

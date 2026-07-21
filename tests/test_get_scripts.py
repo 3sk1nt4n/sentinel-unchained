@@ -27,6 +27,12 @@ def test_windows_bootstrap_is_key_safe_and_hands_off_to_onboarding() -> None:
     # and evidence is never auto-downloaded by the bootstrap.
     assert "dfirmadness.com/the-stolen-szechuan-sauce" in script
     assert not re.search(r"(Invoke-WebRequest|Start-BitsTransfer|curl)[^\n]*dfirmadness", script)
+    # The DC01 guide points at the EXACT direct files (the landing page buries
+    # them under "The Artifacts"), and pulls only the two named zips from the
+    # download folder so an unrelated archive is never swept in.
+    assert "case001/DC01-memory.zip" in script
+    assert "case001/DC01-E01.zip" in script
+    assert "Resolve-Dc01Pair" in script
     # DC01 is verify-and-onboard, never a hardcoded download: MD5 check gates it.
     assert "Get-FileHash -Algorithm MD5" in script
     assert "64A4E2CB47138084A5C2878066B2D7B1" in script
