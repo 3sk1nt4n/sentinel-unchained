@@ -208,6 +208,12 @@ sentinel verify "C:\path\to\bundle" --require-complete --require-live-gpt56
 
 ## 🐧 Linux and macOS (same one-command experience)
 
+> [!TIP]
+> **Do I need Docker? Only if you want it.**
+> - 🪟 **Windows - no Docker at all.** The flagship lane is native PowerShell + CPython 3.11.
+> - 🐧 **Linux - your choice.** Native `./setup.sh` (needs Python 3.11; on stock Ubuntu 24.04 add the deadsnakes PPA first: `sudo add-apt-repository ppa:deadsnakes/ppa && sudo apt install python3.11 python3.11-venv`) **or** the hardened Docker container via `get.sh`. **Both lanes were executed end to end and verified live on 2026-07-21.**
+> - 🍎 **macOS - use the Docker Desktop lane** (the same hardened `linux/amd64` container). Native macOS is not verified on Mac hardware.
+
 On **Linux** the exact same flow runs natively with the Bash mirrors of the two
 scripts. On **macOS** the supported route is the hardened Docker lane
 (`linux/amd64` emulation); it is not yet verified on Mac hardware.

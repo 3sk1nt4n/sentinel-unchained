@@ -120,6 +120,12 @@ junior-analyst walkthrough is [Start Here](docs/START-HERE.md).
 > opening can fan out up to twelve typed forensic tools concurrently); keep
 > evidence on a local SSD path, not a OneDrive/cloud-synced folder.
 
+> [!TIP]
+> **Do I need Docker? Only if you want it.**
+> - 🪟 **Windows - no Docker at all.** The flagship lane is native PowerShell + CPython 3.11 (`get.ps1` one-liner or `setup.ps1`). Docker is optional extra isolation.
+> - 🐧 **Linux - your choice.** Native `./setup.sh` (needs Python 3.11; on stock Ubuntu 24.04 add the deadsnakes PPA first: `sudo add-apt-repository ppa:deadsnakes/ppa && sudo apt install python3.11 python3.11-venv`) **or** the hardened Docker container via `get.sh`. **Both lanes were executed end to end and verified live on 2026-07-21.**
+> - 🍎 **macOS - use the Docker Desktop lane** (the same hardened `linux/amd64` container). Native macOS is not verified on Mac hardware.
+
 ## 1. 🧰 Install prerequisites
 
 Install Git for Windows and official CPython 3.11 AMD64:

@@ -326,11 +326,13 @@ After install, bare `sentinel` is identical to the launcher. Re-verify anytime w
 Honest lane table; labels come straight from the repo's own assessment docs.
 
 ```
+Docker is optional everywhere except macOS: Windows is fully native (no Docker), and Linux chooses native or container.
+
 | Platform | Lane | Honest status |
 | --- | --- | --- |
-| Windows 10/11 (AMD64, CPython 3.11.9) | Native install via setup.ps1 or get.ps1 | Validated flagship. 378/378 tests pass in 22.5s, ruff clean (run 2026-07-21). |
-| Linux | setup.sh / hardened Docker image | STATIC-ONLY: read and reasoned, not executed on a real host. README notes the same suite runs in the Linux container with a few Windows-only tests skipping. |
-| macOS | Docker lane only | Same hardened linux/amd64 image under Docker Desktop emulation; not yet verified on Mac hardware. |
+| Windows 10/11 (AMD64, CPython 3.11.9) | Native install via setup.ps1 or get.ps1 - no Docker | Validated flagship. 378/378 tests pass, ruff clean (run 2026-07-21). |
+| Linux | Native setup.sh (Python 3.11; stock Ubuntu 24.04 needs the deadsnakes PPA) or the hardened Docker image | Executed end to end 2026-07-21: container 369 passed + 9 Windows-only skips; native WSL Ubuntu lane setup -> $0 flow -> verify all pass; the Windows-sealed COMPLETE bundle strict-verifies VALID inside the no-network container (byte-exact cross-OS). |
+| macOS | Docker Desktop lane | Same hardened linux/amd64 image under emulation; not yet verified on Mac hardware. |
 ```
 
 ---
